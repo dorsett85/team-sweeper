@@ -22,11 +22,14 @@ const plugins = [
 const config = {
   mode: isProd ? 'production' : 'development',
   entry: {
+    main: {
+      import: './src/frontend/index.tsx'
+    },
     // Split the main vendors into its own chunk and make sure the other chunks
     // are set to depend on them.
     vendor: ['react', 'react-dom'],
-    main: {
-      import: './src/frontend/index.tsx',
+    home: {
+      import: './src/frontend/pages/home/Home.tsx',
       dependOn: 'vendor'
     }
   },
@@ -46,6 +49,10 @@ const config = {
       {
         test: /\.less$/i,
         use: [isProd ? MiniCssExtractPlugin.loader : 'style-loader', 'css-loader', 'less-loader']
+      },
+      {
+        test: /\.(png|jpe?g|svg|ttf|woff2?)$/i,
+        type: 'asset/resource'
       }
     ]
   },

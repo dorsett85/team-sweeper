@@ -1,11 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './components/App';
-import './index.less';
+import './assets/css/index.less';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+// This file is used to create a bundle that will be shared across all pages.
+// Webpack will automatically add the imported assets to the static/bundles
+// directory for consumption by the spring server.
