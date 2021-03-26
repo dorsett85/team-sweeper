@@ -12,7 +12,15 @@ const plugins = [
   new ForkTsCheckerWebpackPlugin(),
   new webpack.HotModuleReplacementPlugin(),
   new ESLintPlugin({ extensions: ['js', 'jsx', 'ts', 'tsx'] }),
-  new WebpackManifestPlugin(),
+  new WebpackManifestPlugin({
+    // Only return the basename for the keys with the preceding path
+    map: (fileDescriptor) => {
+      return {
+        ...fileDescriptor,
+        name: path.basename(fileDescriptor.name || '')
+      };
+    }
+  }),
   isProd &&
     new MiniCssExtractPlugin({
       filename: '[name].[contenthash].css'

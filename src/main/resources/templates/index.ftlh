@@ -1,4 +1,4 @@
-<#include "macros/appHeading.macro.ftlh"/>
+<#include "macros/header.ftlh"/>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -6,6 +6,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Team Sweeper - Minesweeper with others</title>
+    <link rel="icon" type="image/png" href="${bundleManifest.mine16Png}" sizes="16x16">
+    <link rel="icon" type="image/png" href="${bundleManifest.mine32Png}" sizes="32x32">
+    <link rel="icon" type="image/png" href="${bundleManifest.mine96Png}" sizes="96x96">
     <#--
     css bundles are only available for production builds, otherwise the style
     tags are inserted by the javascript bundles. If the styling is out of sync
