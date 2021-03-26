@@ -21,15 +21,6 @@ public class BundleManifest {
     @JsonProperty("home.css")
     public String homeCss;
 
-    @JsonProperty("mine-16.png")
-    public String mine16Png;
-
-    @JsonProperty("mine-32.png")
-    public String mine32Png;
-
-    @JsonProperty("mine-96.png")
-    public String mine96Png;
-
     public String getMainJs() {
         return mainJs;
     }
@@ -47,12 +38,4 @@ public class BundleManifest {
     public String getHomeCss() {
         return homeCss;
     }
-
-    public String getMine16Png() {
-        return mine16Png;
-    }
-
-    public String getMine32Png() { return mine32Png; }
-
-    public String getMine96Png() { return mine96Png; }
 }

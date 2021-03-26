@@ -39,3 +39,24 @@ body {
     font-size: 1.25rem;
   }
 }
+
+.footer {
+  &-content {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+    margin-top: 16px;
+    &-professional-link {
+      margin-block-end: 10px;
+      text-shadow: 1.5px 1.5px 4px #82888b;
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      a:hover {
+        color: orangered;
+        text-decoration: underline;
+      }
+    }
+  }
+}

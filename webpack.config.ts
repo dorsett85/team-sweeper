@@ -60,7 +60,10 @@ const config = {
       },
       {
         test: /\.(png|jpe?g|svg|ttf|woff2?)$/i,
-        type: 'asset/resource'
+        type: 'asset/resource',
+        generator: {
+          filename: '[base]'
+        }
       }
     ]
   },
