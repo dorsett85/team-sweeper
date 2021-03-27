@@ -30,14 +30,14 @@ const plugins = [
 const config = {
   mode: isProd ? 'production' : 'development',
   entry: {
-    main: {
-      import: './src/frontend/index.tsx'
+    common: {
+      import: './src/frontend/pages/common.ts'
     },
     // Split the main vendors into its own chunk and make sure the other chunks
     // are set to depend on them.
     vendor: ['react', 'react-dom'],
     home: {
-      import: './src/frontend/pages/home/Home.tsx',
+      import: './src/frontend/pages/home/home.ts',
       dependOn: 'vendor'
     }
   },

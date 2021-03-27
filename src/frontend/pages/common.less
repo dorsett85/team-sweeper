@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'Lato';
   src: local('Lato Regular'), local('Lato-Regular'),
-  url('../fonts/Lato-Regular.woff2') format('woff2'),
-  url('../fonts/Lato-Regular.woff') format('woff'),
-  url('../fonts/Lato-Regular.ttf') format('truetype');
+  url('../assets/fonts/Lato-Regular.woff2') format('woff2'),
+  url('../assets/fonts/Lato-Regular.woff') format('woff'),
+  url('../assets/fonts/Lato-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
@@ -11,15 +11,14 @@
 @font-face {
   font-family: 'Lato';
   src: local('Lato Bold'), local('Lato-Bold'),
-  url('../fonts/Lato-Bold.woff2') format('woff2'),
-  url('../fonts/Lato-Bold.woff') format('woff'),
-  url('../fonts/Lato-Bold.ttf') format('truetype');
+  url('../assets/fonts/Lato-Bold.woff2') format('woff2'),
+  url('../assets/fonts/Lato-Bold.woff') format('woff'),
+  url('../assets/fonts/Lato-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
 }
 
 body {
-  margin: 0;
   font-family: 'Lato', sans-serif;
 }
 
@@ -41,13 +40,14 @@ body {
 }
 
 .footer {
+  margin: 0 auto;
+  max-width: 540px;
   &-content {
-    display: flex;
-    align-items: flex-end;
-    flex-direction: column;
     margin-top: 16px;
+    text-align: right;
     &-professional-link {
-      margin-block-end: 10px;
+      display: block;
+      margin-bottom: 12px;
       text-shadow: 1.5px 1.5px 4px #82888b;
       a {
         color: inherit;

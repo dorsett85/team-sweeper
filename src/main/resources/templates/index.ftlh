@@ -15,8 +15,8 @@
     tags are inserted by the javascript bundles. If the styling is out of sync
     when using the webpack dev server, run `yarn build:dev` first.
     -->
-    <#if bundleManifest.mainCss?has_content>
-        <link href="${bundleManifest.mainCss}" rel="stylesheet">
+    <#if bundleManifest.commonCss?has_content>
+        <link href="${bundleManifest.commonCss}" rel="stylesheet">
     </#if>
     <#if bundleManifest.homeCss?has_content>
         <link href="${bundleManifest.homeCss}" rel="stylesheet">
@@ -25,10 +25,13 @@
 <body>
 
 <@header />
-<div id="root"></div>
+<nav class="select-game-nav text-center">
+    <a href="/single-player">Single Player</a>
+    <a href="/multi-player">Multi Player</a>
+</nav>
 <@footer />
 
-<script src="${bundleManifest.mainJs}"></script>
+<script src="${bundleManifest.commonJs}"></script>
 <script src="${bundleManifest.vendorJs}"></script>
 <script src="${bundleManifest.homeJs}"></script>
 </body>

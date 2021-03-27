@@ -6,11 +6,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BundleManifest {
 
-    @JsonProperty("main.js")
-    public String mainJs;
+    @JsonProperty("common.js")
+    public String commonJs;
 
-    @JsonProperty("main.css")
-    public String mainCss;
+    @JsonProperty("common.css")
+    public String commonCss;
 
     @JsonProperty("vendor.js")
     public String vendorJs;
@@ -21,12 +21,12 @@ public class BundleManifest {
     @JsonProperty("home.css")
     public String homeCss;
 
-    public String getMainJs() {
-        return mainJs;
+    public String getCommonJs() {
+        return commonJs;
     }
 
-    public String getMainCss() {
-        return mainCss;
+    public String getCommonCss() {
+        return commonCss;
     }
 
     public String getVendorJs() { return vendorJs; }
@@ -35,7 +35,5 @@ public class BundleManifest {
         return homeJs;
     }
 
-    public String getHomeCss() {
-        return homeCss;
-    }
+    public String getHomeCss() { return homeCss; }
 }
