@@ -21,6 +21,12 @@ public class BundleManifest {
     @JsonProperty("home.css")
     public String homeCss;
 
+    @JsonProperty("singlePlayer.js")
+    public String singlePlayerJs;
+
+    @JsonProperty("singlePlayer.css")
+    public String singlePlayerCss;
+
     public String getCommonJs() {
         return commonJs;
     }
@@ -36,4 +42,10 @@ public class BundleManifest {
     }
 
     public String getHomeCss() { return homeCss; }
+
+    public String getSinglePlayerJs() {
+        return singlePlayerJs;
+    }
+
+    public String getSinglePlayerCss() { return singlePlayerCss; }
 }

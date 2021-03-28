@@ -37,7 +37,11 @@ const config = {
     // are set to depend on them.
     vendor: ['react', 'react-dom'],
     home: {
-      import: './src/frontend/pages/home/home.ts',
+      import: './src/frontend/pages/home/index.ts',
+      dependOn: 'vendor'
+    },
+    singlePlayer: {
+      import: './src/frontend/pages/single-player/index.tsx',
       dependOn: 'vendor'
     }
   },
