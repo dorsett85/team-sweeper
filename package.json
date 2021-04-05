@@ -12,8 +12,10 @@
     "build": "NODE_ENV=production webpack"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^1.5.1",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "react-redux": "^7.2.3"
   },
   "devDependencies": {
     "@types/fork-ts-checker-webpack-plugin": "^0.4.5",
