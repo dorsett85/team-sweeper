@@ -2,7 +2,9 @@
 
 <@commonPage>
     <@commonHead title="Team Sweeper - Minesweeper with others" cssHrefs=[bundleManifest.commonCss!, bundleManifest.homeCss!]>
-        <link rel="prefetch" href="/single-player">
+        <link rel="prefetch" href="/single-player" as="document">
+        <link rel="prefetch" href="${bundleManifest.singlePlayerJs}" as="script">
+        <link rel="prefetch" href="${bundleManifest.singlePlayerCss!}" as="style">
     </@commonHead>
     <@commonBody jsSources=[bundleManifest.commonJs, bundleManifest.vendorJs, bundleManifest.homeJs]>
         <nav class="select-game-nav text-center">
