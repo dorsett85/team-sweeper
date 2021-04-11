@@ -1,7 +1,10 @@
 import { CaseReducer, createSlice, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
 
 interface SinglePlayerState {
-  value: number;
+  /**
+   * Difficulty setting of the game
+   */
+  difficulty: 'e' | 'm' | 'h';
 }
 
 type SinglePlayerCaseReducer<TPayload = void> = CaseReducer<
@@ -14,7 +17,7 @@ interface SinglePlayerReducers extends SliceCaseReducers<SinglePlayerState> {
 }
 
 const initialState: SinglePlayerState = {
-  value: 0
+  difficulty: 'h'
 };
 
 export const counterSlice = createSlice<SinglePlayerState, SinglePlayerReducers>({

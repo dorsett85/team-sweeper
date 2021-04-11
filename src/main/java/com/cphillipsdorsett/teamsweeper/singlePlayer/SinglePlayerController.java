@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class SinglePlayerController {
@@ -19,8 +20,10 @@ public class SinglePlayerController {
     }
 
     @GetMapping("/single-player/new-game")
-    public ResponseEntity<GameBoard> newGame(SinglePlayerService singlePlayerService) {
-        GameBoard board = singlePlayerService.createBoard("e");
+    public ResponseEntity<GameBoard> newGame(
+        @RequestParam(value = "difficulty", defaultValue = "e") String difficulty, SinglePlayerService singlePlayerService
+    ) {
+        GameBoard board = singlePlayerService.createBoard(difficulty);
         return new ResponseEntity<>(board, HttpStatus.OK);
     }
 
