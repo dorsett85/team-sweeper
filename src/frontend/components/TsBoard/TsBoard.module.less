@@ -12,78 +12,7 @@ each(@difficulty, {
   }
 })
 
-.tsBoardLoading {
+.tsBoardMessage {
   margin: auto;
   padding: 24px;
-}
-
-each(@difficulty, {
-  .tsCellContainer-@{value} {
-    display: flex;
-    flex-basis: calc(100% / extract(@difficultyRowCells, @index));
-    position: relative;
-    height: 0;
-    padding-bottom: calc(100% / extract(@difficultyRowCells, @index));
-    background-color: whitesmoke;
-  }
-})
-
-.tsCell {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 1px solid transparent;
-  border-radius: 2px;
-  box-sizing: border-box;
-  background-clip: padding-box;
-}
-
-.tsCellUncovered {
-  &:extend(.tsCell);
-  background-color: white;
-  user-select: none;
-}
-
-each(@colors, {
-  .nearbyMineCell-@{index} {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 10%;
-    height: 80%;
-    background: @value;
-    box-shadow: 0 0 5px 0.5px @value;
-    border-radius: 8px;
-    color: white;
-    font-weight: bold;
-  }
-})
-
-.mineCell {
-  width: inherit;
-  height: inherit;
-  background-image: url('../../assets/img/mine-96.png');
-  background-position: center;
-  background-size: 85%;
-  background-repeat: no-repeat;
-}
-
-.tsCellCovered {
-  &:extend(.tsCell);
-  background-color: black;
-  cursor: pointer;
-  opacity: 1;
-  z-index: 1;
-  transform: scale(1);
-  transform-origin: bottom;
-  transition: transform 0.5s, border-radius 0.5s, opacity 0.5s;
-  &:hover {
-    background-color: rgb(66, 66, 66);
-  }
-}
-
-.tsCellCoverRemoved {
-  border-radius: 50px;
-  opacity: 0;
-  transform: scale(0);
 }

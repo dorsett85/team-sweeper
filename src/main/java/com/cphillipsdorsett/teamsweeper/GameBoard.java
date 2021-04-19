@@ -67,14 +67,6 @@ public class GameBoard {
                 mineCount--;
             }
         }
-
-        for (GameCell[] row : board) {
-            for (GameCell cell : row) {
-                System.out.print(cell.value + " ");
-            }
-            System.out.print("\n");
-        }
-
     }
 
     /**
