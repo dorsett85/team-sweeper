@@ -18,8 +18,8 @@ const TsBoardCell: React.FC<TsCell> = ({ value }) => {
       // last transition end.
       let transitionRunCount = 0;
       let transitionEndCount = 0;
-      transitionRunListener = (e) => transitionRunCount++;
-      transitionEndListener = (e) => {
+      transitionRunListener = () => transitionRunCount++;
+      transitionEndListener = () => {
         transitionEndCount++;
         if (transitionRunCount === transitionEndCount) {
           cell.remove();

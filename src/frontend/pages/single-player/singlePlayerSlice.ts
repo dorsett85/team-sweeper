@@ -1,10 +1,14 @@
 import { CaseReducer, createSlice, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
 
-interface SinglePlayerState {
+export interface SinglePlayerState {
   /**
    * Difficulty setting of the game
    */
   difficulty: 'e' | 'm' | 'h';
+  /**
+   * Whether or not the game board is loading
+   */
+  isLoading: boolean;
 }
 
 type SinglePlayerCaseReducer<TPayload = void> = CaseReducer<
@@ -13,23 +17,28 @@ type SinglePlayerCaseReducer<TPayload = void> = CaseReducer<
 >;
 
 interface SinglePlayerReducers extends SliceCaseReducers<SinglePlayerState> {
-  resetSinglePlayerState: SinglePlayerCaseReducer;
+  setDifficulty: SinglePlayerCaseReducer<SinglePlayerState['difficulty']>;
+  setIsLoading: SinglePlayerCaseReducer<SinglePlayerState['isLoading']>;
 }
 
 const initialState: SinglePlayerState = {
-  difficulty: 'h'
+  difficulty: 'h',
+  isLoading: true
 };
 
 export const counterSlice = createSlice<SinglePlayerState, SinglePlayerReducers>({
   name: 'singlePlayer',
   initialState,
   reducers: {
-    resetSinglePlayerState: (state) => {
-      state = initialState;
+    setDifficulty: (state, { payload }) => {
+      state.difficulty = payload;
+    },
+    setIsLoading: (state, { payload }) => {
+      state.isLoading = payload;
     }
   }
 });
 
-export const { resetSinglePlayerState } = counterSlice.actions;
+export const { setDifficulty, setIsLoading } = counterSlice.actions;
 
 export const singlePlayerReducer = counterSlice.reducer;

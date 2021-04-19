@@ -1,12 +1,21 @@
-.gameControl {
+.gameControlContainer {
   display: flex;
   justify-content: space-around;
 }
 
-.gameControlBtn {
+.gameControl {
   font-weight: bold;
   padding: 8px;
-  border: none;
   border-radius: 5px;
+  font-family: inherit;
   cursor: pointer;
+}
+
+.gameControlDifficultySelect {
+  &:extend(.gameControl);
+}
+
+.gameControlResetBtn {
+  &:extend(.gameControl);
+  border: none;
 }
