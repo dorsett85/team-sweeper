@@ -48,7 +48,7 @@ const TsBoardCell: React.FC<TsCell> = ({ value, rowIdx, colIdx }) => {
       cell?.removeEventListener('transitionend', transitionEndListener);
       gameEvents.removeOnUncoverCell({ rowIdx, colIdx });
     };
-  }, []);
+  }, [colIdx, rowIdx, value]);
 
   const handleOnClick: React.MouseEventHandler<HTMLButtonElement> = async ({ currentTarget }) => {
     const data = await fetchJson(`/single-player/uncover-cell?rowIdx=${rowIdx}&colIdx=${colIdx}`, {
