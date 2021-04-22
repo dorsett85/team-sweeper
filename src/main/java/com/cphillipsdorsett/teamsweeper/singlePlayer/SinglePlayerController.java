@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -33,16 +32,6 @@ public class SinglePlayerController {
         // TODO check for existing game
         GameBoard board = singlePlayerService.createBoard(difficulty);
         return new ResponseEntity<>(board, HttpStatus.OK);
-    }
-
-    @PutMapping("/single-player/uncover-cell")
-    public ResponseEntity<Integer[]> uncoverCell(
-        @RequestParam(value = "rowIdx") Integer rowIdx,
-        @RequestParam(value = "rowIdx") Integer colIdx,
-        SinglePlayerService singlePlayerService
-    ) {
-        // TODO
-        return new ResponseEntity<>(new Integer[] {rowIdx, colIdx }, HttpStatus.OK);
     }
 
 }
