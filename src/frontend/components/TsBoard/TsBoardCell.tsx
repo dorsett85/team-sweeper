@@ -2,8 +2,7 @@ import React, { memo, useEffect, useRef } from 'react';
 import styles from './TsBoardCell.module.less';
 import { TsCell } from '../../types/TsBoardResponse';
 import { useAppSelector } from '../../pages/single-player/singlePlayerStore';
-import { fetchJson } from '../../utils/fetchJson';
-import gameEvents from '../../utils/GameEvents';
+import sock from '../../utils/GameSocket';
 
 const TsBoardCell: React.FC<TsCell> = ({ value, rowIdx, colIdx }) => {
   const difficulty = useAppSelector((state) => state.difficulty);
@@ -14,13 +13,10 @@ const TsBoardCell: React.FC<TsCell> = ({ value, rowIdx, colIdx }) => {
     const cell = coveredCellRef.current;
 
     // Subscribe to the onUncoverCell Event
-    gameEvents.addOnUncoverCell({ rowIdx, colIdx }, () => {
+    sock.addOnUncoverCell({ rowIdx, colIdx }, () => {
       if (cell && !cell.disabled) {
         cell.disabled = true;
         cell.classList.add(styles.tsCellCoverRemoved);
-        if (value === '0') {
-          gameEvents.uncoverNearbyCells({ rowIdx, colIdx });
-        }
       }
     });
 
@@ -46,23 +42,15 @@ const TsBoardCell: React.FC<TsCell> = ({ value, rowIdx, colIdx }) => {
     return () => {
       cell?.removeEventListener('transitionrun', transitionRunListener);
       cell?.removeEventListener('transitionend', transitionEndListener);
-      gameEvents.removeOnUncoverCell({ rowIdx, colIdx });
+      sock.removeOnUncoverCell({ rowIdx, colIdx });
     };
   }, [colIdx, rowIdx, value]);
 
-  const handleOnClick: React.MouseEventHandler<HTMLButtonElement> = async ({ currentTarget }) => {
-    const data = await fetchJson(`/single-player/uncover-cell?rowIdx=${rowIdx}&colIdx=${colIdx}`, {
-      method: 'put'
-    });
+  const handleOnClick: React.MouseEventHandler<HTMLButtonElement> = async () => {
+    sock.sendJson({ rowIdx, colIdx });
 
-    currentTarget.disabled = true;
-    currentTarget.classList.add(styles.tsCellCoverRemoved);
-
-    if (value === '0') {
-      gameEvents.uncoverNearbyCells({ rowIdx, colIdx });
-    } else if (value === 'x') {
-      gameEvents.uncoverAllCells();
-    }
+    // currentTarget.disabled = true;
+    // currentTarget.classList.add(styles.tsCellCoverRemoved);
   };
 
   return (
