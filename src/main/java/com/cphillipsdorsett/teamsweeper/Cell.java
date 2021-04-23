@@ -2,7 +2,7 @@ package com.cphillipsdorsett.teamsweeper;
 
 import org.springframework.lang.NonNull;
 
-public class GameCell {
+public class Cell {
     /**
      * Row index on the board
      */
@@ -21,7 +21,7 @@ public class GameCell {
      */
     public boolean covered = true;
 
-    public GameCell(int rIdx, int cIdx) {
+    public Cell(int rIdx, int cIdx) {
         this.rowIdx = rIdx;
         this.colIdx = cIdx;
     }

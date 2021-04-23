@@ -1,10 +1,10 @@
 import React, { memo, useEffect, useRef } from 'react';
-import styles from './TsBoardCell.module.less';
-import { TsCell } from '../../types/TsBoardResponse';
+import styles from './GameCell.module.less';
+import { Cell } from '../../types/Board';
 import { useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import sock from '../../utils/GameSocket';
 
-const TsBoardCell: React.FC<TsCell> = ({ value, rowIdx, colIdx }) => {
+const GameCell: React.FC<Cell> = ({ value, rowIdx, colIdx }) => {
   const difficulty = useAppSelector((state) => state.difficulty);
   const coveredCellRef = useRef<HTMLButtonElement | null>(null);
 
@@ -65,4 +65,4 @@ const TsBoardCell: React.FC<TsCell> = ({ value, rowIdx, colIdx }) => {
   );
 };
 
-export default memo(TsBoardCell);
+export default memo(GameCell);

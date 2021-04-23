@@ -13,7 +13,6 @@ public class SocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         // TODO parse json message and dispatch actions based on the payload
-        System.out.println("We got your message: " + message.getPayload());
         session.sendMessage(message);
     }
 

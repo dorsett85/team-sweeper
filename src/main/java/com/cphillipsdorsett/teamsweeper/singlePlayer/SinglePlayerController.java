@@ -1,7 +1,7 @@
 package com.cphillipsdorsett.teamsweeper.singlePlayer;
 
+import com.cphillipsdorsett.teamsweeper.Board;
 import com.cphillipsdorsett.teamsweeper.BundleManifest;
-import com.cphillipsdorsett.teamsweeper.GameBoard;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class SinglePlayerController {
     }
 
     @GetMapping("/single-player/new-game")
-    public ResponseEntity<GameBoard> newGame(
+    public ResponseEntity<Board> newGame(
         @RequestParam(value = "difficulty", defaultValue = "e") String difficulty, SinglePlayerService singlePlayerService
     ) {
         // Make sure the difficulty param is one we accept
@@ -30,7 +30,7 @@ public class SinglePlayerController {
         }
 
         // TODO check for existing game
-        GameBoard board = singlePlayerService.createBoard(difficulty);
+        Board board = singlePlayerService.createBoard(difficulty);
         return new ResponseEntity<>(board, HttpStatus.OK);
     }
 

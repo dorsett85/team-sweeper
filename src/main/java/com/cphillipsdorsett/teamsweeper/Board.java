@@ -2,8 +2,8 @@ package com.cphillipsdorsett.teamsweeper;
 
 import java.util.Random;
 
-public class GameBoard {
-    public final GameCell[][] board;
+public class Board {
+    public final Cell[][] cells2d;
     public final int rows;
     public final int cols;
     public final int mines;
@@ -25,7 +25,7 @@ public class GameBoard {
         { 0, -1},
     };
 
-    public GameBoard(String difficulty) {
+    public Board(String difficulty) {
         if (difficulty.equals("e")) {
             rows = 9;
             cols = 9;
@@ -40,14 +40,14 @@ public class GameBoard {
             mines = 99;
         }
 
-        board = new GameCell[rows][cols];
+        cells2d = new Cell[rows][cols];
         totalCells = rows * cols;
         nonMines = totalCells - mines;
 
         // Adds cells to the rows and columns
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
-                board[row][col] = new GameCell(row, col);
+                cells2d[row][col] = new Cell(row, col);
             }
         }
 
@@ -56,7 +56,7 @@ public class GameBoard {
         while (mineCount > 0) {
             int rowIndex = new Random().nextInt(rows);
             int colIndex = new Random().nextInt(cols);
-            GameCell cell = board[rowIndex][colIndex];
+            Cell cell = cells2d[rowIndex][colIndex];
             if (!cell.value.equals("x")) {
                 cell.value = "x";
 
@@ -70,20 +70,20 @@ public class GameBoard {
     }
 
     /**
-     * Add 1 to value of all surrounding cells of the passed in GameCell. The
-     * passed in GameCell must be one has a mine on it.
+     * Add 1 to value of all surrounding cells of the passed in Cell. The
+     * passed in Cell must be one has a mine on it.
      */
-    private void addNearbyMineCount(GameCell cellWithMine) {
+    private void addNearbyMineCount(Cell cellWithMine) {
 
         for (int[] cellTuple : surroundingCells) {
             int rIdx = cellWithMine.rowIdx + cellTuple[0];
             int cIdx = cellWithMine.colIdx + cellTuple[1];
 
             // Check that the indexes are not out of bounds
-            boolean isRowOob = rIdx < 0 || rIdx + 1 > board.length;
-            boolean isColOob = cIdx < 0 || cIdx + 1 > board[0].length;
+            boolean isRowOob = rIdx < 0 || rIdx + 1 > cells2d.length;
+            boolean isColOob = cIdx < 0 || cIdx + 1 > cells2d[0].length;
             if (!isRowOob && !isColOob) {
-                GameCell nearbyCell = board[rIdx][cIdx];
+                Cell nearbyCell = cells2d[rIdx][cIdx];
                 if (!nearbyCell.value.equals("x")) {
                     int newValue = Integer.parseInt(nearbyCell.value) + 1;
                     nearbyCell.value = Integer.toString(newValue);

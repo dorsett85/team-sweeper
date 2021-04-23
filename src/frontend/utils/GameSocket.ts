@@ -1,6 +1,6 @@
-import { TsCell } from '../types/TsBoardResponse';
+import { Cell } from '../types/Board';
 
-type UncoverCellParam = Pick<TsCell, 'rowIdx' | 'colIdx'>;
+type UncoverCellParam = Pick<Cell, 'rowIdx' | 'colIdx'>;
 
 export class GameSocket {
   /**
