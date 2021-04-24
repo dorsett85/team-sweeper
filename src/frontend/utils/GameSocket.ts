@@ -20,7 +20,6 @@ export class GameSocket {
   private addSockHandlers(): void {
     // Successfully opened socket connection
     this.sock.onopen = (e) => {
-      console.log('Socket connection is open:', e);
       // TODO fire on open callbacks
     };
 
