@@ -12,7 +12,6 @@ import java.util.ArrayList;
 @Component
 public class GameSocketHandler extends TextWebSocketHandler {
 
-
     public ArrayList<WebSocketSession> sessions = new ArrayList<>();
 
     @Override

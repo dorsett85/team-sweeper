@@ -8,25 +8,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Set;
+
 @Controller
+@RequestMapping("/game")
 public class GameController {
 
-    @GetMapping("/game/single-player")
+    @GetMapping("/single-player")
     public String singlePlayer(BundleManifest bundleManifest, Model model) {
         model.addAttribute("bundleManifest", bundleManifest);
         return "single-player";
     }
 
-    @GetMapping("/game/new-game")
+    @GetMapping("/new-game")
     public ResponseEntity<Board> newGame(
         @RequestParam(value = "difficulty", defaultValue = "e") String difficulty,
         GameService gameService
     ) {
         // Make sure the difficulty param is one we accept
-        // TODO simplify logic check for the difficulty param
-        if (!difficulty.equals("e") && !difficulty.equals("m") && !difficulty.equals("h")) {
+        if (!Set.of("e", "m", "h").contains(difficulty)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
