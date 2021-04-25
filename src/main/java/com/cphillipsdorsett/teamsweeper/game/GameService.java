@@ -1,11 +1,11 @@
-package com.cphillipsdorsett.teamsweeper.singlePlayer;
+package com.cphillipsdorsett.teamsweeper.game;
 
 import com.cphillipsdorsett.teamsweeper.Board;
 
 import org.springframework.stereotype.Service;
 
 @Service
-public class SinglePlayerService {
+public class GameService {
 
     public Board createBoard(String difficulty) {
         Board board = new Board(difficulty);

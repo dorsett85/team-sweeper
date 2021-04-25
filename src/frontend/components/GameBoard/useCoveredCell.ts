@@ -22,7 +22,7 @@ export const useCoveredCell = ({
   colIdx
 }: Pick<Cell, 'rowIdx' | 'colIdx'>): UseCoveredCellReturn => {
   const coveredCellRef = useRef<HTMLButtonElement | null>(null);
-  const [className, setClassName] = useState(styles.tsCellCovered);
+  const [className, setClassName] = useState(styles.cellCovered);
 
   // Initial event listener setup
   useEffect(() => {
@@ -38,7 +38,7 @@ export const useCoveredCell = ({
       sock.addOnUncoverCell({ rowIdx, colIdx }, () => {
         if (!cell.disabled) {
           cell.disabled = true;
-          setClassName((currentState) => `${currentState} ${styles.tsCellCoverRemoved}`);
+          setClassName((currentState) => `${currentState} ${styles.cellCoverRemoved}`);
         }
       });
 

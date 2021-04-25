@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './GameBoard.module.less';
 import { Board } from '../../types/Board';
-import TsBoardCell from './GameCell';
+import GameCell from './GameCell';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { fetchJson } from '../../utils/fetchJson';
@@ -18,7 +18,7 @@ const GameBoard: React.FC = () => {
   useEffect(() => {
     if (isLoading) {
       setLoadingError(false);
-      fetchJson<Board>(`/single-player/new-game?difficulty=${difficulty}`)
+      fetchJson<Board>(`/game/new-game?difficulty=${difficulty}`)
         .then((newBoard) => {
           setBoard(newBoard);
         })
@@ -34,19 +34,17 @@ const GameBoard: React.FC = () => {
   let gameBoard: React.ReactNode;
   if (loadingError || isLoading) {
     gameBoard = (
-      <span className={styles.tsBoardMessage}>
+      <span className={styles.boardMessage}>
         {loadingError ? 'Failed to load the game, try refreshing' : 'loading...'}
       </span>
     );
   } else {
     gameBoard = board?.cells2d.flatMap((row) =>
-      row.map((cell) => (
-        <TsBoardCell key={`${difficulty}-${cell.rowIdx}-${cell.colIdx}`} {...cell} />
-      ))
+      row.map((cell) => <GameCell key={`${difficulty}-${cell.rowIdx}-${cell.colIdx}`} {...cell} />)
     );
   }
 
-  return <div className={styles[`tsBoard-${difficulty}`]}>{gameBoard}</div>;
+  return <div className={styles[`board-${difficulty}`]}>{gameBoard}</div>;
 };
 
 export default GameBoard;

@@ -105,5 +105,5 @@ export class GameSocket {
   }
 }
 
-const sock = new GameSocket('ws://localhost:8080/publish');
+const sock = new GameSocket('ws://localhost:8080/game/publish');
 export default sock;

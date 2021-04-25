@@ -1,32 +1,28 @@
-package com.cphillipsdorsett.teamsweeper.singlePlayer;
+package com.cphillipsdorsett.teamsweeper.game;
 
 import com.cphillipsdorsett.teamsweeper.Board;
 import com.cphillipsdorsett.teamsweeper.BundleManifest;
 
-import com.cphillipsdorsett.teamsweeper.GameSocketHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.socket.WebSocketSession;
-
-import java.util.ArrayList;
 
 @Controller
-public class SinglePlayerController {
+public class GameController {
 
-    @GetMapping("/single-player")
+    @GetMapping("/game/single-player")
     public String singlePlayer(BundleManifest bundleManifest, Model model) {
         model.addAttribute("bundleManifest", bundleManifest);
         return "single-player";
     }
 
-    @GetMapping("/single-player/new-game")
+    @GetMapping("/game/new-game")
     public ResponseEntity<Board> newGame(
-        @RequestParam(value = "difficulty", defaultValue = "e") String difficulty, SinglePlayerService singlePlayerService
+        @RequestParam(value = "difficulty", defaultValue = "e") String difficulty,
+        GameService gameService
     ) {
         // Make sure the difficulty param is one we accept
         // TODO simplify logic check for the difficulty param
@@ -35,14 +31,8 @@ public class SinglePlayerController {
         }
 
         // TODO check for existing game
-        Board board = singlePlayerService.createBoard(difficulty);
+        Board board = gameService.createBoard(difficulty);
         return new ResponseEntity<>(board, HttpStatus.OK);
-    }
-
-    @GetMapping("/single-player/test")
-    public ResponseEntity<String> test(GameSocketHandler sock) {
-        System.out.println(sock.sessions.size());
-        return new ResponseEntity<>("Success", HttpStatus.OK);
     }
 
 }

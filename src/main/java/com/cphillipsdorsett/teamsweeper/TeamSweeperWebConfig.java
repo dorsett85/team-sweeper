@@ -1,4 +1,4 @@
-package com.cphillipsdorsett.teamsweeper.config;
+package com.cphillipsdorsett.teamsweeper;
 
 import com.cphillipsdorsett.teamsweeper.BundleManifestArgumentResolver;
 import org.springframework.context.annotation.Configuration;

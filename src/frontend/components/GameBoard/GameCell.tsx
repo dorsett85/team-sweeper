@@ -9,9 +9,9 @@ const GameCell: React.FC<Cell> = ({ value, rowIdx, colIdx }) => {
   const coveredCell = useCoveredCell({ rowIdx, colIdx });
 
   return (
-    <div className={styles[`tsCellContainer-${difficulty}`]}>
+    <div className={styles[`cellContainer-${difficulty}`]}>
       <button {...coveredCell} />
-      <div className={styles.tsCellUncovered}>
+      <div className={styles.cellUncovered}>
         <div className={styles[value === 'x' ? 'mineCell' : `nearbyMineCell-${value}`]}>
           {!['0', 'x'].includes(value) && value}
         </div>
