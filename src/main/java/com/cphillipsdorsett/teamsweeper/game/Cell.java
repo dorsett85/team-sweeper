@@ -1,4 +1,4 @@
-package com.cphillipsdorsett.teamsweeper;
+package com.cphillipsdorsett.teamsweeper.game;
 
 import org.springframework.lang.NonNull;
 

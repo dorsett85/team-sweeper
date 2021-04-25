@@ -1,4 +1,6 @@
-package com.cphillipsdorsett.teamsweeper;
+package com.cphillipsdorsett.teamsweeper.game;
+
+import com.cphillipsdorsett.teamsweeper.game.Cell;
 
 import java.util.Random;
 
