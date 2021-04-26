@@ -1,7 +1,5 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
-import com.cphillipsdorsett.teamsweeper.game.Cell;
-
 import java.util.Random;
 
 public class Board {
