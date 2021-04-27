@@ -1,15 +1,25 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
-import com.cphillipsdorsett.teamsweeper.Board;
-
 import org.springframework.stereotype.Service;
 
 @Service
 public class GameService {
 
-    public Board createBoard(String difficulty) {
+    GameDao gameDao;
+
+    public GameService(GameDao gameDao) {
+        this.gameDao = gameDao;
+    }
+
+    public Board getBoard(String sessionId, String difficulty) {
+        // TODO lookup if the game exists by session id
+
         Board board = new Board(difficulty);
-        // TODO add row to DB
+
+        // Add record to the db
+        Game insertGame = new Game(difficulty, board.mines, board.nonMines);
+        gameDao.create(insertGame);
+
         return board;
     }
 }
