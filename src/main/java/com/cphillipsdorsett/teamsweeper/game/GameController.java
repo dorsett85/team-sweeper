@@ -2,6 +2,7 @@ package com.cphillipsdorsett.teamsweeper.game;
 
 import com.cphillipsdorsett.teamsweeper.BundleManifest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -30,18 +31,18 @@ public class GameController {
     }
 
     @GetMapping("/new-game")
-    public ResponseEntity<Board> newGame(
+    public ResponseEntity<Game> newGame(
         @RequestParam(value = "difficulty", defaultValue = "e") String difficulty,
         HttpSession session
-    ) {
+    ) throws JsonProcessingException {
         // Make sure the difficulty param is one we accept
         if (!Set.of("e", "m", "h").contains(difficulty)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        Board board = gameService.getBoard(session.getId(), difficulty);
+        Game game = gameService.getGame(session.getId(), difficulty);
 
-        return new ResponseEntity<>(board, HttpStatus.OK);
+        return new ResponseEntity<>(game, HttpStatus.OK);
     }
 
 }

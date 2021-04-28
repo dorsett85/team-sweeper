@@ -1,4 +1,4 @@
-import { Cell } from '../types/Board';
+import { Cell } from '../types/Game';
 
 type UncoverCellParam = Pick<Cell, 'rowIdx' | 'colIdx'>;
 

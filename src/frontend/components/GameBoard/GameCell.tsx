@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import styles from './GameCell.module.less';
-import { Cell } from '../../types/Board';
+import { Cell } from '../../types/Game';
 import { useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { useCoveredCell } from './useCoveredCell';
 

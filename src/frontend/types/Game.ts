@@ -5,8 +5,8 @@ export interface Cell {
   covered: boolean;
 }
 
-export interface Board {
-  cells2d: Cell[][];
+export interface Game {
+  board: Cell[][];
   rows: number;
   cols: number;
   mines: number;

@@ -4,6 +4,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -23,17 +25,42 @@ public class GameDao implements GameRepository {
     }
 
     @Transactional
-    public void create(Game game) {
-        em
+    public Game create(Game game) {
+        int num = em
             .createNativeQuery("" +
-                "insert into game (difficulty, mines, non_mines, total_cells) " +
-                "values (?, ?, ?, ?)"
+                "INSERT INTO game (difficulty, mines, non_mines, board, total_cells) " +
+                "VALUES (?, ?, ?, ?, ?);"
             )
             .setParameter(1, game.difficulty)
             .setParameter(2, game.mines)
             .setParameter(3, game.nonMines)
-            .setParameter(4, game.totalCells)
+            .setParameter(4, game.board)
+            .setParameter(5, game.totalCells)
             .executeUpdate();
+        return (Game) em
+            .createNativeQuery("" +
+                "SELECT g.* " +
+                "FROM game g " +
+                "WHERE g.id = (SELECT LAST_INSERT_ID())",
+                Game.class
+            )
+            .getSingleResult();
+    }
+
+    @Transactional
+    public Game findBySessionId(String session_id) {
+        List<Game> results = (List<Game>) em
+            .createNativeQuery("" +
+                "SELECT g.* " +
+                "FROM game g " +
+                "INNER JOIN session_game sg ON g.id = sg.game_id " +
+                "INNER JOIN SPRING_SESSION ss ON sg.session_id = ss.SESSION_ID " +
+                "WHERE ss.SESSION_ID = ?",
+                Game.class
+            )
+            .setParameter(1, session_id)
+            .getResultList();
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override

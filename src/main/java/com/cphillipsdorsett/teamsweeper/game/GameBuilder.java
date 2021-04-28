@@ -1,14 +1,23 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.HashMap;
 import java.util.Random;
 
-public class Board {
-    public final Cell[][] cells2d;
+public class GameBuilder {
     public final int rows;
     public final int cols;
     public final int mines;
     public final int nonMines;
     public final int totalCells;
+    public final Cell[][] board;
+    private static final HashMap<String, BoardConfig> boardConfigMap = new HashMap<>() {{
+        put("e", new BoardConfig(9, 9, 10));
+        put("m", new BoardConfig(16, 16, 40));
+        put("h", new BoardConfig(16, 30, 99));
+    }};
 
     /**
      * 2d array of surrounding cells starting in top left corner moving
@@ -25,29 +34,20 @@ public class Board {
         { 0, -1},
     };
 
-    public Board(String difficulty) {
-        if (difficulty.equals("e")) {
-            rows = 9;
-            cols = 9;
-            mines = 10;
-        } else if (difficulty.equals("m")) {
-            rows = 16;
-            cols = 16;
-            mines = 40;
-        } else {
-            rows = 16;
-            cols = 30;
-            mines = 99;
-        }
+    public GameBuilder(String difficulty) {
+        BoardConfig boardConfig = boardConfigMap.get(difficulty);
+        rows = boardConfig.rows;
+        cols = boardConfig.cols;
+        mines = boardConfig.mines;
 
-        cells2d = new Cell[rows][cols];
+        board = new Cell[rows][cols];
         totalCells = rows * cols;
         nonMines = totalCells - mines;
 
         // Adds cells to the rows and columns
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
-                cells2d[row][col] = new Cell(row, col);
+                board[row][col] = new Cell(row, col);
             }
         }
 
@@ -56,7 +56,7 @@ public class Board {
         while (mineCount > 0) {
             int rowIndex = new Random().nextInt(rows);
             int colIndex = new Random().nextInt(cols);
-            Cell cell = cells2d[rowIndex][colIndex];
+            Cell cell = board[rowIndex][colIndex];
             if (!cell.value.equals("x")) {
                 cell.value = "x";
 
@@ -80,15 +80,31 @@ public class Board {
             int cIdx = cellWithMine.colIdx + cellTuple[1];
 
             // Check that the indexes are not out of bounds
-            boolean isRowOob = rIdx < 0 || rIdx + 1 > cells2d.length;
-            boolean isColOob = cIdx < 0 || cIdx + 1 > cells2d[0].length;
+            boolean isRowOob = rIdx < 0 || rIdx + 1 > board.length;
+            boolean isColOob = cIdx < 0 || cIdx + 1 > board[0].length;
             if (!isRowOob && !isColOob) {
-                Cell nearbyCell = cells2d[rIdx][cIdx];
+                Cell nearbyCell = board[rIdx][cIdx];
                 if (!nearbyCell.value.equals("x")) {
                     int newValue = Integer.parseInt(nearbyCell.value) + 1;
                     nearbyCell.value = Integer.toString(newValue);
                 }
             }
+        }
+    }
+
+    public String getSerializedBoard() throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(board);
+    }
+
+    private static class BoardConfig {
+        public int rows;
+        public int cols;
+        public int mines;
+
+        public BoardConfig(int rows, int cols, int mines) {
+            this.rows = rows;
+            this.cols = cols;
+            this.mines = mines;
         }
     }
 

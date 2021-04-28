@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import styles from './GameBoard.module.less';
-import { Board } from '../../types/Board';
+import { Game } from '../../types/Game';
 import GameCell from './GameCell';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { fetchJson } from '../../utils/fetchJson';
 
 const GameBoard: React.FC = () => {
-  const [board, setBoard] = useState<Board>();
+  const [game, setGame] = useState<Game>();
   const [loadingError, setLoadingError] = useState(false);
   const difficulty = useAppSelector((state) => state.difficulty);
   const isLoading = useAppSelector((state) => state.isLoading);
@@ -18,9 +18,11 @@ const GameBoard: React.FC = () => {
   useEffect(() => {
     if (isLoading) {
       setLoadingError(false);
-      fetchJson<Board>(`/game/new-game?difficulty=${difficulty}`)
-        .then((newBoard) => {
-          setBoard(newBoard);
+      fetchJson<Game>(`/game/new-game?difficulty=${difficulty}`)
+        .then((newGame) => {
+          // @ts-ignore
+          newGame.board = JSON.parse(newGame.board);
+          setGame(newGame);
         })
         .catch(() => {
           setLoadingError(true);
@@ -39,7 +41,7 @@ const GameBoard: React.FC = () => {
       </span>
     );
   } else {
-    gameBoard = board?.cells2d.flatMap((row) =>
+    gameBoard = game?.board.flatMap((row) =>
       row.map((cell) => <GameCell key={`${difficulty}-${cell.rowIdx}-${cell.colIdx}`} {...cell} />)
     );
   }

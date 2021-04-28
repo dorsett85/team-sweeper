@@ -1,4 +1,4 @@
-import { Cell } from '../../types/Board';
+import { Cell } from '../../types/Game';
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import sock from '../../utils/GameSocket';
 import styles from './GameCell.module.less';
