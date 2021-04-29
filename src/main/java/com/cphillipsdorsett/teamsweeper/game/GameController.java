@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpSession;
 import java.util.Set;
@@ -31,18 +32,18 @@ public class GameController {
     }
 
     @GetMapping("/new-game")
-    public ResponseEntity<Game> newGame(
+    public ResponseEntity<GameDto> newGame(
         @RequestParam(value = "difficulty", defaultValue = "e") String difficulty,
         HttpSession session
     ) throws JsonProcessingException {
         // Make sure the difficulty param is one we accept
         if (!Set.of("e", "m", "h").contains(difficulty)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "difficulty param must be (e|m|h)");
         }
 
-        Game game = gameService.getGame(session.getId(), difficulty);
+        GameDto gameDto = gameService.newGame(session.getId(), difficulty);
 
-        return new ResponseEntity<>(game, HttpStatus.OK);
+        return ResponseEntity.ok(gameDto);
     }
 
 }

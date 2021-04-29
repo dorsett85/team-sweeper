@@ -4,7 +4,6 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,16 +25,13 @@ public class GameDao implements GameRepository {
 
     @Transactional
     public Game create(Game game) {
-        int num = em
+        em
             .createNativeQuery("" +
-                "INSERT INTO game (difficulty, mines, non_mines, board, total_cells) " +
-                "VALUES (?, ?, ?, ?, ?);"
+                "INSERT INTO game (difficulty, board) " +
+                "VALUES (:difficulty, :board)"
             )
-            .setParameter(1, game.difficulty)
-            .setParameter(2, game.mines)
-            .setParameter(3, game.nonMines)
-            .setParameter(4, game.board)
-            .setParameter(5, game.totalCells)
+            .setParameter("difficulty", game.difficulty)
+            .setParameter("board", game.board)
             .executeUpdate();
         return (Game) em
             .createNativeQuery("" +

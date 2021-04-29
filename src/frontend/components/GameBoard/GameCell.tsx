@@ -1,20 +1,24 @@
 import React, { memo } from 'react';
 import styles from './GameCell.module.less';
-import { Cell } from '../../types/Game';
-import { useAppSelector } from '../../pages/single-player/singlePlayerStore';
+import { Cell, Game } from '../../types/Game';
 import { useCoveredCell } from './useCoveredCell';
 
-const GameCell: React.FC<Cell> = ({ value, rowIdx, colIdx }) => {
-  const difficulty = useAppSelector((state) => state.difficulty);
-  const coveredCell = useCoveredCell({ rowIdx, colIdx });
+interface GameCellProps extends Pick<Cell, 'rowIdx' | 'colIdx'> {
+  difficulty: Game['difficulty'];
+}
+
+const GameCell: React.FC<GameCellProps> = ({ difficulty, rowIdx, colIdx }) => {
+  const { value, ...coveredCell } = useCoveredCell({ rowIdx, colIdx });
 
   return (
     <div className={styles[`cellContainer-${difficulty}`]}>
       <button {...coveredCell} />
       <div className={styles.cellUncovered}>
-        <div className={styles[value === 'x' ? 'mineCell' : `nearbyMineCell-${value}`]}>
-          {!['0', 'x'].includes(value) && value}
-        </div>
+        {value && (
+          <div className={styles[value === 'x' ? 'mineCell' : `nearbyMineCell-${value}`]}>
+            {!['0', 'x'].includes(value) && value}
+          </div>
+        )}
       </div>
     </div>
   );

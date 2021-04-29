@@ -6,10 +6,8 @@ export interface Cell {
 }
 
 export interface Game {
-  board: Cell[][];
+  difficulty: 'e' | 'm' | 'h';
   rows: number;
   cols: number;
   mines: number;
-  nonMines: number;
-  totalCells: number;
 }

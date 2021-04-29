@@ -96,7 +96,11 @@ public class GameBuilder {
         return new ObjectMapper().writeValueAsString(board);
     }
 
-    private static class BoardConfig {
+    public static BoardConfig getBoardConfig(String difficulty) {
+        return boardConfigMap.get(difficulty);
+    }
+
+    public static class BoardConfig {
         public int rows;
         public int cols;
         public int mines;

@@ -6,9 +6,20 @@ import styles from './GameCell.module.less';
 /**
  * Props are passed to the covered cell react button element
  */
-interface UseCoveredCellReturn {
+interface UseCoveredCell {
+  /**
+   * Ref of the uncovered cell button
+   */
   ref: MutableRefObject<HTMLButtonElement | null>;
+  /**
+   * Classname for the uncovered cell button
+   */
   className: string;
+  /**
+   * Value is initially undefined. After the cell is clicked the server will
+   * return (reveal) the value of the cell.
+   */
+  value: Cell['value'] | undefined;
 }
 
 /**
@@ -20,9 +31,10 @@ interface UseCoveredCellReturn {
 export const useCoveredCell = ({
   rowIdx,
   colIdx
-}: Pick<Cell, 'rowIdx' | 'colIdx'>): UseCoveredCellReturn => {
+}: Pick<Cell, 'rowIdx' | 'colIdx'>): UseCoveredCell => {
   const coveredCellRef = useRef<HTMLButtonElement | null>(null);
   const [className, setClassName] = useState(styles.cellCovered);
+  const [value, setValue] = useState<UseCoveredCell['value']>();
 
   // Initial event listener setup
   useEffect(() => {
@@ -35,9 +47,10 @@ export const useCoveredCell = ({
 
     if (cell) {
       // Subscribe to the onUncoverCell Event
-      sock.addOnUncoverCell({ rowIdx, colIdx }, () => {
+      sock.addOnUncoverCell({ rowIdx, colIdx }, (value) => {
         if (!cell.disabled) {
           cell.disabled = true;
+          setValue(value);
           setClassName((currentState) => `${currentState} ${styles.cellCoverRemoved}`);
         }
       });
@@ -67,5 +80,5 @@ export const useCoveredCell = ({
     };
   }, [colIdx, rowIdx]);
 
-  return { ref: coveredCellRef, className };
+  return { ref: coveredCellRef, className, value };
 };

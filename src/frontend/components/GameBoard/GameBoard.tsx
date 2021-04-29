@@ -3,7 +3,7 @@ import styles from './GameBoard.module.less';
 import { Game } from '../../types/Game';
 import GameCell from './GameCell';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
-import { setIsLoading } from '../../pages/single-player/singlePlayerSlice';
+import { setDifficulty, setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { fetchJson } from '../../utils/fetchJson';
 
 const GameBoard: React.FC = () => {
@@ -13,15 +13,13 @@ const GameBoard: React.FC = () => {
   const isLoading = useAppSelector((state) => state.isLoading);
   const dispatch = useAppDispatch();
 
-  // We'll refetch a new board whenever the difficulty or loading state changes, which will occur
-  // on any page refresh or game control change.
+  // We'll refetch a new board whenever the difficulty or loading state changes,
+  // which will occur on any page refresh or game control change.
   useEffect(() => {
     if (isLoading) {
       setLoadingError(false);
       fetchJson<Game>(`/game/new-game?difficulty=${difficulty}`)
         .then((newGame) => {
-          // @ts-ignore
-          newGame.board = JSON.parse(newGame.board);
           setGame(newGame);
         })
         .catch(() => {
@@ -33,6 +31,13 @@ const GameBoard: React.FC = () => {
     }
   }, [difficulty, dispatch, isLoading]);
 
+  useEffect(() => {
+    // Need to set the difficulty since it might be a previously created game!
+    if (game) {
+      dispatch(setDifficulty(game.difficulty));
+    }
+  }, [game, dispatch]);
+
   let gameBoard: React.ReactNode;
   if (loadingError || isLoading) {
     gameBoard = (
@@ -40,10 +45,16 @@ const GameBoard: React.FC = () => {
         {loadingError ? 'Failed to load the game, try refreshing' : 'loading...'}
       </span>
     );
-  } else {
-    gameBoard = game?.board.flatMap((row) =>
-      row.map((cell) => <GameCell key={`${difficulty}-${cell.rowIdx}-${cell.colIdx}`} {...cell} />)
-    );
+  } else if (game) {
+    const tempBoard: React.ReactNodeArray = [];
+    for (let r = 0; r < game.rows; r++) {
+      for (let c = 0; c < game.cols; c++) {
+        tempBoard.push(
+          <GameCell key={`${difficulty}-${r}-${c}`} difficulty={difficulty} rowIdx={r} colIdx={c} />
+        );
+      }
+    }
+    gameBoard = tempBoard;
   }
 
   return <div className={styles[`board-${difficulty}`]}>{gameBoard}</div>;

@@ -15,6 +15,7 @@ public class GameSocketInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         // TODO check for a session
+        attributes.put("sessionId", "SESSION_ID");
         return true;
     }
 
