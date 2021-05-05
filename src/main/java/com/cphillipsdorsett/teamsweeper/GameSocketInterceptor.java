@@ -2,6 +2,7 @@ package com.cphillipsdorsett.teamsweeper;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
@@ -10,12 +11,16 @@ import java.util.Map;
 public class GameSocketInterceptor implements HandshakeInterceptor {
 
     /**
-     * We'll use this override to check the session and authenticate the user
+     * We'll use this override to check the session and possibly to authenticate
+     * the user.
      */
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        // TODO check for a session
-        attributes.put("sessionId", "SESSION_ID");
+    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) {
+        if (request instanceof ServletServerHttpRequest) {
+            ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
+            String sessionId = servletRequest.getServletRequest().getSession().getId();
+            attributes.put("sessionId", sessionId);
+        }
         return true;
     }
 
