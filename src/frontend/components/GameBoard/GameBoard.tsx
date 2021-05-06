@@ -5,6 +5,7 @@ import GameCell from './GameCell';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { setDifficulty, setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { fetchJson } from '../../utils/fetchJson';
+import sock from '../../utils/GameSocket';
 
 const GameBoard: React.FC = () => {
   const [game, setGame] = useState<Game>();
@@ -50,7 +51,15 @@ const GameBoard: React.FC = () => {
     for (let r = 0; r < game.rows; r++) {
       for (let c = 0; c < game.cols; c++) {
         tempBoard.push(
-          <GameCell key={`${difficulty}-${r}-${c}`} difficulty={difficulty} rowIdx={r} colIdx={c} />
+          <GameCell
+            key={`${difficulty}-${r}-${c}`}
+            onClick={() => {
+              sock.sendJson({ gameId: game.id, rowIdx: r, colIdx: c });
+            }}
+            difficulty={difficulty}
+            rowIdx={r}
+            colIdx={c}
+          />
         );
       }
     }

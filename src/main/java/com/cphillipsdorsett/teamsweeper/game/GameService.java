@@ -28,6 +28,6 @@ public class GameService {
         SessionGame sessionGame = new SessionGame(sessionId, game.id);
         sessionGameDao.create(sessionGame);
 
-        return new GameDto(game.difficulty, GameBuilder.getBoardConfig(game.difficulty));
+        return new GameDto(game, GameBuilder.getBoardConfig(game.difficulty));
     }
 }

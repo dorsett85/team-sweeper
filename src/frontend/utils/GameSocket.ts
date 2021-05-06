@@ -44,7 +44,7 @@ export class GameSocket {
         const { rowIdx, colIdx, value } = JSON.parse(e.data);
         this.handleOnUncoverCell({ rowIdx, colIdx, value });
       } catch (e) {
-        console.error('Unable to handle the server message');
+        console.error('Unable to handle the server message: ', e);
       }
     };
   }

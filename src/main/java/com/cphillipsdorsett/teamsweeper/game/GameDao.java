@@ -44,17 +44,19 @@ public class GameDao implements GameRepository {
     }
 
     @Transactional
-    public Game findBySessionId(String session_id) {
+    public Game findCurrent(String sessionId, int gameId) {
         List<Game> results = (List<Game>) em
             .createNativeQuery("" +
                 "SELECT g.* " +
                 "FROM game g " +
                 "INNER JOIN session_game sg ON g.id = sg.game_id " +
                 "INNER JOIN SPRING_SESSION ss ON sg.session_id = ss.SESSION_ID " +
-                "WHERE ss.SESSION_ID = ?",
+                "WHERE ss.SESSION_ID = :sessionId " +
+                "   AND g.id = :gameId",
                 Game.class
             )
-            .setParameter(1, session_id)
+            .setParameter("sessionId", sessionId)
+            .setParameter("gameId", gameId)
             .getResultList();
         return results.isEmpty() ? null : results.get(0);
     }

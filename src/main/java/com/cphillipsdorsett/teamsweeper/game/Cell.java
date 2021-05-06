@@ -6,11 +6,11 @@ public class Cell {
     /**
      * Row index on the board
      */
-    public final int rowIdx;
+    public int rowIdx;
     /**
      * Column index on the board
      */
-    public final int colIdx;
+    public int colIdx;
     /**
      * Surrounding mine count ('0' to '8' or 'x' if it's a mine)
      */
@@ -20,6 +20,8 @@ public class Cell {
      * Whether or not the cell is covered
      */
     public boolean covered = true;
+
+    public Cell() {}
 
     public Cell(int rIdx, int cIdx) {
         this.rowIdx = rIdx;

@@ -6,6 +6,7 @@ export interface Cell {
 }
 
 export interface Game {
+  id: number;
   difficulty: 'e' | 'm' | 'h';
   rows: number;
   cols: number;

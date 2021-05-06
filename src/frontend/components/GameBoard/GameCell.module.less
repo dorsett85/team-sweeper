@@ -21,7 +21,7 @@ each(@difficulty, {
   background-clip: padding-box;
 }
 
-.cellUncovered {
+.uncoveredCell {
   &:extend(.cell);
   background-color: white;
   user-select: none;
@@ -51,7 +51,7 @@ each(@colors, {
   background-repeat: no-repeat;
 }
 
-.cellCovered {
+.coveredCell {
   &:extend(.cell);
   background-color: black;
   cursor: pointer;
@@ -65,7 +65,7 @@ each(@colors, {
   }
 }
 
-.cellCoverRemoved {
+.coveredCellRemoved {
   border-radius: 50px;
   opacity: 0;
   transform: scale(0);

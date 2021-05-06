@@ -3,7 +3,6 @@ package com.cphillipsdorsett.teamsweeper.game;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -24,21 +23,35 @@ public class GameSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
-        // TODO parse json message and dispatch actions based on the payload
         ObjectMapper om = new ObjectMapper();
-        Map<String, Integer> cell = om.readValue(message.getPayload(), new TypeReference<>() {});
-        System.out.println(cell.get("rowIdx"));
-        session.sendMessage(message);
-    }
+        Map<String, Integer> clickedCellInfo = om.readValue(message.getPayload(), new TypeReference<>() {
+        });
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        sessions.add(session);
-        System.out.println("Added session: " + session.getId());
-    }
+        String GAME_ID = "gameId";
+        String ROW_IDX = "rowIdx";
+        String COL_IDX = "colIdx";
 
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        sessions.remove(session);
+        int gameId = clickedCellInfo.get(GAME_ID);
+        int rowIdx = clickedCellInfo.get(ROW_IDX);
+        int colIdx = clickedCellInfo.get(COL_IDX);
+        String sessionId = (String) session.getAttributes().get("sessionId");
+
+        Game game = gameDao.findCurrent(sessionId, gameId);
+        Cell[][] board = om.readValue(game.board, new TypeReference<>() {
+        });
+        String value = board[rowIdx][colIdx].value;
+
+        String jsonMessage = String.format(
+            "{ \"%s\": %s, \"%s\": %s, \"%s\": \"%s\" }",
+            ROW_IDX,
+            rowIdx,
+            COL_IDX,
+            colIdx,
+            "value",
+            value
+        );
+        TextMessage uncoveredCellMessage = new TextMessage(jsonMessage);
+
+        session.sendMessage(uncoveredCellMessage);
     }
 }
