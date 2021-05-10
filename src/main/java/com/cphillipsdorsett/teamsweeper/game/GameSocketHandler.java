@@ -39,19 +39,31 @@ public class GameSocketHandler extends TextWebSocketHandler {
         Game game = gameDao.findCurrent(sessionId, gameId);
         Cell[][] board = om.readValue(game.board, new TypeReference<>() {
         });
-        String value = board[rowIdx][colIdx].value;
+        Cell cell = board[rowIdx][colIdx];
 
-        String jsonMessage = String.format(
-            "{ \"%s\": %s, \"%s\": %s, \"%s\": \"%s\" }",
-            ROW_IDX,
-            rowIdx,
-            COL_IDX,
-            colIdx,
-            "value",
-            value
-        );
-        TextMessage uncoveredCellMessage = new TextMessage(jsonMessage);
+        uncoverCell(cell, board, session);
+    }
 
-        session.sendMessage(uncoveredCellMessage);
+    private void uncoverCell(Cell cell, Cell[][] board, WebSocketSession session) throws IOException {
+        ObjectMapper om = new ObjectMapper();
+        if (cell.covered) {
+            cell.covered = false;
+            String cellMessage = om.writeValueAsString(cell);
+            session.sendMessage(new TextMessage(cellMessage));
+
+            // If the cell isn't near any mines we'll uncover the surrounding
+            // cells as well.
+            if (cell.value.equals("0")) {
+                for (int[] cellTuple : GameBuilder.surroundingCells) {
+                    int rIdx = cell.rowIdx + cellTuple[0];
+                    int cIdx = cell.colIdx + cellTuple[1];
+
+                    boolean rowInBounds = rIdx >= 0 && rIdx < board.length;
+                    boolean colInBounds = cIdx >= 0 && cIdx < board[0].length;
+                    if (rowInBounds && colInBounds) {
+                        uncoverCell(board[rIdx][cIdx], board, session);                    }
+                }
+            }
+        }
     }
 }

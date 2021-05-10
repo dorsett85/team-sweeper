@@ -23,7 +23,7 @@ public class GameBuilder {
      * 2d array of surrounding cells starting in top left corner moving
      * clockwise.
      */
-    private final int[][] surroundingCells = {
+    public static final int[][] surroundingCells = {
         { -1, -1 },
         { -1, 0},
         { -1, 1},
