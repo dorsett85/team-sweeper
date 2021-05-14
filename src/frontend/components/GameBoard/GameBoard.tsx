@@ -54,7 +54,10 @@ const GameBoard: React.FC = () => {
           <GameCell
             key={`${difficulty}-${r}-${c}`}
             onClick={() => {
-              sock.sendJson({ gameId: game.id, rowIdx: r, colIdx: c });
+              sock.sendMsg({
+                type: 'uncoverCell',
+                payload: { gameId: game.id, rowIdx: r, colIdx: c }
+              });
             }}
             difficulty={difficulty}
             rowIdx={r}

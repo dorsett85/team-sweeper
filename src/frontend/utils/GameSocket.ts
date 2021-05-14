@@ -1,7 +1,24 @@
-import { Cell } from '../types/Game';
+import { Cell, Game } from '../types/Game';
 
-type CellIndexParam = Pick<Cell, 'rowIdx' | 'colIdx'>;
+/**
+ * Object passed to the sendMsg method. The server will know which action to
+ * dispatch based on the type as well as know what the corresponding payload is.
+ */
+interface SocketMessage<TType extends string, TPayload> {
+  /**
+   * Type of the message which will be used to dispatch actions on the server
+   */
+  type: TType;
+  /**
+   * Data associated with the type
+   */
+  payload: TPayload;
+}
+
+type SocketSend = SocketMessage<'uncoverCell', CellIndexes & { gameId: Game['id'] }>;
+
 type UncoverCellParam = Pick<Cell, 'rowIdx' | 'colIdx' | 'value'>;
+type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
 
 type UncoverCellCallback = (value: Cell['value']) => void;
 
@@ -52,7 +69,7 @@ export class GameSocket {
   /**
    * Same as Websocket send method, but serializes to json first
    */
-  public sendJson<T>(data: T): void {
+  public sendMsg(data: SocketSend): void {
     this.sock.send(JSON.stringify(data));
   }
 
@@ -60,14 +77,14 @@ export class GameSocket {
    * Add a callback function to the onUncoverCellMap. This is the uncover cell
    * event "subscription".
    */
-  public addOnUncoverCell({ rowIdx, colIdx }: CellIndexParam, callback: UncoverCellCallback): void {
+  public addOnUncoverCell({ rowIdx, colIdx }: CellIndexes, callback: UncoverCellCallback): void {
     this.onUncoverCellMap[`${rowIdx}-${colIdx}`] = callback;
   }
 
   /**
    * Remove the callback function to the onUncoverCellMap
    */
-  public removeOnUncoverCell({ rowIdx, colIdx }: CellIndexParam): void {
+  public removeOnUncoverCell({ rowIdx, colIdx }: CellIndexes): void {
     delete this.onUncoverCellMap[`${rowIdx}-${colIdx}`];
   }
 

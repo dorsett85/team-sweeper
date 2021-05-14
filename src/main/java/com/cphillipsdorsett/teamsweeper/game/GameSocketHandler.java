@@ -1,6 +1,7 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -24,24 +25,32 @@ public class GameSocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         ObjectMapper om = new ObjectMapper();
-        Map<String, Integer> clickedCellInfo = om.readValue(message.getPayload(), new TypeReference<>() {
-        });
+        JsonNode messageNode = om.readTree(message.getPayload());
+        String messageType = messageNode.get("type").asText();
 
-        String GAME_ID = "gameId";
-        String ROW_IDX = "rowIdx";
-        String COL_IDX = "colIdx";
+        // We'll parse/dispatch the payload property based on the message type
+        if (messageType.equals("uncoverCell")) {
+            Map<String, Integer> clickedCell = om.readValue(
+                messageNode.get("payload").toString(),
+                new TypeReference<>() {
+                }
+            );
+            String GAME_ID = "gameId";
+            String ROW_IDX = "rowIdx";
+            String COL_IDX = "colIdx";
 
-        int gameId = clickedCellInfo.get(GAME_ID);
-        int rowIdx = clickedCellInfo.get(ROW_IDX);
-        int colIdx = clickedCellInfo.get(COL_IDX);
-        String sessionId = (String) session.getAttributes().get("sessionId");
+            int gameId = clickedCell.get(GAME_ID);
+            int rowIdx = clickedCell.get(ROW_IDX);
+            int colIdx = clickedCell.get(COL_IDX);
+            String sessionId = (String) session.getAttributes().get("sessionId");
 
-        Game game = gameDao.findCurrent(sessionId, gameId);
-        Cell[][] board = om.readValue(game.board, new TypeReference<>() {
-        });
-        Cell cell = board[rowIdx][colIdx];
+            Game game = gameDao.findCurrent(sessionId, gameId);
+            Cell[][] board = om.readValue(game.board, new TypeReference<>() {
+            });
+            Cell cell = board[rowIdx][colIdx];
 
-        uncoverCell(cell, board, session);
+            uncoverCell(cell, board, session);
+        }
     }
 
     private void uncoverCell(Cell cell, Cell[][] board, WebSocketSession session) throws IOException {
@@ -61,7 +70,8 @@ public class GameSocketHandler extends TextWebSocketHandler {
                     boolean rowInBounds = rIdx >= 0 && rIdx < board.length;
                     boolean colInBounds = cIdx >= 0 && cIdx < board[0].length;
                     if (rowInBounds && colInBounds) {
-                        uncoverCell(board[rIdx][cIdx], board, session);                    }
+                        uncoverCell(board[rIdx][cIdx], board, session);
+                    }
                 }
             }
         }
