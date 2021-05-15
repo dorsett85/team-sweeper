@@ -1,6 +1,6 @@
-package com.cphillipsdorsett.teamsweeper.game;
+package com.cphillipsdorsett.teamsweeper.game.websocket;
 
-import com.cphillipsdorsett.teamsweeper.game.GameSocketDispatch.MessageDispatch;
+import com.cphillipsdorsett.teamsweeper.game.websocket.GameSocketDispatch.MessageDispatch;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -31,6 +31,10 @@ public class GameSocketHandler extends TextWebSocketHandler {
         dispatch(messageType).run(msgNode, session, sessions);
     }
 
+    /**
+     * Convenience method to return the appropriate dispatch handler based on
+     * the type.
+     */
     private MessageDispatch dispatch(String type) {
         return gameSocketDispatch.dispatchMap.get(type);
     }

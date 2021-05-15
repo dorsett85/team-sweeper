@@ -1,4 +1,4 @@
-package com.cphillipsdorsett.teamsweeper;
+package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;

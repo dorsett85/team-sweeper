@@ -1,4 +1,4 @@
-package com.cphillipsdorsett.teamsweeper.game;
+package com.cphillipsdorsett.teamsweeper.game.dao;
 
 import org.springframework.stereotype.Repository;
 

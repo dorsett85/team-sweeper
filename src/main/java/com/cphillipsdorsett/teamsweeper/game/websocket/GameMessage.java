@@ -1,4 +1,4 @@
-package com.cphillipsdorsett.teamsweeper.game;
+package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 public abstract class GameMessage<T> {
     public String type;

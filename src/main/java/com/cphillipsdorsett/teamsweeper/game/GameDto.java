@@ -1,5 +1,7 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
+import com.cphillipsdorsett.teamsweeper.game.dao.Game;
+
 public class GameDto {
     public int id;
     public String difficulty;

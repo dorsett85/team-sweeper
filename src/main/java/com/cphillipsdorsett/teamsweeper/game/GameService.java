@@ -1,5 +1,9 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
+import com.cphillipsdorsett.teamsweeper.game.dao.Game;
+import com.cphillipsdorsett.teamsweeper.game.dao.GameDao;
+import com.cphillipsdorsett.teamsweeper.game.dao.SessionGame;
+import com.cphillipsdorsett.teamsweeper.game.dao.SessionGameDao;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.stereotype.Service;
 

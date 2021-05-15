@@ -1,4 +1,4 @@
-package com.cphillipsdorsett.teamsweeper.game;
+package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 public class UncoverCellMessage extends GameMessage<UncoverCellMessage.UncoverCellPayload> {
     public static final String TYPE = "uncoverCell";

@@ -1,4 +1,4 @@
-package com.cphillipsdorsett.teamsweeper.game;
+package com.cphillipsdorsett.teamsweeper.game.dao;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

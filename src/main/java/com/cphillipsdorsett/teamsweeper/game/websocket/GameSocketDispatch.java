@@ -1,5 +1,9 @@
-package com.cphillipsdorsett.teamsweeper.game;
+package com.cphillipsdorsett.teamsweeper.game.websocket;
 
+import com.cphillipsdorsett.teamsweeper.game.Cell;
+import com.cphillipsdorsett.teamsweeper.game.dao.Game;
+import com.cphillipsdorsett.teamsweeper.game.GameBuilder;
+import com.cphillipsdorsett.teamsweeper.game.dao.GameDao;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
