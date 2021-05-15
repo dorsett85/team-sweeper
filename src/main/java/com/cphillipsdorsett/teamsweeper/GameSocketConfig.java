@@ -19,7 +19,7 @@ public class GameSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         // TODO add/remove the appropriate origins during production and
-        //  development, e.g., cphillipsdorsett.com on production.
+        //  development, e.g., add cphillipsdorsett.com on production.
         registry
             .addHandler(gameSocketHandler, "/game/publish")
             .setAllowedOrigins("http://localhost:4000")

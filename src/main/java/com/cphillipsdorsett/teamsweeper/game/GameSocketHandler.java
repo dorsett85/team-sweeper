@@ -1,6 +1,6 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.cphillipsdorsett.teamsweeper.game.GameSocketDispatch.MessageDispatch;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -10,70 +10,28 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 
 @Component
 public class GameSocketHandler extends TextWebSocketHandler {
 
     private ArrayList<WebSocketSession> sessions = new ArrayList<>();
-    private final GameDao gameDao;
+    private final ObjectMapper om = new ObjectMapper();
+    private final GameSocketDispatch gameSocketDispatch;
 
-    public GameSocketHandler(GameDao gameDao) {
-        this.gameDao = gameDao;
+    public GameSocketHandler(GameSocketDispatch gameSocketDispatch) {
+     this.gameSocketDispatch = gameSocketDispatch;
     }
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
-        ObjectMapper om = new ObjectMapper();
-        JsonNode messageNode = om.readTree(message.getPayload());
-        String messageType = messageNode.get("type").asText();
+        JsonNode msgNode = om.readTree(message.getPayload());
+        String messageType = msgNode.get("type").asText();
 
         // We'll parse/dispatch the payload property based on the message type
-        if (messageType.equals("uncoverCell")) {
-            Map<String, Integer> clickedCell = om.readValue(
-                messageNode.get("payload").toString(),
-                new TypeReference<>() {
-                }
-            );
-            String GAME_ID = "gameId";
-            String ROW_IDX = "rowIdx";
-            String COL_IDX = "colIdx";
-
-            int gameId = clickedCell.get(GAME_ID);
-            int rowIdx = clickedCell.get(ROW_IDX);
-            int colIdx = clickedCell.get(COL_IDX);
-            String sessionId = (String) session.getAttributes().get("sessionId");
-
-            Game game = gameDao.findCurrent(sessionId, gameId);
-            Cell[][] board = om.readValue(game.board, new TypeReference<>() {
-            });
-            Cell cell = board[rowIdx][colIdx];
-
-            uncoverCell(cell, board, session);
-        }
+        dispatch(messageType).run(msgNode, session, sessions);
     }
 
-    private void uncoverCell(Cell cell, Cell[][] board, WebSocketSession session) throws IOException {
-        ObjectMapper om = new ObjectMapper();
-        if (cell.covered) {
-            cell.covered = false;
-            String cellMessage = om.writeValueAsString(cell);
-            session.sendMessage(new TextMessage(cellMessage));
-
-            // If the cell isn't near any mines we'll uncover the surrounding
-            // cells as well.
-            if (cell.value.equals("0")) {
-                for (int[] cellTuple : GameBuilder.surroundingCells) {
-                    int rIdx = cell.rowIdx + cellTuple[0];
-                    int cIdx = cell.colIdx + cellTuple[1];
-
-                    boolean rowInBounds = rIdx >= 0 && rIdx < board.length;
-                    boolean colInBounds = cIdx >= 0 && cIdx < board[0].length;
-                    if (rowInBounds && colInBounds) {
-                        uncoverCell(board[rIdx][cIdx], board, session);
-                    }
-                }
-            }
-        }
+    private MessageDispatch dispatch(String type) {
+        return gameSocketDispatch.dispatchMap.get(type);
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class GameBuilder {
@@ -13,7 +14,7 @@ public class GameBuilder {
     public final int nonMines;
     public final int totalCells;
     public final Cell[][] board;
-    private static final HashMap<String, BoardConfig> boardConfigMap = new HashMap<>() {{
+    private static final Map<String, BoardConfig> boardConfigMap = new HashMap<>() {{
         put("e", new BoardConfig(9, 9, 10));
         put("m", new BoardConfig(16, 16, 40));
         put("h", new BoardConfig(16, 30, 99));
