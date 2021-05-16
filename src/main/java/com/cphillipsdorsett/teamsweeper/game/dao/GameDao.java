@@ -14,7 +14,6 @@ import java.util.Optional;
  */
 @Repository
 public class GameDao implements GameRepository {
-
     EntityManager em;
     GameRepository gameRepository;
 
@@ -27,10 +26,11 @@ public class GameDao implements GameRepository {
     public Game create(Game game) {
         em
             .createNativeQuery("" +
-                "INSERT INTO game (difficulty, board) " +
-                "VALUES (:difficulty, :board)"
+                "INSERT INTO game (difficulty, status, board) " +
+                "VALUES (:difficulty, :status, :board)"
             )
             .setParameter("difficulty", game.difficulty)
+            .setParameter("status", game.status)
             .setParameter("board", game.board)
             .executeUpdate();
         return (Game) em

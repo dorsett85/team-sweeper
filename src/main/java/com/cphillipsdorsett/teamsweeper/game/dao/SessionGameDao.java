@@ -8,7 +8,6 @@ import java.util.Optional;
 
 @Repository
 public class SessionGameDao implements SessionGameRepository {
-
     EntityManager em;
     SessionGameRepository sessionGameRepository;
 

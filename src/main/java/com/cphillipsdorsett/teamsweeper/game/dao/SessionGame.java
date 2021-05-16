@@ -6,7 +6,6 @@ import javax.persistence.Id;
 
 @Entity
 public class SessionGame {
-
     @Id
     public int id;
     @Column(name = "session_id")

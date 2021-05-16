@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 
 public class BundleManifestArgumentResolver implements HandlerMethodArgumentResolver {
-
     @Override
     public BundleManifest resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();

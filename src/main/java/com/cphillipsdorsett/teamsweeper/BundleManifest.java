@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BundleManifest {
-
     @JsonProperty("common.js")
     public String commonJs;
 

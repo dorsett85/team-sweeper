@@ -9,7 +9,6 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import java.util.Map;
 
 public class GameSocketInterceptor implements HandshakeInterceptor {
-
     /**
      * We'll use this override to check the session and possibly to authenticate
      * the user.

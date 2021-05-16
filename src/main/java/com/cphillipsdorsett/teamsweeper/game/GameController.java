@@ -18,7 +18,6 @@ import java.util.Set;
 @Controller
 @RequestMapping("/game")
 public class GameController {
-
     GameService gameService;
 
     public GameController(GameService gameService) {

@@ -10,10 +10,10 @@ import java.time.Instant;
 @Entity
 @DynamicInsert
 public class Game {
-
     @Id
     public int id;
     public String difficulty;
+    public String status = "in-progress";
     /**
      * JSON string representing a 2 dimensional array of rows and columns that
      * contains cells.
@@ -39,6 +39,14 @@ public class Game {
 
     public void setDifficulty(String difficulty) {
         this.difficulty = difficulty;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getBoard() {

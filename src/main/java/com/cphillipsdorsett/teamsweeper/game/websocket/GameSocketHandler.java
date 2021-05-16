@@ -13,7 +13,6 @@ import java.util.ArrayList;
 
 @Component
 public class GameSocketHandler extends TextWebSocketHandler {
-
     private ArrayList<WebSocketSession> sessions = new ArrayList<>();
     private final ObjectMapper om = new ObjectMapper();
     private final GameSocketDispatch gameSocketDispatch;
@@ -28,7 +27,7 @@ public class GameSocketHandler extends TextWebSocketHandler {
         String messageType = msgNode.get("type").asText();
 
         // We'll parse/dispatch the payload property based on the message type
-        dispatch(messageType).run(msgNode, session, sessions);
+        dispatch(messageType).call(msgNode, session, sessions);
     }
 
     /**

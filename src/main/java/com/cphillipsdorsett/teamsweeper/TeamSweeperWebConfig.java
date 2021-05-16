@@ -9,7 +9,6 @@ import java.util.List;
 
 @Configuration
 public class TeamSweeperWebConfig implements WebMvcConfigurer {
-
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(new BundleManifestArgumentResolver());
