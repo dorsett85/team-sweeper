@@ -12,16 +12,13 @@ interface GameCellProps extends Pick<Cell, 'rowIdx' | 'colIdx'> {
 }
 
 const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx }) => {
-  const coveredCellRef = useRef<HTMLButtonElement | null>(null);
-  const [coveredCellClassName, setCoveredCellClassName] = useState(styles.coveredCell);
   const [value, setValue] = useState<Cell['value']>();
+  const coveredCellRef = useRef<HTMLButtonElement | null>(null);
+  const isCellClicked = useRef(false);
 
   // Subscribe to the onUncoverCell event
   useEffect(() => {
-    sock.addOnUncoverCell({ rowIdx, colIdx }, (value) => {
-      setValue(value);
-      setCoveredCellClassName((currentState) => `${currentState} ${styles.coveredCellRemoved}`);
-    });
+    sock.addOnUncoverCell({ rowIdx, colIdx }, setValue);
 
     return () => {
       sock.removeOnUncoverCell({ rowIdx, colIdx });
@@ -63,6 +60,7 @@ const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx
 
   const handleOnCoveredCellClick = () => {
     // Leaving this as a separate handler for now, may add more behavior here
+    isCellClicked.current = true;
     onClick();
   };
 
@@ -70,13 +68,21 @@ const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx
     <div className={styles[`cellContainer-${difficulty}`]}>
       <button
         ref={coveredCellRef}
-        className={coveredCellClassName}
+        className={`${styles.coveredCell} ${value ? styles.coveredCellRemoved : ''}`}
         onClick={handleOnCoveredCellClick}
         disabled={!!value}
       />
       <div className={styles.uncoveredCell}>
         {value && (
-          <div className={styles[value === 'x' ? 'mineCell' : `nearbyMineCell-${value}`]}>
+          <div
+            className={
+              styles[
+                value === 'x'
+                  ? `mineCell${isCellClicked.current ? 'Clicked' : ''}`
+                  : `nearbyMineCell-${value}`
+              ]
+            }
+          >
             {!['0', 'x'].includes(value) && value}
           </div>
         )}
