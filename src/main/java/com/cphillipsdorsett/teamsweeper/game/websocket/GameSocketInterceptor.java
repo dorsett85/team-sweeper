@@ -6,6 +6,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
+import javax.servlet.http.HttpSession;
 import java.util.Map;
 
 public class GameSocketInterceptor implements HandshakeInterceptor {
@@ -17,10 +18,13 @@ public class GameSocketInterceptor implements HandshakeInterceptor {
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) {
         if (request instanceof ServletServerHttpRequest) {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-            String sessionId = servletRequest.getServletRequest().getSession().getId();
-            attributes.put("sessionId", sessionId);
+            HttpSession session = servletRequest.getServletRequest().getSession(false);
+            if (session != null) {
+                attributes.put("sessionId", session.getId());
+                return true;
+            }
         }
-        return true;
+        return false;
     }
 
     @Override
