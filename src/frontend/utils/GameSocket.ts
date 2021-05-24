@@ -22,6 +22,21 @@ type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
 
 type UncoverCellCallback = (value: Cell['value']) => void;
 
+interface ReadyStateHandlers {
+  /**
+   * Called from websocket onopen event
+   */
+  onOpen: (e: Event) => void;
+  /**
+   * Called from websocket onerror event
+   */
+  onError: (e: Event) => void;
+  /**
+   * Called from websocket onclose event
+   */
+  onClose: (e: CloseEvent) => void;
+}
+
 export class GameSocket {
   /**
    * A map where the keys represent the row and column index of a given cell in the format
@@ -32,26 +47,25 @@ export class GameSocket {
 
   private sock: WebSocket;
 
-  public constructor(url: string) {
+  public constructor(url: string, readyStateHandlers: ReadyStateHandlers) {
     this.sock = new WebSocket(url);
-    this.addSockHandlers();
+    this.addSockHandlers(readyStateHandlers);
   }
 
-  private addSockHandlers(): void {
+  private addSockHandlers(readyStateHandlers: ReadyStateHandlers): void {
     // Successfully opened socket connection
-    this.sock.onopen = () => {
-      // TODO fire on open callbacks
-    };
-
-    // Successfully closed socket connection
-    this.sock.onclose = (e) => {
-      console.log('Socket connection is closed:', e);
-      // TODO fire on close callbacks
+    this.sock.onopen = (e) => {
+      readyStateHandlers.onOpen(e);
     };
 
     // Failed socket connection
     this.sock.onerror = (e) => {
-      console.log(e);
+      readyStateHandlers.onError(e);
+    };
+
+    // Successfully closed socket connection
+    this.sock.onclose = (e) => {
+      readyStateHandlers.onClose(e);
     };
 
     // Handle published messages
@@ -95,6 +109,3 @@ export class GameSocket {
     this.onUncoverCellMap[`${rowIdx}-${colIdx}`]?.(value);
   }
 }
-
-const sock = new GameSocket('ws://localhost:8080/game/publish');
-export default sock;

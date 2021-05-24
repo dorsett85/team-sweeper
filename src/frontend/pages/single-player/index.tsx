@@ -3,9 +3,12 @@ import SinglePlayer from './SinglePlayer';
 import { renderReactDom } from '../../utils/renderReactDom';
 import { Provider } from 'react-redux';
 import singlePlayerStore from './singlePlayerStore';
+import GameSocketProvider from '../../components/GameSocketProvider/GameSocketProvider';
 
 renderReactDom(
   <Provider store={singlePlayerStore}>
-    <SinglePlayer />
+    <GameSocketProvider>
+      <SinglePlayer />
+    </GameSocketProvider>
   </Provider>
 );

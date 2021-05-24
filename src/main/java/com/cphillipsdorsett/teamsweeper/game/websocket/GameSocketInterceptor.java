@@ -15,20 +15,31 @@ public class GameSocketInterceptor implements HandshakeInterceptor {
      * the user.
      */
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) {
+    public boolean beforeHandshake(
+        ServerHttpRequest request,
+        ServerHttpResponse response,
+        WebSocketHandler wsHandler,
+        Map<String, Object> attributes
+    ) {
         if (request instanceof ServletServerHttpRequest) {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-            HttpSession session = servletRequest.getServletRequest().getSession(false);
-            if (session != null) {
-                attributes.put("sessionId", session.getId());
-                return true;
-            }
+
+            // Always create a new session for the app to use
+            HttpSession session = servletRequest.getServletRequest().getSession(true);
+            attributes.put("sessionId", session.getId());
+            return true;
         }
+        // This should never happen coming from the client side
         return false;
     }
 
     @Override
-    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
+    public void afterHandshake(
+        ServerHttpRequest request,
+        ServerHttpResponse response,
+        WebSocketHandler wsHandler,
+        Exception exception
+    ) {
 
     }
 }

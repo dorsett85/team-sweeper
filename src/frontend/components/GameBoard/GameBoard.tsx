@@ -5,7 +5,7 @@ import GameCell from './GameCell';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { setDifficulty, setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { fetchJson } from '../../utils/fetchJson';
-import sock from '../../utils/GameSocket';
+import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 
 const GameBoard: React.FC = () => {
   const [game, setGame] = useState<Game>();
@@ -13,6 +13,7 @@ const GameBoard: React.FC = () => {
   const difficulty = useAppSelector((state) => state.difficulty);
   const isLoading = useAppSelector((state) => state.isLoading);
   const dispatch = useAppDispatch();
+  const { sock } = useGameSocket();
 
   // We'll refetch a new board whenever the difficulty or loading state changes,
   // which will occur on any page refresh or game control change.

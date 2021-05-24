@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 import styles from './GameCell.module.less';
 import { Cell, Game } from '../../types/Game';
-import sock from '../../utils/GameSocket';
+import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 
 interface GameCellProps extends Pick<Cell, 'rowIdx' | 'colIdx'> {
   difficulty: Game['difficulty'];
@@ -13,6 +13,7 @@ interface GameCellProps extends Pick<Cell, 'rowIdx' | 'colIdx'> {
 
 const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx }) => {
   const [value, setValue] = useState<Cell['value']>();
+  const { sock } = useGameSocket();
   const coveredCellRef = useRef<HTMLButtonElement | null>(null);
   const isCellClicked = useRef(false);
 
@@ -23,7 +24,7 @@ const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx
     return () => {
       sock.removeOnUncoverCell({ rowIdx, colIdx });
     };
-  }, [colIdx, rowIdx]);
+  }, [colIdx, rowIdx, sock]);
 
   // Create custom transition event where the covered cell is removed from the
   // DOM after the animations end.

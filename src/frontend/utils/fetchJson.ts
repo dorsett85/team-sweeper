@@ -7,5 +7,5 @@ export const fetchJson = async <T extends Record<string, any>>(
   init?: RequestInit
 ): Promise<T> => {
   const res = await fetch(input, init);
-  return await res.json();
+  return res.json();
 };
