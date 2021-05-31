@@ -1,6 +1,7 @@
 package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 import com.cphillipsdorsett.teamsweeper.game.GameService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -33,9 +34,21 @@ public class GameSocketDispatch {
         String sessionId = (String) session.getAttributes().get("sessionId");
 
         gameService.uncoverCell(sessionId, msg.payload, cell -> {
-            String cellMessage = om.writeValueAsString(cell);
-            session.sendMessage(new TextMessage(cellMessage));
+            var cellMessage = transformToPublish(UncoverCellMessage.TYPE, cell);
+            session.sendMessage(cellMessage);
         });
+    }
+
+    /**
+     * Create a message object that's ready to be sent to the client with "type"
+     * and "payload" properties
+     */
+    private TextMessage transformToPublish(String type, Object payload) throws JsonProcessingException {
+        var message = new HashMap<>() {{
+            put("type", type);
+            put("payload", payload);
+        }};
+        return new TextMessage(om.writeValueAsString(message));
     }
 
     /**

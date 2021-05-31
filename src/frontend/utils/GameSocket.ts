@@ -1,10 +1,33 @@
 import { Cell, Game } from '../types/Game';
 
+interface ReadyStateHandlers {
+  /**
+   * Called from websocket onopen event
+   */
+  onOpen: (e: Event) => void;
+  /**
+   * Called from websocket onerror event
+   */
+  onError: (e: Event) => void;
+  /**
+   * Called from websocket onclose event
+   */
+  onClose: (e: CloseEvent) => void;
+}
+
 /**
- * Object passed to the sendMsg method. The server will know which action to
- * dispatch based on the type as well as know what the corresponding payload is.
+ * Allowed values for the type property when sending/receiving socket messages.
+ * If we start having different values between sending and receiving then we can
+ * have separate types.
  */
-interface SocketMessage<TType extends string, TPayload> {
+type SocketMessageType = 'uncoverCell';
+
+/**
+ * Object for sending and receiving socket messages. The server will know which
+ * action to dispatch based on the type as well as know what the corresponding
+ * payload is.
+ */
+interface SocketMessage<TType extends SocketMessageType, TPayload> {
   /**
    * Type of the message which will be used to dispatch actions on the server
    */
@@ -22,34 +45,34 @@ type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
 
 type UncoverCellCallback = (value: Cell['value']) => void;
 
-interface ReadyStateHandlers {
-  /**
-   * Called from websocket onopen event
-   */
-  onOpen: (e: Event) => void;
-  /**
-   * Called from websocket onerror event
-   */
-  onError: (e: Event) => void;
-  /**
-   * Called from websocket onclose event
-   */
-  onClose: (e: CloseEvent) => void;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface DispatchMap {
+  uncoverCell: (payload: UncoverCellParam) => void;
 }
 
 export class GameSocket {
+  private sock: WebSocket;
   /**
    * A map where the keys represent the row and column index of a given cell in the format
    * "<ROW_IDX>-<COLUMN_IDX>", and the value is a callback function that is called when the cell is
    * uncovered.
    */
   private onUncoverCellMap: Record<string, UncoverCellCallback> = {};
-
-  private sock: WebSocket;
+  /**
+   * This map will lookup the correct dispatch method to call with the payload
+   * property as the argument. The lookup is based on the "type" property sent
+   * from the server.
+   */
+  private readonly dispatchMap: DispatchMap;
 
   public constructor(url: string, readyStateHandlers: ReadyStateHandlers) {
     this.sock = new WebSocket(url);
     this.addSockHandlers(readyStateHandlers);
+
+    // Instantiate all of our message handlers
+    this.dispatchMap = {
+      uncoverCell: (payload) => this.handleOnUncoverCell(payload)
+    };
   }
 
   private addSockHandlers(readyStateHandlers: ReadyStateHandlers): void {
@@ -70,10 +93,12 @@ export class GameSocket {
 
     // Handle published messages
     this.sock.onmessage = (e) => {
-      console.log('Message data from server:', e.data);
       try {
-        const { rowIdx, colIdx, value } = JSON.parse(e.data);
-        this.handleOnUncoverCell({ rowIdx, colIdx, value });
+        // Parse the type and payload properties from the server. The type
+        // property will lookup the correct dispatch method to call with the
+        // payload property as the argument.
+        const { type, payload } = JSON.parse(e.data);
+        this.dispatchMap[type as SocketMessageType](payload);
       } catch (e) {
         console.error('Unable to handle the server message: ', e);
       }
