@@ -34,13 +34,17 @@ const GameControl: React.FC = () => {
 
   return (
     <div className={styles.gameControlContainer}>
-      <select
-        onInput={handleOnSelect}
-        className={styles.gameControlDifficultySelect}
-        value={difficulty}
-      >
-        {difficultyOptions}
-      </select>
+      <div className={styles.gameControlSelectWrapper}>
+        <select
+          onInput={handleOnSelect}
+          className={styles.gameControlDifficultySelect}
+          value={difficulty}
+          aria-label='select difficulty'
+        >
+          {difficultyOptions}
+        </select>
+        <span className={styles.dropdownIcon}>▼</span>
+      </div>
       <button onClick={handleOnResetClick} className={styles.gameControlResetBtn}>
         Reset Game
       </button>
