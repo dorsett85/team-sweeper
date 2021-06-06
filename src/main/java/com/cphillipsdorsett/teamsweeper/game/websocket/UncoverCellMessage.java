@@ -1,8 +1,7 @@
 package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 public class UncoverCellMessage extends GameMessage<UncoverCellMessage.UncoverCellPayload> {
-    public static final String TYPE = "uncoverCell";
-    public String type = UncoverCellMessage.TYPE;
+    public static GameSocketMessageType TYPE = GameSocketMessageType.UNCOVER_CELL;
     public UncoverCellPayload payload;
 
     public static class UncoverCellPayload {

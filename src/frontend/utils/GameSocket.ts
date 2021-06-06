@@ -20,7 +20,9 @@ interface ReadyStateHandlers {
  * If we start having different values between sending and receiving then we can
  * have separate types.
  */
-type SocketMessageType = 'uncoverCell';
+export enum SocketMessageType {
+  UNCOVER_CELL = 'UNCOVER_CELL'
+}
 
 /**
  * Object for sending and receiving socket messages. The server will know which
@@ -38,7 +40,10 @@ interface SocketMessage<TType extends SocketMessageType, TPayload> {
   payload: TPayload;
 }
 
-type SocketSend = SocketMessage<'uncoverCell', CellIndexes & { gameId: Game['id'] }>;
+type SocketSend = SocketMessage<
+  SocketMessageType.UNCOVER_CELL,
+  CellIndexes & { gameId: Game['id'] }
+>;
 
 type UncoverCellParam = Pick<Cell, 'rowIdx' | 'colIdx' | 'value'>;
 type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
@@ -47,7 +52,7 @@ type UncoverCellCallback = (value: Cell['value']) => void;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface DispatchMap {
-  uncoverCell: (payload: UncoverCellParam) => void;
+  [SocketMessageType.UNCOVER_CELL]: (payload: UncoverCellParam) => void;
 }
 
 export class GameSocket {
@@ -71,7 +76,7 @@ export class GameSocket {
 
     // Instantiate all of our message handlers
     this.dispatchMap = {
-      uncoverCell: (payload) => this.handleOnUncoverCell(payload)
+      [SocketMessageType.UNCOVER_CELL]: (payload) => this.handleOnUncoverCell(payload)
     };
   }
 

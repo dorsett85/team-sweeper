@@ -1,5 +1,6 @@
 package com.cphillipsdorsett.teamsweeper.game.websocket;
 
+import com.cphillipsdorsett.teamsweeper.game.Cell;
 import com.cphillipsdorsett.teamsweeper.game.GameService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,7 +18,7 @@ import java.util.Map;
 public class GameSocketDispatch {
     private final ObjectMapper om = new ObjectMapper();
     private final GameService gameService;
-    public final Map<String, MessageDispatch> dispatchMap;
+    public final Map<GameSocketMessageType, MessageDispatch> dispatchMap;
 
     public GameSocketDispatch(GameService gameService) {
         this.gameService = gameService;
@@ -33,9 +34,19 @@ public class GameSocketDispatch {
         UncoverCellMessage msg = om.treeToValue(node, UncoverCellMessage.class);
         String sessionId = (String) session.getAttributes().get("sessionId");
 
-        gameService.uncoverCell(sessionId, msg.payload, cell -> {
-            var cellMessage = transformToPublish(UncoverCellMessage.TYPE, cell);
-            session.sendMessage(cellMessage);
+        gameService.uncoverCell(sessionId, msg.payload, new GameService.UncoveredCellMessageCallback() {
+            @Override
+            public void reveal(Cell cell) throws IOException {
+                TextMessage cellMessage = transformToPublish(UncoverCellMessage.TYPE, cell);
+                session.sendMessage(cellMessage);
+            }
+
+            @Override
+            public void endGame(String status) throws IOException {
+                // TODO let the frontend know the game is over
+                TextMessage endGameMessage = transformToPublish(GameSocketMessageType.END_GAME, status);
+                session.sendMessage(endGameMessage);
+            }
         });
     }
 
@@ -43,7 +54,7 @@ public class GameSocketDispatch {
      * Create a message object that's ready to be sent to the client with "type"
      * and "payload" properties
      */
-    private TextMessage transformToPublish(String type, Object payload) throws JsonProcessingException {
+    private TextMessage transformToPublish(GameSocketMessageType type, Object payload) throws JsonProcessingException {
         var message = new HashMap<>() {{
             put("type", type);
             put("payload", payload);

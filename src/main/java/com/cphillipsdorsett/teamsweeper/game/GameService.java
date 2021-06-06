@@ -43,37 +43,54 @@ public class GameService {
     public void uncoverCell(
         String sessionId,
         UncoverCellPayload payload,
-        UncoveredCellReadyForQueue readyForQueue
+        UncoveredCellMessageCallback callback
     ) throws IOException {
         Game game = gameDao.findCurrent(sessionId, payload.gameId);
         Cell[][] board = getDeSerializedBoard(game.board);
         Cell cell = board[payload.rowIdx][payload.colIdx];
 
+        boolean mineUncovered = cell.value.equals("x");
+
         // Now that we have the initial covered cell, we'll uncover it and
         // repeat the process for all surrounding cells
-        uncoverCellCascade(cell, board, readyForQueue, cell.value.equals("x"));
+        uncoverCellCascade(cell, board, game, callback, mineUncovered);
+
+        // It's possible that a mine was uncovered, but the game was already
+        // wom, so we'll make sure they can't lose after winning.
+        if (mineUncovered && game.status.equals("in-progress")) {
+            game.status = "lost";
+        } else {
+            // TODO check if the game has been won
+        }
+
+        // Let the frontend know that the game is over
+        if (!game.status.equals("in-progress")) {
+            callback.endGame(game.status);
+        }
     }
 
     /**
      * Uncover a cell and recursively uncover surrounding cells if it isn't
      * near a mine.
-     * <p>
+     *
      * When the cell is covered we'll also call a handler notifying the the web
      * socket that we can add the cell to the message queue.
      */
     private void uncoverCellCascade(
         Cell cell,
         Cell[][] board,
-        UncoveredCellReadyForQueue readyForQueue,
+        Game game,
+        UncoveredCellMessageCallback callback,
         boolean uncoverAll
     ) throws IOException {
         if (cell.covered) {
             cell.covered = false;
-            readyForQueue.call(cell);
 
             if (uncoverAll) {
                 cell.checked = true;
             }
+
+            callback.reveal(cell);
 
             // If the cell isn't near any mines we'll uncover the surrounding
             // cells as well.
@@ -88,7 +105,8 @@ public class GameService {
                         uncoverCellCascade(
                             board[rIdx][cIdx],
                             board,
-                            readyForQueue,
+                            game,
+                            callback,
                             uncoverAll
                         );
                     }
@@ -102,7 +120,16 @@ public class GameService {
         });
     }
 
-    public interface UncoveredCellReadyForQueue {
-        void call(Cell cell) throws IOException;
+    public interface UncoveredCellMessageCallback {
+        /**
+         * Fired when the cell is uncovered and notifies the frontend that it
+         * has been revealed.
+         */
+        void reveal(Cell cell) throws IOException;
+
+        /**
+         * Notifies the frontend that the game is no longer in progress
+         */
+        void endGame(String status) throws IOException;
     }
 }

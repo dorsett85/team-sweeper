@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '../../pages/single-player/single
 import { setDifficulty, setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { fetchJson } from '../../utils/fetchJson';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
+import { SocketMessageType } from '../../utils/GameSocket';
 
 const GameBoard: React.FC = () => {
   const [game, setGame] = useState<Game>();
@@ -56,7 +57,7 @@ const GameBoard: React.FC = () => {
             key={`${difficulty}-${r}-${c}`}
             onClick={() => {
               sock.sendMsg({
-                type: 'uncoverCell',
+                type: SocketMessageType.UNCOVER_CELL,
                 payload: { gameId: game.id, rowIdx: r, colIdx: c }
               });
             }}
