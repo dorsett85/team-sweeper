@@ -58,9 +58,9 @@ interface DispatchMap {
 export class GameSocket {
   private sock: WebSocket;
   /**
-   * A map where the keys represent the row and column index of a given cell in the format
-   * "<ROW_IDX>-<COLUMN_IDX>", and the value is a callback function that is called when the cell is
-   * uncovered.
+   * A map where the keys represent the row and column index of a given cell in
+   * the format "<ROW_IDX>-<COLUMN_IDX>", and the value is a callback function
+   * that is called when the cell is uncovered.
    */
   private onUncoverCellMap: Record<string, UncoverCellCallback> = {};
   /**

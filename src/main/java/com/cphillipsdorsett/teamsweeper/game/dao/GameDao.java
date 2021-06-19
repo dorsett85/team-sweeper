@@ -61,6 +61,18 @@ public class GameDao implements GameRepository {
         return results.isEmpty() ? null : results.get(0);
     }
 
+    @Transactional
+    public void update(Game game) {
+        em.createNativeQuery("" +
+            "UPDATE game g " +
+            "SET g.board = :board " +
+            "WHERE g.id = :gameId"
+        )
+        .setParameter("board", game.board)
+        .setParameter("gameId", game.id)
+        .executeUpdate();
+    }
+
     @Override
     public <S extends Game> S save(S entity) {
         return gameRepository.save(entity);

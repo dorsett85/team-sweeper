@@ -72,8 +72,8 @@ public class GameService {
     /**
      * Uncover a cell and recursively uncover surrounding cells if it isn't
      * near a mine.
-     *
-     * When the cell is covered we'll also call a handler notifying the the web
+     * <p>
+     * When the cell is covered we'll also call a handler notifying the web
      * socket that we can add the cell to the message queue.
      */
     private void uncoverCellCascade(
@@ -90,7 +90,14 @@ public class GameService {
                 cell.checked = true;
             }
 
+            // Store the updated game in the database and tell the frontend that
+            // the cell has been revealed.
+            game.board = om.writeValueAsString(board);
+            new Thread(() -> gameDao.update(game));
             callback.reveal(cell);
+
+            // TODO - if multiplayer
+            // Read updated game in case of changes form the other player
 
             // If the cell isn't near any mines we'll uncover the surrounding
             // cells as well.
