@@ -56,7 +56,7 @@ public class GameService {
         uncoverCellCascade(cell, board, game, callback, mineUncovered);
 
         // It's possible that a mine was uncovered, but the game was already
-        // wom, so we'll make sure they can't lose after winning.
+        // won, so we'll make sure they can't lose after winning.
         if (mineUncovered && game.status.equals("in-progress")) {
             game.status = "lost";
         } else {
