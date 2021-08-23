@@ -1,9 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import { singlePlayerReducer } from './singlePlayerSlice';
+import { initialState, singlePlayerReducer, SinglePlayerState } from './singlePlayerSlice';
+import { DIFFICULTY } from './constants/difficulty';
 
 const singlePlayerStore = configureStore({
-  reducer: singlePlayerReducer
+  reducer: singlePlayerReducer,
+  preloadedState: {
+    ...initialState,
+    difficulty:
+      (localStorage.getItem(DIFFICULTY) as SinglePlayerState['difficulty']) ||
+      initialState.difficulty
+  }
 });
 
 // Infer the `RootState` and `AppDispatch` types from the singlePlayerStore itself

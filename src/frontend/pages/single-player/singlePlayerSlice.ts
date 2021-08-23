@@ -22,7 +22,7 @@ interface SinglePlayerReducers extends SliceCaseReducers<SinglePlayerState> {
   setIsLoading: SinglePlayerCaseReducer<SinglePlayerState['isLoading']>;
 }
 
-const initialState: SinglePlayerState = {
+export const initialState: SinglePlayerState = {
   difficulty: 'h',
   isLoading: true
 };

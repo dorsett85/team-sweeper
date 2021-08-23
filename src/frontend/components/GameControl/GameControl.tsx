@@ -6,6 +6,7 @@ import {
   setIsLoading
 } from '../../pages/single-player/singlePlayerSlice';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
+import { DIFFICULTY } from '../../pages/single-player/constants/difficulty';
 
 const difficultyMap = {
   e: 'Easy',
@@ -24,6 +25,9 @@ const GameControl: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const handleOnSelect: FormEventHandler<HTMLSelectElement> = ({ currentTarget }) => {
+    // Save the difficulty setting for when the user returns to the page
+    localStorage.setItem(DIFFICULTY, currentTarget.value);
+
     dispatch(setIsLoading(true));
     dispatch(setDifficulty(currentTarget.value as SinglePlayerState['difficulty']));
   };
