@@ -72,7 +72,7 @@ public class GameService {
     /**
      * Uncover a cell and recursively uncover surrounding cells if it isn't
      * near a mine.
-     * <p>
+     *
      * When the cell is covered we'll also call a handler notifying the web
      * socket that we can add the cell to the message queue.
      */
@@ -97,7 +97,7 @@ public class GameService {
             callback.reveal(cell);
 
             // TODO - if multiplayer
-            // Read updated game in case of changes form the other player
+            // Read updated game in case of changes from the other player
 
             // If the cell isn't near any mines we'll uncover the surrounding
             // cells as well.

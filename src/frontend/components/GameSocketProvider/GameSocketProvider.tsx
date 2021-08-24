@@ -1,5 +1,6 @@
 import React, { createContext, useMemo, useState } from 'react';
 import { GameSocket } from '../../utils/GameSocket';
+import styles from './GameSocketProvider.module.less';
 
 interface GameSocketState {
   sock: GameSocket;
@@ -33,8 +34,14 @@ const GameSocketProvider: React.FC = ({ children }) => {
 
   return (
     <GameSocketContext.Provider value={{ readyState, sock }}>
-      {/* TODO add fallback component if the socket connection closes */}
-      {readyState === 'OPEN' ? children : <div>WEBSOCKET CONNECTION IS CLOSED</div>}
+      {readyState === 'OPEN' ? (
+        children
+      ) : readyState === 'CLOSED' ? (
+        <div className={styles.socketClosed} role='alert'>
+          <p>WEBSOCKET CONNECTION IS CLOSED</p>
+          <p>TRY REFRESHING THE PAGE</p>
+        </div>
+      ) : null}
     </GameSocketContext.Provider>
   );
 };
