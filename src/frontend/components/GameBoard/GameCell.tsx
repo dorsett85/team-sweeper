@@ -73,7 +73,7 @@ const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx
         onClick={handleOnCoveredCellClick}
         disabled={!!value}
       />
-      <div className={styles.uncoveredCell}>
+      <div className={styles[value === 'x' ? 'uncoveredMineCell' : 'uncoveredCell']}>
         {value && (
           <div
             className={

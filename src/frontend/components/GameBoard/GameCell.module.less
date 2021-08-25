@@ -47,6 +47,11 @@ each(@difficulty, {
   user-select: none;
 }
 
+.uncoveredMineCell {
+  &:extend(.uncoveredCell);
+  z-index: 10;
+}
+
 each(@colors, {
   .nearbyMineCell-@{index} {
     display: flex;
