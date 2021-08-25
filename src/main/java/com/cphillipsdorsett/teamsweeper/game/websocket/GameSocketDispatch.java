@@ -2,6 +2,7 @@ package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 import com.cphillipsdorsett.teamsweeper.game.Cell;
 import com.cphillipsdorsett.teamsweeper.game.GameService;
+import com.cphillipsdorsett.teamsweeper.game.dao.GameStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,7 +43,7 @@ public class GameSocketDispatch {
             }
 
             @Override
-            public void endGame(String status) throws IOException {
+            public void endGame(GameStatus status) throws IOException {
                 // TODO let the frontend know the game is over
                 TextMessage endGameMessage = transformToPublish(GameSocketMessageType.END_GAME, status);
                 session.sendMessage(endGameMessage);

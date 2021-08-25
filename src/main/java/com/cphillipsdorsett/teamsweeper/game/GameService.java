@@ -1,9 +1,6 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
-import com.cphillipsdorsett.teamsweeper.game.dao.Game;
-import com.cphillipsdorsett.teamsweeper.game.dao.GameDao;
-import com.cphillipsdorsett.teamsweeper.game.dao.SessionGame;
-import com.cphillipsdorsett.teamsweeper.game.dao.SessionGameDao;
+import com.cphillipsdorsett.teamsweeper.game.dao.*;
 import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellMessage.UncoverCellPayload;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -52,19 +49,19 @@ public class GameService {
         boolean mineUncovered = cell.value.equals("x");
 
         // Now that we have the initial covered cell, we'll uncover it and
-        // repeat the process for all surrounding cells
+        // repeat the process for all surrounding cells.
         uncoverCellCascade(cell, board, game, callback, mineUncovered);
 
         // It's possible that a mine was uncovered, but the game was already
         // won, so we'll make sure they can't lose after winning.
-        if (mineUncovered && game.status.equals("in-progress")) {
-            game.status = "lost";
+        if (mineUncovered && game.status == GameStatus.IN_PROGRESS) {
+            game.status = GameStatus.LOST;
         } else {
             // TODO check if the game has been won
         }
 
         // Let the frontend know that the game is over
-        if (!game.status.equals("in-progress")) {
+        if (game.status != GameStatus.IN_PROGRESS) {
             callback.endGame(game.status);
         }
     }
@@ -137,6 +134,6 @@ public class GameService {
         /**
          * Notifies the frontend that the game is no longer in progress
          */
-        void endGame(String status) throws IOException;
+        void endGame(GameStatus status) throws IOException;
     }
 }

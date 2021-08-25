@@ -2,9 +2,7 @@ package com.cphillipsdorsett.teamsweeper.game.dao;
 
 import org.hibernate.annotations.DynamicInsert;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
@@ -13,7 +11,8 @@ public class Game {
     @Id
     public int id;
     public String difficulty;
-    public String status = "in-progress";
+    @Enumerated(EnumType.STRING)
+    public GameStatus status = GameStatus.IN_PROGRESS;
     /**
      * JSON string representing a 2 dimensional array of rows and columns that
      * contains cells.
@@ -41,11 +40,11 @@ public class Game {
         this.difficulty = difficulty;
     }
 
-    public String getStatus() {
+    public GameStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(GameStatus status) {
         this.status = status;
     }
 

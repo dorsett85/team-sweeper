@@ -30,7 +30,7 @@ public class GameDao implements GameRepository {
                 "VALUES (:difficulty, :status, :board)"
             )
             .setParameter("difficulty", game.difficulty)
-            .setParameter("status", game.status)
+            .setParameter("status", game.status.name())
             .setParameter("board", game.board)
             .executeUpdate();
         return (Game) em

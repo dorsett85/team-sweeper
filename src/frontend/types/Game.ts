@@ -9,7 +9,7 @@ export interface Cell {
 export interface Game {
   id: number;
   difficulty: 'e' | 'm' | 'h';
-  status: 'win' | 'lose' | 'in-progress';
+  status: 'IN_PROGRESS' | 'WON' | 'LOST';
   rows: number;
   cols: number;
   mines: number;
