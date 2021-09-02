@@ -44,7 +44,6 @@ public class GameSocketDispatch {
 
             @Override
             public void endGame(GameStatus status) throws IOException {
-                // TODO let the frontend know the game is over
                 TextMessage endGameMessage = transformToPublish(GameSocketMessageType.END_GAME, status);
                 session.sendMessage(endGameMessage);
             }

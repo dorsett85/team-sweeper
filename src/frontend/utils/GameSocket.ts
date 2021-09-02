@@ -21,7 +21,8 @@ interface ReadyStateHandlers {
  * have separate types.
  */
 export enum SocketMessageType {
-  UNCOVER_CELL = 'UNCOVER_CELL'
+  UNCOVER_CELL = 'UNCOVER_CELL',
+  END_GAME = 'END_GAME'
 }
 
 /**
@@ -50,9 +51,9 @@ type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
 
 type UncoverCellCallback = (value: Cell['value']) => void;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface DispatchMap {
   [SocketMessageType.UNCOVER_CELL]: (payload: UncoverCellParam) => void;
+  [SocketMessageType.END_GAME]: (status: Game['status']) => void;
 }
 
 export class GameSocket {
@@ -76,7 +77,8 @@ export class GameSocket {
 
     // Instantiate all of our message handlers
     this.dispatchMap = {
-      [SocketMessageType.UNCOVER_CELL]: (payload) => this.handleOnUncoverCell(payload)
+      [SocketMessageType.UNCOVER_CELL]: (payload) => this.handleOnUncoverCell(payload),
+      [SocketMessageType.END_GAME]: (status) => this.handleOnEndGame(status)
     };
   }
 
@@ -135,7 +137,14 @@ export class GameSocket {
   /**
    * Fire the uncover cell callback for the given row/column index
    */
-  public handleOnUncoverCell({ rowIdx, colIdx, value }: UncoverCellParam): void {
+  private handleOnUncoverCell({ rowIdx, colIdx, value }: UncoverCellParam): void {
     this.onUncoverCellMap[`${rowIdx}-${colIdx}`]?.(value);
+  }
+
+  /**
+   * Handler for when the server says the game has either been won or lost
+   */
+  private handleOnEndGame(status: Game['status']): void {
+    console.log('status:', status);
   }
 }

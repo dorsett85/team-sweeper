@@ -101,16 +101,4 @@ public class GameBuilder {
         return boardConfigMap.get(difficulty);
     }
 
-    public static class BoardConfig {
-        public int rows;
-        public int cols;
-        public int mines;
-
-        public BoardConfig(int rows, int cols, int mines) {
-            this.rows = rows;
-            this.cols = cols;
-            this.mines = mines;
-        }
-    }
-
 }

@@ -9,7 +9,7 @@ public class GameDto {
     public int cols;
     public int mines;
 
-    public GameDto(Game game, GameBuilder.BoardConfig boardConfig) {
+    public GameDto(Game game, BoardConfig boardConfig) {
         this.id = game.id;
         this.difficulty = game.difficulty;
         this.rows = boardConfig.rows;

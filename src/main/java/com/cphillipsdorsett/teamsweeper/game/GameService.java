@@ -44,32 +44,55 @@ public class GameService {
     ) throws IOException {
         Game game = gameDao.findCurrent(sessionId, payload.gameId);
         Cell[][] board = getDeSerializedBoard(game.board);
-        Cell cell = board[payload.rowIdx][payload.colIdx];
+        Cell uncoveredCell = board[payload.rowIdx][payload.colIdx];
 
-        boolean mineUncovered = cell.value.equals("x");
+        boolean mineUncovered = uncoveredCell.value.equals("x");
+
+        // It's possible that a mine was uncovered, but the game was already
+        // won (lag in backend sending status to frontend), so we'll make sure
+        // they can't lose after winning.
+        if (mineUncovered && game.status == GameStatus.IN_PROGRESS) {
+            game.status = GameStatus.LOST;
+        }
 
         // Now that we have the initial covered cell, we'll uncover it and
         // repeat the process for all surrounding cells.
-        uncoverCellCascade(cell, board, game, callback, mineUncovered);
+        uncoverCellCascade(uncoveredCell, board, game, callback, mineUncovered);
 
-        // It's possible that a mine was uncovered, but the game was already
-        // won, so we'll make sure they can't lose after winning.
-        if (mineUncovered && game.status == GameStatus.IN_PROGRESS) {
-            game.status = GameStatus.LOST;
-        } else {
-            // TODO check if the game has been won
+        // Once the cell cascade has finished, we'll check to see if the game
+        // has been won.
+        if (game.status == GameStatus.IN_PROGRESS) {
+            BoardConfig boardConfig = GameBuilder.getBoardConfig(game.difficulty);
+
+            // To see if the game has been won, we'll compare the total non-mine
+            // cells on the board to the number of cells that have been
+            // uncovered. The game is won if they're equal.
+            int totalCellsToUncover = (boardConfig.cols * boardConfig.rows) - boardConfig.mines;
+            int uncoveredCellCount = 0;
+            for (Cell[] row : board) {
+                for (Cell cell : row) {
+                    if (!cell.covered) {
+                        uncoveredCellCount++;
+                    }
+                    if (totalCellsToUncover == uncoveredCellCount) {
+                        game.status = GameStatus.WON;
+                    }
+                }
+            }
         }
 
         // Let the frontend know that the game is over
         if (game.status != GameStatus.IN_PROGRESS) {
             callback.endGame(game.status);
         }
+
+        // Update the database
     }
 
     /**
      * Uncover a cell and recursively uncover surrounding cells if it isn't
      * near a mine.
-     *
+     * <p>
      * When the cell is covered we'll also call a handler notifying the web
      * socket that we can add the cell to the message queue.
      */
@@ -90,7 +113,7 @@ public class GameService {
             // Store the updated game in the database and tell the frontend that
             // the cell has been revealed.
             game.board = om.writeValueAsString(board);
-            new Thread(() -> gameDao.update(game));
+            new Thread(() -> gameDao.update(game)).start();
             callback.reveal(cell);
 
             // TODO - if multiplayer
