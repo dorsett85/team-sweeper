@@ -86,7 +86,8 @@ public class GameService {
             callback.endGame(game.status);
         }
 
-        // Update the database
+        // Update the database with the latest status
+        gameDao.update(game);
     }
 
     /**
@@ -103,40 +104,44 @@ public class GameService {
         UncoveredCellMessageCallback callback,
         boolean uncoverAll
     ) throws IOException {
-        if (cell.covered) {
-            cell.covered = false;
+        // Early exit if the cell is already uncovered or if we're not
+        // uncovering everything and the cell has already been checked.
+        if ((!cell.covered && !uncoverAll) || (uncoverAll && cell.checked)) {
+            return;
+        }
 
-            if (uncoverAll) {
-                cell.checked = true;
-            }
+        cell.covered = false;
 
-            // Store the updated game in the database and tell the frontend that
-            // the cell has been revealed.
-            game.board = om.writeValueAsString(board);
-            new Thread(() -> gameDao.update(game)).start();
-            callback.reveal(cell);
+        if (uncoverAll) {
+            cell.checked = true;
+        }
 
-            // TODO - if multiplayer
-            // Read updated game in case of changes from the other player
+        // Store the updated game in the database and tell the frontend that
+        // the cell has been revealed.
+        game.board = om.writeValueAsString(board);
+        new Thread(() -> gameDao.update(game)).start();
+        callback.reveal(cell);
 
-            // If the cell isn't near any mines we'll uncover the surrounding
-            // cells as well.
-            if (cell.value.equals("0") || uncoverAll) {
-                for (int[] cellTuple : GameBuilder.surroundingCells) {
-                    int rIdx = cell.rowIdx + cellTuple[0];
-                    int cIdx = cell.colIdx + cellTuple[1];
+        // TODO - if multiplayer
+        // Read updated game in case of changes from the other player
 
-                    boolean rowInBounds = rIdx >= 0 && rIdx < board.length;
-                    boolean colInBounds = cIdx >= 0 && cIdx < board[0].length;
-                    if (rowInBounds && colInBounds) {
-                        uncoverCellCascade(
-                            board[rIdx][cIdx],
-                            board,
-                            game,
-                            callback,
-                            uncoverAll
-                        );
-                    }
+        // If the cell isn't near any mines we'll uncover the surrounding
+        // cells as well.
+        if (cell.value.equals("0") || uncoverAll) {
+            for (int[] cellTuple : GameBuilder.surroundingCells) {
+                int rIdx = cell.rowIdx + cellTuple[0];
+                int cIdx = cell.colIdx + cellTuple[1];
+
+                boolean rowInBounds = rIdx >= 0 && rIdx < board.length;
+                boolean colInBounds = cIdx >= 0 && cIdx < board[0].length;
+                if (rowInBounds && colInBounds) {
+                    uncoverCellCascade(
+                        board[rIdx][cIdx],
+                        board,
+                        game,
+                        callback,
+                        uncoverAll
+                    );
                 }
             }
         }

@@ -36,6 +36,6 @@ public class Cell {
 
     @Override
     public String toString() {
-        return "{ value: " + value + ", covered: " + covered + " }";
+        return "{ value: " + value + ", covered: " + covered + ", checked: " + checked + " }";
     }
 }
