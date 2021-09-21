@@ -43,6 +43,12 @@ public class GameService {
         UncoveredCellMessageCallback callback
     ) throws IOException {
         Game game = gameDao.findCurrent(sessionId, payload.gameId);
+
+        // Early exit if the game is already over
+        if (game.status != GameStatus.IN_PROGRESS) {
+            return;
+        }
+
         Cell[][] board = getDeSerializedBoard(game.board);
         Cell uncoveredCell = board[payload.rowIdx][payload.colIdx];
 

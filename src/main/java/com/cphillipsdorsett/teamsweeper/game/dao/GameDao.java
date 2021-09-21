@@ -63,14 +63,16 @@ public class GameDao implements GameRepository {
 
     @Transactional
     public void update(Game game) {
-        em.createNativeQuery("" +
-            "UPDATE game g " +
-            "SET g.board = :board " +
-            "WHERE g.id = :gameId"
-        )
-        .setParameter("board", game.board)
-        .setParameter("gameId", game.id)
-        .executeUpdate();
+        em
+            .createNativeQuery("" +
+                "UPDATE game g " +
+                "SET g.board = :board, g.status = :status " +
+                "WHERE g.id = :gameId"
+            )
+            .setParameter("board", game.board)
+            .setParameter("status", game.status.toString())
+            .setParameter("gameId", game.id)
+            .executeUpdate();
     }
 
     @Override
