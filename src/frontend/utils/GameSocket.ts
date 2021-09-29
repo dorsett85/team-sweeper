@@ -51,9 +51,12 @@ type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
 
 type UncoverCellCallback = (value: Cell['value']) => void;
 
+type EndGameStatus = Exclude<Game['status'], 'IN_PROGRESS'>;
+type EndGameCallback = (status: EndGameStatus) => void;
+
 interface DispatchMap {
   [SocketMessageType.UNCOVER_CELL]: (payload: UncoverCellParam) => void;
-  [SocketMessageType.END_GAME]: (status: Game['status']) => void;
+  [SocketMessageType.END_GAME]: EndGameCallback;
 }
 
 export class GameSocket {
@@ -64,6 +67,10 @@ export class GameSocket {
    * that is called when the cell is uncovered.
    */
   private onUncoverCellMap: Record<string, UncoverCellCallback> = {};
+  /**
+   * Map of callbacks to fire when the game ends
+   */
+  private onEndGameMap: Map<number, EndGameCallback> = new Map();
   /**
    * This map will lookup the correct dispatch method to call with the payload
    * property as the argument. The lookup is based on the "type" property sent
@@ -142,9 +149,26 @@ export class GameSocket {
   }
 
   /**
+   * Add a callback function to be fired when the game ends. Returns the key of
+   * the callback (useful to remove the callback from the end game map).
+   */
+  public addOnEndGame(callback: (status: EndGameStatus) => void): number {
+    const key = this.onEndGameMap.size;
+    this.onEndGameMap.set(key, callback);
+    return key;
+  }
+
+  /**
+   * Remove a callback function to be fired when the game ends.
+   */
+  public removeOnEndGame(key: number): boolean {
+    return this.onEndGameMap.delete(key);
+  }
+
+  /**
    * Handler for when the server says the game has either been won or lost
    */
-  private handleOnEndGame(status: Game['status']): void {
-    console.log('status:', status);
+  private handleOnEndGame(status: EndGameStatus): void {
+    this.onEndGameMap.forEach((callback) => callback(status));
   }
 }

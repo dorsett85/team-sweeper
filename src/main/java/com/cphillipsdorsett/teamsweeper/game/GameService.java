@@ -37,6 +37,9 @@ public class GameService {
         return new GameDto(game, GameBuilder.getBoardConfig(game.difficulty));
     }
 
+    /**
+     * Called when a user clicks/touches a cell on the board
+     */
     public void uncoverCell(
         String sessionId,
         UncoverCellPayload payload,
