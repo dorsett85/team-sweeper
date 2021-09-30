@@ -19,6 +19,15 @@ const GameModal: React.FC = () => {
   return (
     <Modal open={!!status} onClose={() => setStatus(undefined)}>
       {status}
+      <div>
+        <button>a</button>
+      </div>
+      <div>
+        <button>b</button>
+      </div>
+      <div>
+        <button>c</button>
+      </div>
     </Modal>
   );
 };
