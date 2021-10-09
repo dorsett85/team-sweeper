@@ -51,7 +51,7 @@ type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
 
 type UncoverCellCallback = (value: Cell['value']) => void;
 
-type EndGameStatus = Exclude<Game['status'], 'IN_PROGRESS'>;
+export type EndGameStatus = Exclude<Game['status'], 'IN_PROGRESS'>;
 type EndGameCallback = (status: EndGameStatus) => void;
 
 interface DispatchMap {

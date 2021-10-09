@@ -47,7 +47,8 @@ public class GameService {
     ) throws IOException {
         Game game = gameDao.findCurrent(sessionId, payload.gameId);
 
-        // Early exit if the game is already over
+        // Early exit if the game is already over since all of the cells have
+        // already been uncovered.
         if (game.status != GameStatus.IN_PROGRESS) {
             return;
         }
@@ -57,10 +58,10 @@ public class GameService {
 
         boolean mineUncovered = uncoveredCell.value.equals("x");
 
-        // It's possible that a mine was uncovered, but the game was already
-        // won (lag in backend sending status to frontend), so we'll make sure
-        // they can't lose after winning.
-        if (mineUncovered && game.status == GameStatus.IN_PROGRESS) {
+        // TODO It's possible that a mine was uncovered while the backend was
+        //  still processing if the game had been won. We may want to add status
+        //  queue to make sure the clicks and processing get handled in order.
+        if (mineUncovered) {
             game.status = GameStatus.LOST;
         }
 
@@ -83,20 +84,24 @@ public class GameService {
                     if (!cell.covered) {
                         uncoveredCellCount++;
                     }
+
+                    // Whoop, game is won, set the status and uncover the rest
+                    // of the cells.
                     if (totalCellsToUncover == uncoveredCellCount) {
                         game.status = GameStatus.WON;
+                        uncoverCellCascade(cell, board, game, callback, true);
                     }
                 }
             }
         }
 
-        // Let the frontend know that the game is over
+        // Let the frontend know that the game is over and make a final update
+        // of the game to the database.
         if (game.status != GameStatus.IN_PROGRESS) {
             callback.endGame(game.status);
+            gameDao.update(game);
         }
 
-        // Update the database with the latest status
-        gameDao.update(game);
     }
 
     /**
