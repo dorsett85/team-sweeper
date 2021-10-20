@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Modal from '../Modal/Modal';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
-import styles from './GameModal.less';
-import { EndGameStatus } from '../../utils/GameSocket';
+import styles from './GameModal.module.less';
+import { GameEnd } from '../../types/Game';
 
-const statusTextMap: Record<EndGameStatus, string> = {
+const statusTextMap: Record<GameEnd['status'], string> = {
   WON: 'won',
   LOST: 'lost'
 };
@@ -12,12 +12,12 @@ const statusTextMap: Record<EndGameStatus, string> = {
 const HEADING_ID = 'game-modal-heading';
 
 const GameModal: React.FC = () => {
-  const [status, setStatus] = useState<EndGameStatus>();
+  const [gameEnd, setGameEnd] = useState<GameEnd>();
   const { sock } = useGameSocket();
 
   useEffect(() => {
-    const callbackKey = sock.addOnEndGame((endGameStatus) => {
-      setStatus(endGameStatus);
+    const callbackKey = sock.addOnEndGame((gameEnd) => {
+      setGameEnd(gameEnd);
     });
 
     return () => {
@@ -25,22 +25,28 @@ const GameModal: React.FC = () => {
     };
   }, [sock]);
 
-  const modalBody = status && (
+  const modalBody = gameEnd && (
     <>
       <h2 id={HEADING_ID} className={styles.gameModalHeading}>
-        You {statusTextMap[status]}!
+        You {statusTextMap[gameEnd.status]}!
       </h2>
+      <hr />
       <div>
-        <button>b</button>
-      </div>
-      <div>
-        <button>c</button>
+        <h3>Time</h3>
+        <span>
+          {new Date(gameEnd.duration).getMinutes()}m {new Date(gameEnd.duration).getSeconds()}s
+        </span>
       </div>
     </>
   );
 
   return (
-    <Modal open={!!status} onClose={() => setStatus(undefined)} aria-labelledby={HEADING_ID}>
+    <Modal
+      open={!!gameEnd?.status}
+      onClose={() => setGameEnd(undefined)}
+      dialogClassName={styles[`gameModal-${gameEnd?.status}`]}
+      aria-labelledby={HEADING_ID}
+    >
       {modalBody}
     </Modal>
   );

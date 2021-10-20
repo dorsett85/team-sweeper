@@ -66,11 +66,12 @@ public class GameDao implements GameRepository {
         em
             .createNativeQuery("" +
                 "UPDATE game g " +
-                "SET g.board = :board, g.status = :status " +
+                "SET g.board = :board, g.status = :status, g.started_at = :startedAt " +
                 "WHERE g.id = :gameId"
             )
             .setParameter("board", game.board)
             .setParameter("status", game.status.toString())
+            .setParameter("startedAt", game.startedAt)
             .setParameter("gameId", game.id)
             .executeUpdate();
     }

@@ -2,7 +2,7 @@ package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 import com.cphillipsdorsett.teamsweeper.game.Cell;
 import com.cphillipsdorsett.teamsweeper.game.GameService;
-import com.cphillipsdorsett.teamsweeper.game.dao.GameStatus;
+import com.cphillipsdorsett.teamsweeper.game.dto.GameEndDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,8 +43,8 @@ public class GameSocketDispatch {
             }
 
             @Override
-            public void endGame(GameStatus status) throws IOException {
-                TextMessage endGameMessage = transformToPublish(GameSocketMessageType.END_GAME, status);
+            public void endGame(GameEndDto gameEndDto) throws IOException {
+                TextMessage endGameMessage = transformToPublish(GameSocketMessageType.END_GAME, gameEndDto);
                 session.sendMessage(endGameMessage);
             }
         });

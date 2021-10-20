@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from './GameBoard.module.less';
-import { Game } from '../../types/Game';
+import { GameStart } from '../../types/Game';
 import GameCell from './GameCell';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { setDifficulty, setIsLoading } from '../../pages/single-player/singlePlayerSlice';
@@ -9,7 +9,7 @@ import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 import { SocketMessageType } from '../../utils/GameSocket';
 
 const GameBoard: React.FC = () => {
-  const [game, setGame] = useState<Game>();
+  const [game, setGame] = useState<GameStart>();
   const [loadingError, setLoadingError] = useState(false);
   const difficulty = useAppSelector((state) => state.difficulty);
   const isLoading = useAppSelector((state) => state.isLoading);
@@ -21,7 +21,7 @@ const GameBoard: React.FC = () => {
   useEffect(() => {
     if (isLoading) {
       setLoadingError(false);
-      fetchJson<Game>(`/game/new-game?difficulty=${difficulty}`)
+      fetchJson<GameStart>(`/game/new-game?difficulty=${difficulty}`)
         .then((newGame) => {
           setGame(newGame);
         })

@@ -1,6 +1,8 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
 import com.cphillipsdorsett.teamsweeper.game.dao.*;
+import com.cphillipsdorsett.teamsweeper.game.dto.GameEndDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.GameStartDto;
 import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellMessage.UncoverCellPayload;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -8,6 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 
 @Service
 public class GameService {
@@ -20,7 +24,7 @@ public class GameService {
         this.sessionGameDao = sessionGameDao;
     }
 
-    public GameDto newGame(String sessionId, String difficulty) throws JsonProcessingException {
+    public GameStartDto newGame(String sessionId, String difficulty) throws JsonProcessingException {
 
         GameBuilder gameBuilder = new GameBuilder(difficulty);
 
@@ -34,7 +38,7 @@ public class GameService {
         SessionGame sessionGame = new SessionGame(sessionId, game.id);
         sessionGameDao.create(sessionGame);
 
-        return new GameDto(game, GameBuilder.getBoardConfig(game.difficulty));
+        return new GameStartDto(game, GameBuilder.getBoardConfig(game.difficulty));
     }
 
     /**
@@ -46,6 +50,11 @@ public class GameService {
         UncoveredCellMessageCallback callback
     ) throws IOException {
         Game game = gameDao.findCurrent(sessionId, payload.gameId);
+
+        // If this is the first click then set a started timestamp
+        if (game.startedAt == null) {
+            game.startedAt = Instant.now();
+        }
 
         // Early exit if the game is already over since all of the cells have
         // already been uncovered.
@@ -98,7 +107,9 @@ public class GameService {
         // Let the frontend know that the game is over and make a final update
         // of the game to the database.
         if (game.status != GameStatus.IN_PROGRESS) {
-            callback.endGame(game.status);
+            long duration = Duration.between(game.startedAt, Instant.now()).toMillis();
+            GameEndDto gameEndDto = new GameEndDto(game.status, duration);
+            callback.endGame(gameEndDto);
             gameDao.update(game);
         }
 
@@ -174,8 +185,8 @@ public class GameService {
         void reveal(Cell cell) throws IOException;
 
         /**
-         * Notifies the frontend that the game is no longer in progress
+         * Notifies the frontend that the game is over (either won or lost)
          */
-        void endGame(GameStatus status) throws IOException;
+        void endGame(GameEndDto gameEndDto) throws IOException;
     }
 }

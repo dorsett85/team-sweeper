@@ -1,11 +1,11 @@
 import { CaseReducer, createSlice, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
-import { Game } from '../../types/Game';
+import { GameStart } from '../../types/Game';
 
 export interface SinglePlayerState {
   /**
    * Difficulty setting of the game
    */
-  difficulty: Game['difficulty'];
+  difficulty: GameStart['difficulty'];
   /**
    * Whether or not the game board is loading
    */

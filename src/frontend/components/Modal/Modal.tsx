@@ -12,9 +12,13 @@ interface ModalProps
    * Callback when the modal requests to close
    */
   onClose: () => void;
+  /**
+   * Passed to the dialog element
+   */
+  dialogClassName?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ open, onClose, children, ...rest }) => {
+const Modal: React.FC<ModalProps> = ({ open, onClose, children, dialogClassName, ...rest }) => {
   const backdropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -82,7 +86,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, children, ...rest }) => {
     <div ref={backdropRef} onClick={handleOnBackdropClick} className={styles.modalBackdrop}>
       <div
         role='dialog'
-        className={styles.modal}
+        className={`${styles.modal} ${dialogClassName || ''}`}
         aria-labelledby={rest['aria-labelledby']}
         aria-describedby={rest['aria-describedby']}
         aria-modal

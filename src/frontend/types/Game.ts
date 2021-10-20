@@ -6,11 +6,18 @@ export interface Cell {
   checked: boolean;
 }
 
-export interface Game {
+type GameStatus = 'IN_PROGRESS' | 'WON' | 'LOST';
+
+export interface GameStart {
   id: number;
   difficulty: 'e' | 'm' | 'h';
-  status: 'IN_PROGRESS' | 'WON' | 'LOST';
+  status: GameStatus;
   rows: number;
   cols: number;
   mines: number;
+}
+
+export interface GameEnd {
+  status: Exclude<GameStatus, 'IN_PROGRESS'>;
+  duration: number;
 }

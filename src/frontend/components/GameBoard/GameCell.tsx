@@ -1,10 +1,10 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 import styles from './GameCell.module.less';
-import { Cell, Game } from '../../types/Game';
+import { Cell, GameStart } from '../../types/Game';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 
 interface GameCellProps extends Pick<Cell, 'rowIdx' | 'colIdx'> {
-  difficulty: Game['difficulty'];
+  difficulty: GameStart['difficulty'];
   /**
    * Callback fired when the coveredCell button is clicked
    */

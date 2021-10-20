@@ -20,6 +20,8 @@ public class Game {
     public String board;
     @Column(name = "created_at")
     public Instant createdAt;
+    @Column(name = "started_at")
+    public Instant startedAt;
 
     protected Game() {}
 
@@ -58,5 +60,9 @@ public class Game {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public Instant getStartedAt() {
+        return startedAt;
     }
 }

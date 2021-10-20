@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS game (
     -- TODO this should probably go in a document database because of the rapid
     --  read/write access from the game.
     board JSON NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    -- When the first click occurred
+    started_at TIMESTAMP
 );
 
 drop table game;

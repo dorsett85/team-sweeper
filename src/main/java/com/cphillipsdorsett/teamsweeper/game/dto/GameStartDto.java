@@ -1,15 +1,19 @@
-package com.cphillipsdorsett.teamsweeper.game;
+package com.cphillipsdorsett.teamsweeper.game.dto;
 
+import com.cphillipsdorsett.teamsweeper.game.BoardConfig;
 import com.cphillipsdorsett.teamsweeper.game.dao.Game;
 
-public class GameDto {
+/**
+ * Data sent to the frontend when a new game starts
+ */
+public class GameStartDto {
     public int id;
     public String difficulty;
     public int rows;
     public int cols;
     public int mines;
 
-    public GameDto(Game game, BoardConfig boardConfig) {
+    public GameStartDto(Game game, BoardConfig boardConfig) {
         this.id = game.id;
         this.difficulty = game.difficulty;
         this.rows = boardConfig.rows;

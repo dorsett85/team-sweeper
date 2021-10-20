@@ -1,4 +1,4 @@
-import { Cell, Game } from '../types/Game';
+import { Cell, GameEnd, GameStart } from '../types/Game';
 
 interface ReadyStateHandlers {
   /**
@@ -43,7 +43,7 @@ interface SocketMessage<TType extends SocketMessageType, TPayload> {
 
 type SocketSend = SocketMessage<
   SocketMessageType.UNCOVER_CELL,
-  CellIndexes & { gameId: Game['id'] }
+  CellIndexes & { gameId: GameStart['id'] }
 >;
 
 type UncoverCellParam = Pick<Cell, 'rowIdx' | 'colIdx' | 'value'>;
@@ -51,8 +51,7 @@ type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
 
 type UncoverCellCallback = (value: Cell['value']) => void;
 
-export type EndGameStatus = Exclude<Game['status'], 'IN_PROGRESS'>;
-type EndGameCallback = (status: EndGameStatus) => void;
+type EndGameCallback = (gameEnd: GameEnd) => void;
 
 interface DispatchMap {
   [SocketMessageType.UNCOVER_CELL]: (payload: UncoverCellParam) => void;
@@ -152,7 +151,7 @@ export class GameSocket {
    * Add a callback function to be fired when the game ends. Returns the key of
    * the callback (useful to remove the callback from the end game map).
    */
-  public addOnEndGame(callback: (status: EndGameStatus) => void): number {
+  public addOnEndGame(callback: (gameEnd: GameEnd) => void): number {
     const key = this.onEndGameMap.size;
     this.onEndGameMap.set(key, callback);
     return key;
@@ -168,7 +167,7 @@ export class GameSocket {
   /**
    * Handler for when the server says the game has either been won or lost
    */
-  private handleOnEndGame(status: EndGameStatus): void {
-    this.onEndGameMap.forEach((callback) => callback(status));
+  private handleOnEndGame(gameEnd: GameEnd): void {
+    this.onEndGameMap.forEach((callback) => callback(gameEnd));
   }
 }
