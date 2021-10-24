@@ -3,7 +3,7 @@ import styles from './GameBoard.module.less';
 import { GameStart } from '../../types/Game';
 import GameCell from './GameCell';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
-import { setDifficulty, setIsLoading } from '../../pages/single-player/singlePlayerSlice';
+import { setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { fetchJson } from '../../utils/fetchJson';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 import { SocketMessageType } from '../../utils/GameSocket';
@@ -33,13 +33,6 @@ const GameBoard: React.FC = () => {
         });
     }
   }, [difficulty, dispatch, isLoading]);
-
-  useEffect(() => {
-    // Need to set the difficulty since it might be a previously created game!
-    if (game) {
-      dispatch(setDifficulty(game.difficulty));
-    }
-  }, [game, dispatch]);
 
   let gameBoard: React.ReactNode;
   if (loadingError || isLoading) {

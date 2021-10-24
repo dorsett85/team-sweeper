@@ -56,8 +56,8 @@ public class GameService {
             game.startedAt = Instant.now();
         }
 
-        // Early exit if the game is already over since all of the cells have
-        // already been uncovered.
+        // Early exit if the game is already over since all of the cells have or
+        // will be uncovered.
         if (game.status != GameStatus.IN_PROGRESS) {
             return;
         }
@@ -65,54 +65,44 @@ public class GameService {
         Cell[][] board = getDeSerializedBoard(game.board);
         Cell uncoveredCell = board[payload.rowIdx][payload.colIdx];
 
-        boolean mineUncovered = uncoveredCell.value.equals("x");
-
+        // Check if a mine was clicked
         // TODO It's possible that a mine was uncovered while the backend was
         //  still processing if the game had been won. We may want to add status
         //  queue to make sure the clicks and processing get handled in order.
-        if (mineUncovered) {
+        if (uncoveredCell.value.equals("x")) {
             game.status = GameStatus.LOST;
+            uncoverCellCascade(uncoveredCell, board, game, callback, true);
+            sendEndGame(game, callback);
+            return;
         }
 
-        // Now that we have the initial covered cell, we'll uncover it and
-        // repeat the process for all surrounding cells.
-        uncoverCellCascade(uncoveredCell, board, game, callback, mineUncovered);
+        // Mine was not clicked and the game is still in progress
+        uncoverCellCascade(uncoveredCell, board, game, callback, false);
 
         // Once the cell cascade has finished, we'll check to see if the game
         // has been won.
-        if (game.status == GameStatus.IN_PROGRESS) {
-            BoardConfig boardConfig = GameBuilder.getBoardConfig(game.difficulty);
+        BoardConfig boardConfig = GameBuilder.getBoardConfig(game.difficulty);
 
-            // To see if the game has been won, we'll compare the total non-mine
-            // cells on the board to the number of cells that have been
-            // uncovered. The game is won if they're equal.
-            int totalCellsToUncover = (boardConfig.cols * boardConfig.rows) - boardConfig.mines;
-            int uncoveredCellCount = 0;
-            for (Cell[] row : board) {
-                for (Cell cell : row) {
-                    if (!cell.covered) {
-                        uncoveredCellCount++;
-                    }
+        // To see if the game has been won, we'll compare the total non-mine
+        // cells on the board to the number of cells that have been
+        // uncovered. The game is won if they're equal.
+        int totalCellsToUncover = (boardConfig.cols * boardConfig.rows) - boardConfig.mines;
+        int uncoveredCellCount = 0;
+        for (Cell[] row : board) {
+            for (Cell cell : row) {
+                if (!cell.covered) {
+                    uncoveredCellCount++;
+                }
 
-                    // Whoop, game is won, set the status and uncover the rest
-                    // of the cells.
-                    if (totalCellsToUncover == uncoveredCellCount) {
-                        game.status = GameStatus.WON;
-                        uncoverCellCascade(cell, board, game, callback, true);
-                    }
+                // Whoop, game is won, set the status and uncover the rest
+                // of the cells.
+                if (totalCellsToUncover == uncoveredCellCount) {
+                    game.status = GameStatus.WON;
+                    uncoverCellCascade(cell, board, game, callback, true);
+                    sendEndGame(game, callback);
                 }
             }
         }
-
-        // Let the frontend know that the game is over and make a final update
-        // of the game to the database.
-        if (game.status != GameStatus.IN_PROGRESS) {
-            long duration = Duration.between(game.startedAt, Instant.now()).toMillis();
-            GameEndDto gameEndDto = new GameEndDto(game.status, duration);
-            callback.endGame(gameEndDto);
-            gameDao.update(game);
-        }
-
     }
 
     /**
@@ -170,6 +160,12 @@ public class GameService {
                 }
             }
         }
+    }
+
+    private void sendEndGame(Game game, UncoveredCellMessageCallback callback) throws IOException {
+        long duration = Duration.between(game.startedAt, Instant.now()).toMillis();
+        GameEndDto gameEndDto = new GameEndDto(game.status, duration);
+        callback.endGame(gameEndDto);
     }
 
     private Cell[][] getDeSerializedBoard(String board) throws JsonProcessingException {

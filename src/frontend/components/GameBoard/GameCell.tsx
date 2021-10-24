@@ -65,6 +65,9 @@ const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx
     onClick();
   };
 
+  const isMine = value === 'x';
+  const isClicked = isCellClicked.current;
+
   return (
     <div className={styles[`cellContainer-${difficulty}`]}>
       <button
@@ -73,15 +76,11 @@ const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx
         onClick={handleOnCoveredCellClick}
         disabled={!!value}
       />
-      <div className={styles[value === 'x' ? 'uncoveredMineCell' : 'uncoveredCell']}>
+      <div className={styles[isMine && isClicked ? 'uncoveredClickedMineCell' : 'uncoveredCell']}>
         {value && (
           <div
             className={
-              styles[
-                value === 'x'
-                  ? `mineCell${isCellClicked.current ? 'Clicked' : ''}`
-                  : `nearbyMineCell-${value}`
-              ]
+              styles[isMine ? `mineCell${isClicked ? 'Clicked' : ''}` : `nearbyMineCell-${value}`]
             }
           >
             {!['0', 'x'].includes(value) && value}

@@ -42,7 +42,7 @@ const GameModal: React.FC = () => {
 
   return (
     <Modal
-      open={!!gameEnd?.status}
+      open={!!gameEnd}
       onClose={() => setGameEnd(undefined)}
       dialogClassName={styles[`gameModal-${gameEnd?.status}`]}
       aria-labelledby={HEADING_ID}
