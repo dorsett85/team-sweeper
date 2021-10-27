@@ -7,8 +7,9 @@ import {
 } from '../../pages/single-player/singlePlayerSlice';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { DIFFICULTY } from '../../pages/single-player/constants/difficulty';
+import { GameStart } from '../../types/Game';
 
-const difficultyMap = {
+const difficultyMap: Record<GameStart['difficulty'], string> = {
   e: 'Easy',
   m: 'Medium',
   h: 'Hard'
