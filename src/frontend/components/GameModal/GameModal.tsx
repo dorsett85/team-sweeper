@@ -3,6 +3,7 @@ import Modal from '../Modal/Modal';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 import styles from './GameModal.module.less';
 import { GameEnd } from '../../types/Game';
+import { fetchJson } from '../../utils/fetchJson';
 
 const statusTextMap: Record<GameEnd['status'], string> = {
   WON: 'won',
@@ -24,6 +25,13 @@ const GameModal: React.FC = () => {
       sock.removeOnEndGame(callbackKey);
     };
   }, [sock]);
+
+  useEffect(() => {
+    // Fetch session stats
+    if (gameEnd) {
+      fetchJson('/game/session-stats').then((data) => console.log(data));
+    }
+  }, [gameEnd]);
 
   const modalBody = gameEnd && (
     <>

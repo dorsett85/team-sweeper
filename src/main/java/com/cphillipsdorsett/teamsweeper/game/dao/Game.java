@@ -10,7 +10,8 @@ import java.time.Instant;
 public class Game {
     @Id
     public int id;
-    public String difficulty;
+    @Enumerated(EnumType.STRING)
+    public GameDifficulty difficulty;
     @Enumerated(EnumType.STRING)
     public GameStatus status = GameStatus.IN_PROGRESS;
     /**
@@ -25,7 +26,7 @@ public class Game {
 
     protected Game() {}
 
-    public Game(String difficulty, String board) {
+    public Game(GameDifficulty difficulty, String board) {
         this.difficulty = difficulty;
         this.board = board;
     }
@@ -34,11 +35,11 @@ public class Game {
         return id;
     }
 
-    public String getDifficulty() {
+    public GameDifficulty getDifficulty() {
         return difficulty;
     }
 
-    public void setDifficulty(String difficulty) {
+    public void setDifficulty(GameDifficulty difficulty) {
         this.difficulty = difficulty;
     }
 

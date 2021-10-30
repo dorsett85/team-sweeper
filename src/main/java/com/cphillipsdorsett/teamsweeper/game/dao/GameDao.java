@@ -4,7 +4,6 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -29,15 +28,16 @@ public class GameDao implements GameRepository {
                 "INSERT INTO game (difficulty, status, board) " +
                 "VALUES (:difficulty, :status, :board)"
             )
-            .setParameter("difficulty", game.difficulty)
+            .setParameter("difficulty", game.difficulty.name())
             .setParameter("status", game.status.name())
             .setParameter("board", game.board)
             .executeUpdate();
         return (Game) em
-            .createNativeQuery("" +
-                "SELECT g.* " +
-                "FROM game g " +
-                "WHERE g.id = (SELECT LAST_INSERT_ID())",
+            .createNativeQuery(
+                "" +
+                    "SELECT g.* " +
+                    "FROM game g " +
+                    "WHERE g.id = (SELECT LAST_INSERT_ID())",
                 Game.class
             )
             .getSingleResult();
@@ -45,20 +45,20 @@ public class GameDao implements GameRepository {
 
     @Transactional
     public Game findCurrent(String sessionId, int gameId) {
-        List<Game> results = (List<Game>) em
-            .createNativeQuery("" +
-                "SELECT g.* " +
-                "FROM game g " +
-                "INNER JOIN session_game sg ON g.id = sg.game_id " +
-                "INNER JOIN SPRING_SESSION ss ON sg.session_id = ss.SESSION_ID " +
-                "WHERE ss.SESSION_ID = :sessionId " +
-                "   AND g.id = :gameId",
+        return (Game) em
+            .createNativeQuery(
+                "" +
+                    "SELECT g.* " +
+                    "FROM game g " +
+                    "INNER JOIN session_game sg ON g.id = sg.game_id " +
+                    "INNER JOIN SPRING_SESSION ss ON sg.session_id = ss.SESSION_ID " +
+                    "WHERE ss.SESSION_ID = :sessionId " +
+                    "    AND g.id = :gameId",
                 Game.class
             )
             .setParameter("sessionId", sessionId)
             .setParameter("gameId", gameId)
-            .getResultList();
-        return results.isEmpty() ? null : results.get(0);
+            .getSingleResult();
     }
 
     @Transactional

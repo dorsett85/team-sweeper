@@ -3,6 +3,7 @@ package com.cphillipsdorsett.teamsweeper.game;
 import com.cphillipsdorsett.teamsweeper.game.dao.*;
 import com.cphillipsdorsett.teamsweeper.game.dto.GameEndDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.GameStartDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.SessionGameStatsDto;
 import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellMessage.UncoverCellPayload;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class GameService {
@@ -24,7 +26,7 @@ public class GameService {
         this.sessionGameDao = sessionGameDao;
     }
 
-    public GameStartDto newGame(String sessionId, String difficulty) throws JsonProcessingException {
+    public GameStartDto newGame(String sessionId, GameDifficulty difficulty) throws JsonProcessingException {
 
         GameBuilder gameBuilder = new GameBuilder(difficulty);
 
@@ -160,6 +162,11 @@ public class GameService {
                 }
             }
         }
+    }
+
+    public SessionGameStatsDto findSessionGameStats(String sessionId) {
+        List<SessionGameStats> sessionGameStatsList = sessionGameDao.findSessionGameStats(sessionId);
+        return SessionGameStatsDto.toSessionGameStatsDto(sessionGameStatsList);
     }
 
     private void sendEndGame(Game game, UncoveredCellMessageCallback callback) throws IOException {

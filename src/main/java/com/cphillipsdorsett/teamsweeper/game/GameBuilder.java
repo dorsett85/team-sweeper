@@ -1,5 +1,6 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
+import com.cphillipsdorsett.teamsweeper.game.dao.GameDifficulty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -14,10 +15,10 @@ public class GameBuilder {
     public final int nonMines;
     public final int totalCells;
     public final Cell[][] board;
-    private static final Map<String, BoardConfig> boardConfigMap = new HashMap<>() {{
-        put("e", new BoardConfig(9, 9, 10));
-        put("m", new BoardConfig(16, 16, 40));
-        put("h", new BoardConfig(16, 30, 99));
+    private static final Map<GameDifficulty, BoardConfig> boardConfigMap = new HashMap<>() {{
+        put(GameDifficulty.E, new BoardConfig(9, 9, 10));
+        put(GameDifficulty.M, new BoardConfig(16, 16, 40));
+        put(GameDifficulty.H, new BoardConfig(16, 30, 99));
     }};
 
     /**
@@ -35,7 +36,7 @@ public class GameBuilder {
         { 0, -1},
     };
 
-    public GameBuilder(String difficulty) {
+    public GameBuilder(GameDifficulty difficulty) {
         BoardConfig boardConfig = boardConfigMap.get(difficulty);
         rows = boardConfig.rows;
         cols = boardConfig.cols;
@@ -97,7 +98,7 @@ public class GameBuilder {
         return new ObjectMapper().writeValueAsString(board);
     }
 
-    public static BoardConfig getBoardConfig(String difficulty) {
+    public static BoardConfig getBoardConfig(GameDifficulty difficulty) {
         return boardConfigMap.get(difficulty);
     }
 

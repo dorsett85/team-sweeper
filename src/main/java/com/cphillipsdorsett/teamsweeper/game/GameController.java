@@ -2,6 +2,7 @@ package com.cphillipsdorsett.teamsweeper.game;
 
 import com.cphillipsdorsett.teamsweeper.BundleManifest;
 
+import com.cphillipsdorsett.teamsweeper.game.dao.GameDifficulty;
 import com.cphillipsdorsett.teamsweeper.game.dto.GameStartDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpSession;
-import java.util.Set;
 
 @Controller
 @RequestMapping("/game")
@@ -37,13 +37,21 @@ public class GameController {
         HttpSession session
     ) throws JsonProcessingException {
         // Make sure the difficulty param is one we accept
-        if (!Set.of("e", "m", "h").contains(difficulty)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "difficulty param must be (e|m|h)");
-        }
+        GameDifficulty gameDifficulty = GameDifficulty
+            .getNameByValue(difficulty)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "difficulty param must be (e|m|h)"));
 
-        GameStartDto gameStartDto = gameService.newGame(session.getId(), difficulty);
+        GameStartDto gameStartDto = gameService.newGame(session.getId(), gameDifficulty);
 
         return ResponseEntity.ok(gameStartDto);
+    }
+
+    @GetMapping("/session-stats")
+    public ResponseEntity<Object> getSessionGameStats(HttpSession session) {
+        // get session stats
+        String id = session.getId();
+        Object sessionGameStats = gameService.findSessionGameStats(session.getId());
+        return ResponseEntity.ok(sessionGameStats);
     }
 
 }

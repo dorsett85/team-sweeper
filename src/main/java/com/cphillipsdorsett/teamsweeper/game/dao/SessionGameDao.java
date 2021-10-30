@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,6 +27,26 @@ public class SessionGameDao implements SessionGameRepository {
             .setParameter(1, sessionGame.sessionId)
             .setParameter(2, sessionGame.gameId)
             .executeUpdate();
+    }
+
+    @Transactional
+    public List<SessionGameStats> findSessionGameStats(String sessionId) {
+        return (List<SessionGameStats>) em
+            .createNativeQuery(
+                "" +
+                    "SELECT" +
+                    "    ROW_NUMBER() OVER ( ORDER BY g.difficulty) id," +
+                    "    g.difficulty," +
+                    "    g.status," +
+                    "    COUNT(g.status) count " +
+                    "FROM session_game sg " +
+                    "INNER JOIN game g ON sg.game_id = g.id " +
+                    "WHERE session_id = :sessionId " +
+                    "GROUP BY g.status, g.difficulty",
+                SessionGameStats.class
+            )
+            .setParameter("sessionId", sessionId)
+            .getResultList();
     }
 
     @Override
