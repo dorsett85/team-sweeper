@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from './GameBoard.module.less';
-import { GameStart } from '../../types/Game';
+import { GameStart } from '../../types/game';
 import GameCell from './GameCell';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { setIsLoading } from '../../pages/single-player/singlePlayerSlice';

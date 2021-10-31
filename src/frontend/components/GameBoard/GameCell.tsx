@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 import styles from './GameCell.module.less';
-import { Cell, GameStart } from '../../types/Game';
+import { Cell, GameStart } from '../../types/game';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 
 interface GameCellProps extends Pick<Cell, 'rowIdx' | 'colIdx'> {

@@ -1,4 +1,4 @@
-import { Cell, GameEnd, GameStart } from '../types/Game';
+import { Cell, GameEnd, GameStart } from '../types/game';
 
 interface ReadyStateHandlers {
   /**

@@ -1,5 +1,5 @@
 import { CaseReducer, createSlice, PayloadAction, SliceCaseReducers } from '@reduxjs/toolkit';
-import { GameStart } from '../../types/Game';
+import { GameStart } from '../../types/game';
 
 export interface SinglePlayerState {
   /**

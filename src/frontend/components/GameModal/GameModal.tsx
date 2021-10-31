@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Modal from '../Modal/Modal';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 import styles from './GameModal.module.less';
-import { GameEnd } from '../../types/Game';
+import { GameEnd } from '../../types/game';
 import { fetchJson } from '../../utils/fetchJson';
 
 const statusTextMap: Record<GameEnd['status'], string> = {

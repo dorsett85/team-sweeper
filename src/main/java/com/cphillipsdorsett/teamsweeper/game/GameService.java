@@ -166,7 +166,7 @@ public class GameService {
 
     public SessionGameStatsDto findSessionGameStats(String sessionId) {
         List<SessionGameStats> sessionGameStatsList = sessionGameDao.findSessionGameStats(sessionId);
-        return SessionGameStatsDto.toSessionGameStatsDto(sessionGameStatsList);
+        return SessionGameStatsDto.fromSessionGameStatsList(sessionGameStatsList);
     }
 
     private void sendEndGame(Game game, UncoveredCellMessageCallback callback) throws IOException {

@@ -22,7 +22,7 @@ public class SessionGameStatsDto {
     /**
      * Maps a {@code List<SessionGameStats>} to a {@code SessGameStatsDto}
      */
-    public static SessionGameStatsDto toSessionGameStatsDto(List<SessionGameStats> sessionGameStatsList) {
+    public static SessionGameStatsDto fromSessionGameStatsList(List<SessionGameStats> sessionGameStatsList) {
         Map<String, GameDifficultyStats> gameStats = generateGameStats(sessionGameStatsList);
         return new SessionGameStatsDto(gameStats);
     }
