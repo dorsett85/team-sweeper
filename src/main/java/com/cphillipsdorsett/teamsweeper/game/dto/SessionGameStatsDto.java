@@ -61,7 +61,7 @@ public class SessionGameStatsDto {
         public final Map<GameStatus, GameStatusStats> statuses;
 
         public GameDifficultyStats() {
-            // Initiate the statuses map with all of the GameStatus keys
+            // Initiate the statuses map with all the GameStatus keys
             this.statuses = new HashMap<>();
             Arrays.stream(GameStatus.values()).forEach(status -> this.statuses.put(status, new GameStatusStats()));
         }

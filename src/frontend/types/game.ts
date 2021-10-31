@@ -1,3 +1,6 @@
+import { GameDifficulty } from './gamedifficulty';
+import { GameStatus } from './gameStatus';
+
 export interface Cell {
   rowIdx: number;
   colIdx: number;
@@ -6,11 +9,9 @@ export interface Cell {
   checked: boolean;
 }
 
-type GameStatus = 'IN_PROGRESS' | 'WON' | 'LOST';
-
 export interface GameStart {
   id: number;
-  difficulty: 'e' | 'm' | 'h';
+  difficulty: GameDifficulty;
   status: GameStatus;
   rows: number;
   cols: number;
