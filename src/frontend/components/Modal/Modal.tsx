@@ -13,12 +13,23 @@ interface ModalProps
    */
   onClose: () => void;
   /**
+   * Whether or not to show the close button
+   */
+  showCloseButton?: boolean;
+  /**
    * Passed to the dialog element
    */
   dialogClassName?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ open, onClose, children, dialogClassName, ...rest }) => {
+const Modal: React.FC<ModalProps> = ({
+  open,
+  onClose,
+  showCloseButton = true,
+  children,
+  dialogClassName,
+  ...rest
+}) => {
   const backdropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,6 +102,11 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, children, dialogClassName,
         aria-describedby={rest['aria-describedby']}
         aria-modal
       >
+        {showCloseButton && (
+          <button onClick={onClose} className={styles.closeButton} aria-label='Close Modal'>
+            x
+          </button>
+        )}
         {children}
       </div>
     </div>,

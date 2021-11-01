@@ -1,6 +1,10 @@
 .gameModalHeading {
+  font-size: 1.625rem;
   text-align: center;
 }
+
+@WON: WON;
+@LOST: LOST;
 
 @shadowStyle: 0 0 4px 1px;
 
@@ -10,4 +14,44 @@
 
 .gameModal-LOST {
   box-shadow: @shadowStyle red;
+}
+
+.summaryTime {
+  padding: 16px 16px;
+  border-radius: 8px;
+  color: white;
+  font-size: 1.625rem;
+}
+
+.summary {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+
+  .summaryTime-WON {
+    &:extend(.summaryTime);
+    background-color: green;
+  }
+
+  .summaryTime-LOST {
+    &:extend(.summaryTime);
+    background-color: red;
+  }
+}
+
+.sessionStatsHeading {
+  font-size: 1.375rem;
+}
+
+.sessionStatsType {
+  font-size: 1.125rem;
+}
+
+.difficultyStatsText {
+  font-weight: bold;
+}
+
+.statusStatsText {
+  padding: 5px 8px;
+  border-radius: 8px;
 }

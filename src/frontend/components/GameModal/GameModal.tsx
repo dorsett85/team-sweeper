@@ -4,21 +4,35 @@ import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 import styles from './GameModal.module.less';
 import { GameEnd } from '../../types/game';
 import { fetchJson } from '../../utils/fetchJson';
+import { SessionGameStats } from '../../types/sessionGameStats';
+import { GameStatus } from '../../types/gameStatus';
+import { GameDifficulty } from '../../types/gamedifficulty';
 
-const statusTextMap: Record<GameEnd['status'], string> = {
+const statusTextMap: Record<GameStatus, string> = {
+  IN_PROGRESS: 'in-progress',
   WON: 'won',
   LOST: 'lost'
+};
+
+const difficultyTextMap: Record<GameDifficulty, string> = {
+  e: 'Easy',
+  m: 'Medium',
+  h: 'Hard'
 };
 
 const HEADING_ID = 'game-modal-heading';
 
 const GameModal: React.FC = () => {
   const [gameEnd, setGameEnd] = useState<GameEnd>();
+  const [sessionGameStats, setSessionGameStats] = useState<SessionGameStats>();
   const { sock } = useGameSocket();
 
   useEffect(() => {
     const callbackKey = sock.addOnEndGame((gameEnd) => {
       setGameEnd(gameEnd);
+
+      // Fetch session stats
+      fetchJson<SessionGameStats>('/game/session-stats').then(setSessionGameStats);
     });
 
     return () => {
@@ -26,25 +40,48 @@ const GameModal: React.FC = () => {
     };
   }, [sock]);
 
-  useEffect(() => {
-    // Fetch session stats
-    if (gameEnd) {
-      fetchJson('/game/session-stats').then((data) => console.log(data));
-    }
-  }, [gameEnd]);
+  const statsSection = sessionGameStats ? (
+    <>
+      <h3 className={styles.sessionStatsHeading}>Session Statistics</h3>
+      <p className={styles.sessionStatsType}>Games Played</p>
+      <ul>
+        {Object.entries(sessionGameStats.games).map(([key, difficultyStats]) => {
+          return (
+            <li key={key}>
+              <span className={styles.difficultyStatsText}>
+                {difficultyTextMap[key as GameDifficulty]}: {difficultyStats.count}
+              </span>
+              {Object.entries(difficultyStats.statuses).map(([key, statusStats]) => {
+                return (
+                  <ul key={key}>
+                    <li>
+                      <div className={styles.statusStatsText}>
+                        {statusTextMap[key as GameStatus]}: {statusStats.count}
+                      </div>
+                    </li>
+                  </ul>
+                );
+              })}
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  ) : null;
 
-  const modalBody = gameEnd && (
+  const modalBody = gameEnd && sessionGameStats && (
     <>
       <h2 id={HEADING_ID} className={styles.gameModalHeading}>
         You {statusTextMap[gameEnd.status]}!
       </h2>
       <hr />
-      <div>
-        <h3>Time</h3>
-        <span>
-          {new Date(gameEnd.duration).getMinutes()}m {new Date(gameEnd.duration).getSeconds()}s
+      <section className={styles.summary}>
+        <span className={styles[`summaryTime-${gameEnd.status}`]}>
+          {new Date(gameEnd.duration).getMinutes()} minutes{' '}
+          {new Date(gameEnd.duration).getSeconds()} seconds
         </span>
-      </div>
+      </section>
+      <section>{statsSection}</section>
     </>
   );
 
