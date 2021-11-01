@@ -48,8 +48,6 @@ public class GameController {
 
     @GetMapping("/session-stats")
     public ResponseEntity<Object> getSessionGameStats(HttpSession session) {
-        // get session stats
-        String id = session.getId();
         Object sessionGameStats = gameService.findSessionGameStats(session.getId());
         return ResponseEntity.ok(sessionGameStats);
     }
