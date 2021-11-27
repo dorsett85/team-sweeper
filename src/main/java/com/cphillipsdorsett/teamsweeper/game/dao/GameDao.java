@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.util.Optional;
 
 /**
@@ -51,8 +52,7 @@ public class GameDao implements GameRepository {
                     "SELECT g.* " +
                     "FROM game g " +
                     "INNER JOIN session_game sg ON g.id = sg.game_id " +
-                    "INNER JOIN SPRING_SESSION ss ON sg.session_id = ss.SESSION_ID " +
-                    "WHERE ss.SESSION_ID = :sessionId " +
+                    "WHERE sg.session_id = :sessionId " +
                     "    AND g.id = :gameId",
                 Game.class
             )
@@ -74,6 +74,38 @@ public class GameDao implements GameRepository {
             .setParameter("startedAt", game.startedAt)
             .setParameter("gameId", game.id)
             .executeUpdate();
+    }
+
+    /**
+     * Only delete games that have a single session id linked to them. If
+     * there's another session linked to a game that means it's still active
+     * (e.g., multiplayer) and we don't want to delete it.
+     */
+    @Transactional
+    public int deleteBySingleSessionReference(String sessionId) {
+        em
+            .createNativeQuery("" +
+                "DELETE FROM game g " +
+                "WHERE g.id IN (" +
+                "    SELECT sg.game_id" +
+                "    FROM session_game sg" +
+                "    WHERE sg.session_id = :sessionId" +
+                "        AND sg.game_id IN (" +
+                "            SELECT game_id" +
+                "            FROM session_game" +
+                "            GROUP BY session_game.game_id" +
+                "            HAVING COUNT(*) = 1" +
+                "        )" +
+                ")"
+            )
+            .setParameter("sessionId", sessionId)
+            .executeUpdate();
+        BigInteger deletedCount = (BigInteger) em
+            .createNativeQuery("" +
+                "SELECT ROW_COUNT()"
+            )
+            .getSingleResult();
+        return deletedCount.intValue();
     }
 
     @Override

@@ -44,6 +44,20 @@ public class GameService {
     }
 
     /**
+     * Delete related table records when a session expires
+     *
+     * @return number of games that were deleted
+     */
+    public int deleteExpiredSessionGames(String sessionId) {
+        int deletedCount = gameDao.deleteBySingleSessionReference(sessionId);
+
+        // Clean up the session_game records as well
+        sessionGameDao.deleteBySessionId(sessionId);
+
+        return deletedCount;
+    }
+
+    /**
      * Called when a user clicks/touches a cell on the board
      */
     public void uncoverCell(
@@ -58,7 +72,7 @@ public class GameService {
             game.startedAt = Instant.now();
         }
 
-        // Early exit if the game is already over since all of the cells have or
+        // Early exit if the game is already over since all the cells have or
         // will be uncovered.
         if (game.status != GameStatus.IN_PROGRESS) {
             return;

@@ -49,6 +49,17 @@ public class SessionGameDao implements SessionGameRepository {
             .getResultList();
     }
 
+    @Transactional
+    public void deleteBySessionId(String sessionId) {
+        em
+            .createNativeQuery("" +
+                "DELETE FROM session_game sg " +
+                "WHERE sg.session_id = :sessionId"
+            )
+            .setParameter("sessionId", sessionId)
+            .executeUpdate();
+    }
+
     @Override
     public <S extends SessionGame> S save(S entity) {
         return null;
