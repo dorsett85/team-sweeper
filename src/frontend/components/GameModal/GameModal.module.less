@@ -1,26 +1,18 @@
-.gameModalHeading {
-  font-size: 1.625rem;
-  text-align: center;
-}
-
-@WON: WON;
-@LOST: LOST;
-
 @shadowStyle: 0 0 4px 1px;
+@gameWonColor: green;
+@gameLostColor: red;
 
 .gameModal-WON {
-  box-shadow: @shadowStyle green;
+  box-shadow: @shadowStyle @gameWonColor;
 }
 
 .gameModal-LOST {
-  box-shadow: @shadowStyle red;
+  box-shadow: @shadowStyle @gameLostColor;
 }
 
-.summaryTime {
-  padding: 16px 16px;
-  border-radius: 8px;
-  color: white;
-  font-size: 1.625rem;
+.gameModalHeading {
+  font-size: 2rem;
+  text-align: center;
 }
 
 .summary {
@@ -28,30 +20,12 @@
   justify-content: center;
   padding: 16px 0;
 
-  .summaryTime-WON {
-    &:extend(.summaryTime);
-    background-color: green;
+  .summaryTime {
+    padding: 16px 16px;
+    font-size: 1.625rem;
   }
-
-  .summaryTime-LOST {
-    &:extend(.summaryTime);
-    background-color: red;
-  }
-}
-
-.sessionStatsHeading {
-  font-size: 1.375rem;
-}
-
-.sessionStatsType {
-  font-size: 1.125rem;
 }
 
 .difficultyStatsText {
-  font-weight: bold;
-}
-
-.statusStatsText {
-  padding: 5px 8px;
-  border-radius: 8px;
+  font-size: 1.125rem;
 }

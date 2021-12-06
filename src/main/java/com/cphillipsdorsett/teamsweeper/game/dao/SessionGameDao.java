@@ -41,7 +41,8 @@ public class SessionGameDao implements SessionGameRepository {
                     "    COUNT(g.status) count " +
                     "FROM session_game sg " +
                     "INNER JOIN game g ON sg.game_id = g.id " +
-                    "WHERE session_id = :sessionId " +
+                    "WHERE sg.session_id = :sessionId " +
+                    "    AND g.started_at IS NOT NULL " +
                     "GROUP BY g.status, g.difficulty",
                 SessionGameStats.class
             )

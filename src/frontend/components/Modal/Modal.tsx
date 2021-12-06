@@ -39,7 +39,7 @@ const Modal: React.FC<ModalProps> = ({
       Escape() {
         onClose();
       },
-      // Only allow tabbing through items inside of the modal
+      // Only allow tabbing through items inside the modal
       Tab(e) {
         const focusableNodeList = backdropRef.current?.querySelectorAll<HTMLElement>(
           'a[href], button, textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select'

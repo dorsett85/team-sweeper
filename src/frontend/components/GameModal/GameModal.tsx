@@ -40,50 +40,47 @@ const GameModal: React.FC = () => {
     };
   }, [sock]);
 
-  const statsSection = sessionGameStats ? (
-    <>
-      <h3 className={styles.sessionStatsHeading}>Session Statistics</h3>
-      <p className={styles.sessionStatsType}>Games Played</p>
-      <ul>
-        {Object.entries(sessionGameStats.games).map(([key, difficultyStats]) => {
-          return (
-            <li key={key}>
-              <span className={styles.difficultyStatsText}>
-                {difficultyTextMap[key as GameDifficulty]}: {difficultyStats.count}
-              </span>
-              {Object.entries(difficultyStats.statuses).map(([key, statusStats]) => {
-                return (
-                  <ul key={key}>
-                    <li>
-                      <div className={styles.statusStatsText}>
-                        {statusTextMap[key as GameStatus]}: {statusStats.count}
-                      </div>
-                    </li>
-                  </ul>
-                );
-              })}
-            </li>
-          );
-        })}
-      </ul>
-    </>
-  ) : null;
+  const renderModalBody = (): React.ReactElement | null => {
+    if (!gameEnd || !sessionGameStats) {
+      return null;
+    }
 
-  const modalBody = gameEnd && sessionGameStats && (
-    <>
-      <h2 id={HEADING_ID} className={styles.gameModalHeading}>
-        You {statusTextMap[gameEnd.status]}!
-      </h2>
-      <hr />
-      <section className={styles.summary}>
-        <span className={styles[`summaryTime-${gameEnd.status}`]}>
-          {new Date(gameEnd.duration).getMinutes()} minutes{' '}
-          {new Date(gameEnd.duration).getSeconds()} seconds
-        </span>
-      </section>
-      <section>{statsSection}</section>
-    </>
-  );
+    const gameDate = new Date(gameEnd.duration);
+    const gameMinutes = gameDate.getMinutes();
+    const gameSeconds = gameDate.getSeconds();
+
+    return (
+      <>
+        <h2 id={HEADING_ID} className={styles.gameModalHeading}>
+          You {statusTextMap[gameEnd.status]}!
+        </h2>
+        <hr />
+        <section className={styles.summary}>
+          <span className={styles.summaryTime}>
+            {gameMinutes} minute{gameMinutes !== 1 ? 's' : ''} {gameSeconds} second
+            {gameSeconds !== 1 ? 's' : ''}
+          </span>
+        </section>
+        <section>
+          <h3>Games Played (win percent)</h3>
+          <ul>
+            {Object.entries(sessionGameStats.games).map(([key, { count, statuses }]) => {
+              const winPct = Math.round((statuses.WON.count / count) * 100);
+              const winPctText = isNaN(winPct) ? 'NA' : `${winPct}%`;
+
+              return (
+                <li key={key}>
+                  <span className={styles.difficultyStatsText}>
+                    {difficultyTextMap[key as GameDifficulty]}: {count} ({winPctText})
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </>
+    );
+  };
 
   return (
     <Modal
@@ -92,7 +89,7 @@ const GameModal: React.FC = () => {
       dialogClassName={styles[`gameModal-${gameEnd?.status}`]}
       aria-labelledby={HEADING_ID}
     >
-      {modalBody}
+      {renderModalBody()}
     </Modal>
   );
 };

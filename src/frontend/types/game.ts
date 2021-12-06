@@ -20,5 +20,8 @@ export interface GameStart {
 
 export interface GameEnd {
   status: Exclude<GameStatus, 'IN_PROGRESS'>;
+  /**
+   * Time in milliseconds
+   */
   duration: number;
 }
