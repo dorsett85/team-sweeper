@@ -42,7 +42,7 @@ const GameBoard: React.FC = () => {
       </span>
     );
   } else if (game) {
-    const tempBoard: React.ReactNodeArray = [];
+    const tempBoard: React.ReactElement[] = [];
     for (let r = 0; r < game.rows; r++) {
       for (let c = 0; c < game.cols; c++) {
         tempBoard.push(

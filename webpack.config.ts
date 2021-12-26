@@ -54,7 +54,7 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.(ts|js)x?$/i,
+        test: /\.[jt]sx?$/i,
         exclude: /node_modules/,
         use: { loader: 'ts-loader', options: { transpileOnly: true } }
       },

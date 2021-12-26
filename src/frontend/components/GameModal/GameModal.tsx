@@ -62,7 +62,7 @@ const GameModal: React.FC = () => {
           </span>
         </section>
         <section>
-          <h3>Games Played (win percent)</h3>
+          <h3>Games Played (win percentage)</h3>
           <ul>
             {Object.entries(sessionGameStats.games).map(([key, { count, statuses }]) => {
               const winPct = Math.round((statuses.WON.count / count) * 100);
