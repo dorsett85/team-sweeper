@@ -46,8 +46,8 @@ const GameModal: React.FC = () => {
     }
 
     const gameDate = new Date(gameEnd.duration);
-    const gameMinutes = gameDate.getMinutes();
-    const gameSeconds = gameDate.getSeconds();
+    const gameMinutes = gameDate.getMinutes().toString().padStart(2, '0');
+    const gameSeconds = gameDate.getSeconds().toString().padStart(2, '0');
 
     return (
       <>
@@ -56,13 +56,18 @@ const GameModal: React.FC = () => {
         </h2>
         <hr />
         <section className={styles.summary}>
-          <span className={styles.summaryTime}>
-            {gameMinutes} minute{gameMinutes !== 1 ? 's' : ''} {gameSeconds} second
-            {gameSeconds !== 1 ? 's' : ''}
-          </span>
+          <div className={styles.timeBox}>
+            <span className={styles.timeText}>{gameMinutes}</span>
+            <span className={styles.timeType}>minutes</span>
+          </div>
+          <div className={styles.timeSeparator}>:</div>
+          <div className={styles.timeBox}>
+            <span className={styles.timeText}>{gameSeconds}</span>
+            <span className={styles.timeType}>seconds</span>
+          </div>
         </section>
         <section>
-          <h3>Games Played (win percentage)</h3>
+          <h3>Games Played (wins/total)</h3>
           <ul>
             {Object.entries(sessionGameStats.games).map(([key, { count, statuses }]) => {
               const winPct = Math.round((statuses.WON.count / count) * 100);
@@ -70,8 +75,11 @@ const GameModal: React.FC = () => {
 
               return (
                 <li key={key}>
-                  <span className={styles.difficultyStatsText}>
-                    {difficultyTextMap[key as GameDifficulty]}: {count} ({winPctText})
+                  <span className={styles.difficultyStats}>
+                    <span className={styles.difficultyStatsType}>
+                      {difficultyTextMap[key as GameDifficulty]}
+                    </span>
+                    : {statuses.WON.count}/{count} ({winPctText})
                   </span>
                 </li>
               );

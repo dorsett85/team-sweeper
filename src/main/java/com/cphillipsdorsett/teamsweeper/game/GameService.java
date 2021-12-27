@@ -44,7 +44,7 @@ public class GameService {
     }
 
     /**
-     * Delete related table records when a session expires
+     * Delete related game table records when a session expires
      *
      * @return number of games that were deleted
      */
