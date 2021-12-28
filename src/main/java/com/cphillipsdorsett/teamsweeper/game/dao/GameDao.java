@@ -29,9 +29,9 @@ public class GameDao implements GameRepository {
                 "INSERT INTO game (difficulty, status, board) " +
                 "VALUES (:difficulty, :status, :board)"
             )
-            .setParameter("difficulty", game.difficulty.name())
-            .setParameter("status", game.status.name())
-            .setParameter("board", game.board)
+            .setParameter("difficulty", game.getDifficulty().name())
+            .setParameter("status", game.getStatus().name())
+            .setParameter("board", game.getBoard())
             .executeUpdate();
         return (Game) em
             .createNativeQuery(
@@ -66,13 +66,18 @@ public class GameDao implements GameRepository {
         em
             .createNativeQuery("" +
                 "UPDATE game g " +
-                "SET g.board = :board, g.status = :status, g.started_at = :startedAt " +
+                "SET" +
+                "    g.board = :board," +
+                "    g.status = :status," +
+                "    g.started_at = :startedAt," +
+                "    g.ended_at = :endedAt " +
                 "WHERE g.id = :gameId"
             )
-            .setParameter("board", game.board)
-            .setParameter("status", game.status.toString())
-            .setParameter("startedAt", game.startedAt)
-            .setParameter("gameId", game.id)
+            .setParameter("board", game.getBoard())
+            .setParameter("status", game.getStatus().toString())
+            .setParameter("startedAt", game.getStartedAt())
+            .setParameter("endedAt", game.getEndedAt())
+            .setParameter("gameId", game.getId())
             .executeUpdate();
     }
 

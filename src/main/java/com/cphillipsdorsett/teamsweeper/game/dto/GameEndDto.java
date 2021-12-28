@@ -6,14 +6,22 @@ import com.cphillipsdorsett.teamsweeper.game.dao.GameStatus;
  * Data sent to the frontend when a game ends
  */
 public class GameEndDto {
-    public GameStatus status;
+    private final GameStatus status;
     /**
      * Amount of time the game lasted (in milliseconds)
      */
-    public long duration;
+    private final long duration;
 
     public GameEndDto(GameStatus status, long duration) {
         this.status = status;
         this.duration = duration;
+    }
+
+    public GameStatus getStatus() {
+        return status;
+    }
+
+    public long getDuration() {
+        return duration;
     }
 }

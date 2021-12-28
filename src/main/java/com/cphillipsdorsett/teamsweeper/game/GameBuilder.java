@@ -20,20 +20,19 @@ public class GameBuilder {
         put(GameDifficulty.M, new BoardConfig(16, 16, 40));
         put(GameDifficulty.H, new BoardConfig(16, 30, 99));
     }};
-
     /**
      * 2d array of surrounding cells starting in top left corner moving
      * clockwise.
      */
     public static final int[][] surroundingCells = {
-        { -1, -1 },
-        { -1, 0},
-        { -1, 1},
-        { 0, 1},
-        { 1, 1},
-        { 1, 0},
-        { 1, -1},
-        { 0, -1},
+        {-1, -1},
+        {-1, 0},
+        {-1, 1},
+        {0, 1},
+        {1, 1},
+        {1, 0},
+        {1, -1},
+        {0, -1},
     };
 
     public GameBuilder(GameDifficulty difficulty) {

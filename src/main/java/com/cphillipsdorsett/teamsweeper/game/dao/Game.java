@@ -9,22 +9,25 @@ import java.time.Instant;
 @DynamicInsert
 public class Game {
     @Id
-    public int id;
+    private int id;
     @Enumerated(EnumType.STRING)
-    public GameDifficulty difficulty;
+    private GameDifficulty difficulty;
     @Enumerated(EnumType.STRING)
-    public GameStatus status = GameStatus.IN_PROGRESS;
+    private GameStatus status = GameStatus.IN_PROGRESS;
     /**
      * JSON string representing a 2 dimensional array of rows and columns that
      * contains cells.
      */
-    public String board;
-    @Column(name = "created_at")
-    public Instant createdAt;
+    private String board;
     @Column(name = "started_at")
-    public Instant startedAt;
+    private Instant startedAt;
+    @Column(name = "ended_at")
+    private Instant endedAt;
+    @Column(name = "created_at")
+    private Instant createdAt;
 
-    protected Game() {}
+    protected Game() {
+    }
 
     public Game(GameDifficulty difficulty, String board) {
         this.difficulty = difficulty;
@@ -59,11 +62,23 @@ public class Game {
         this.board = board;
     }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
     public Instant getStartedAt() {
         return startedAt;
+    }
+
+    public void setStartedAt(Instant startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public Instant getEndedAt() {
+        return endedAt;
+    }
+
+    public void setEndedAt(Instant endedAt) {
+        this.endedAt = endedAt;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 }

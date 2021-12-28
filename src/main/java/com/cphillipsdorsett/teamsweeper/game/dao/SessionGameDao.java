@@ -24,8 +24,8 @@ public class SessionGameDao implements SessionGameRepository {
                 "INSERT INTO session_game (session_id, game_id) " +
                 "VALUES (?, ?);"
             )
-            .setParameter(1, sessionGame.sessionId)
-            .setParameter(2, sessionGame.gameId)
+            .setParameter(1, sessionGame.getSessionId())
+            .setParameter(2, sessionGame.getGameId())
             .executeUpdate();
     }
 

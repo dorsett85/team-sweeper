@@ -7,13 +7,14 @@ import javax.persistence.Id;
 @Entity
 public class SessionGame {
     @Id
-    public int id;
+    private int id;
     @Column(name = "session_id")
-    public String sessionId;
+    private String sessionId;
     @Column(name = "game_id")
-    public int gameId;
+    private int gameId;
 
-    protected SessionGame() {}
+    protected SessionGame() {
+    }
 
     public SessionGame(String sessionId, int gameId) {
         this.sessionId = sessionId;
