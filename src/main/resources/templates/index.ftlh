@@ -9,7 +9,7 @@
     <@commonBody jsSources=[bundleManifest.commonJs, bundleManifest.vendorJs, bundleManifest.homeJs]>
         <nav class="select-game-nav text-center">
             <a href="/game/single-player">Single Player</a>
-            <a href="/game/multi-player">Multi Player</a>
+            <a class="multi-player-link" onclick="alert('Under development')" title="Under development">Multi Player</a>
         </nav>
     </@commonBody>
 </@commonPage>
