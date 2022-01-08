@@ -7,12 +7,22 @@ public class SessionGameStats {
     @Id
     private Long id;
     @Enumerated(EnumType.STRING)
-    public GameDifficulty difficulty;
+    private GameDifficulty difficulty;
     @Enumerated(EnumType.STRING)
-    public GameStatus status;
-    public int count;
+    private GameStatus status;
+    private int count;
+    @Column(name = "fastest_time")
+    private Long fastestTime;
 
-    protected SessionGameStats() {}
+    protected SessionGameStats() {
+    }
+
+    public SessionGameStats(GameDifficulty difficulty, GameStatus status, int count, Long fastestTime) {
+        this.difficulty = difficulty;
+        this.status = status;
+        this.count = count;
+        this.fastestTime = fastestTime;
+    }
 
     public Long getId() {
         return id;
@@ -22,27 +32,15 @@ public class SessionGameStats {
         return difficulty;
     }
 
-    public void setDifficulty(GameDifficulty difficulty) {
-        this.difficulty = difficulty;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public GameStatus getStatus() {
         return status;
-    }
-
-    public void setStatus(GameStatus status) {
-        this.status = status;
     }
 
     public int getCount() {
         return count;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public Long getFastestTime() {
+        return fastestTime;
     }
 }

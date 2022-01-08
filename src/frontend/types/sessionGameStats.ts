@@ -8,7 +8,12 @@ interface CommonStats {
   count: number;
 }
 
-type StatusStats = CommonStats;
+interface StatusStats extends CommonStats {
+  /**
+   * Fastest time from start to end in milliseconds
+   */
+  fastestTime: number | null;
+}
 
 interface DifficultyStats extends CommonStats {
   statuses: Record<GameStatus, StatusStats>;

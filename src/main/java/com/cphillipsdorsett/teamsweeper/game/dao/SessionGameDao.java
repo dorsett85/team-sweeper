@@ -38,7 +38,8 @@ public class SessionGameDao implements SessionGameRepository {
                     "    ROW_NUMBER() OVER ( ORDER BY g.difficulty) id," +
                     "    g.difficulty," +
                     "    g.status," +
-                    "    COUNT(g.status) count " +
+                    "    COUNT(g.status) count," +
+                    "    MIN(TIMESTAMPDIFF(MICROSECOND, g.started_at, g.ended_at) / 1000) as fastest_time " +
                     "FROM session_game sg " +
                     "INNER JOIN game g ON sg.game_id = g.id " +
                     "WHERE sg.session_id = :sessionId " +

@@ -34,10 +34,14 @@ public class SessionGameStatsDto {
     private static Map<String, GameDifficultyStats> generateGameStats(List<SessionGameStats> sessionGameStatsList) {
         Map<String, GameDifficultyStats> baseGamesStats = makeBaseGameStats();
         sessionGameStatsList.forEach(sessionGameStats -> {
-            String difficultyKey = sessionGameStats.difficulty.getValue();
-            GameStatus statusKey = sessionGameStats.status;
-            baseGamesStats.get(difficultyKey).count += sessionGameStats.count;
-            baseGamesStats.get(difficultyKey).statuses.get(statusKey).count += sessionGameStats.count;
+            String difficultyKey = sessionGameStats.getDifficulty().getValue();
+            GameStatus statusKey = sessionGameStats.getStatus();
+
+            // Set values in the baseGamesStats map
+            GameDifficultyStats gameDifficultyStats = baseGamesStats.get(difficultyKey);
+            gameDifficultyStats.count += sessionGameStats.getCount();
+            gameDifficultyStats.statuses.get(statusKey).count = sessionGameStats.getCount();
+            gameDifficultyStats.statuses.get(statusKey).fastestTime = sessionGameStats.getFastestTime();
         });
         return baseGamesStats;
     }
@@ -69,6 +73,10 @@ public class SessionGameStatsDto {
 
     private static class GameStatusStats {
         public int count = 0;
+        /**
+         * Fastest time from start to end in milliseconds
+         */
+        public Long fastestTime;
 
         public GameStatusStats() {
         }

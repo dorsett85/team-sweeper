@@ -4,7 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-@Entity
+@Entity(name = "session_game")
 public class SessionGame {
     @Id
     private int id;
@@ -29,15 +29,7 @@ public class SessionGame {
         return sessionId;
     }
 
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-    }
-
     public int getGameId() {
         return gameId;
-    }
-
-    public void setGameId(int gameId) {
-        this.gameId = gameId;
     }
 }

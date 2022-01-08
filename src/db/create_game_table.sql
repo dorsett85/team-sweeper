@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS game
     --  read/write access from the game.
     board      JSON                                                        NOT NULL,
     -- When the first click occurred
-    started_at TIMESTAMP,
+    started_at TIMESTAMP(3),
     -- When a game is won or lost
-    ended_at   TIMESTAMP,
+    ended_at   TIMESTAMP(3),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP                         NOT NULL
 );
