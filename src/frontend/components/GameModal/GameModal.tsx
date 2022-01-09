@@ -62,7 +62,7 @@ const GameModal: React.FC = () => {
       if (
         gameEnd.status === 'WON' &&
         gameDifficulty === difficultyKey &&
-        (fastestWinTime === null || gameEnd.duration < fastestWinTime)
+        (fastestWinTime === null || gameEnd.duration <= fastestWinTime)
       ) {
         isFastestGame = true;
       }
