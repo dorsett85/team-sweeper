@@ -16,14 +16,14 @@ interface ReadyStateHandlers {
 }
 
 /**
- * Values for the type property when sending socket messages.
+ * Values for the type property when sending socket messages
  */
 export enum SocketMessageSendType {
   UNCOVER_CELL = 'UNCOVER_CELL'
 }
 
 /**
- * Values for the type property when sending socket messages.
+ * Values for the type property when receiving socket messages
  */
 export enum SocketMessageReceiveType {
   START_GAME = 'START_GAME',
@@ -38,7 +38,7 @@ export enum SocketMessageReceiveType {
  */
 interface SocketMessage<TType, TPayload> {
   /**
-   * Type of the message which will be used to dispatch actions on the server
+   * Type of the message which will be used to dispatch actions
    */
   type: TType;
   /**

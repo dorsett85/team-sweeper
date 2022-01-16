@@ -5,6 +5,7 @@ import { GameDifficulty } from '../../types/gamedifficulty';
 import { SessionGameStats } from '../../types/sessionGameStats';
 import { fetchJson } from '../../utils/fetchJson';
 import { useAppSelector } from '../../pages/single-player/singlePlayerStore';
+import { dateToMinutesString, dateToSecondsString } from '../../utils/dateToUnitString';
 
 interface SessionSummaryProps {
   gameEnd: GameEnd;
@@ -52,8 +53,8 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ gameEnd, onProcess
           const fastestTimestamp = fastestWinTime ? new Date(fastestWinTime) : null;
           let fastestTxt = 'NA';
           if (fastestTimestamp) {
-            const fastestMins = fastestTimestamp.getUTCMinutes().toString().padStart(2, '0');
-            const fastestSeconds = fastestTimestamp.getUTCSeconds().toString().padStart(2, '0');
+            const fastestMins = dateToMinutesString(fastestTimestamp);
+            const fastestSeconds = dateToSecondsString(fastestTimestamp);
             fastestTxt = `${fastestMins}:${fastestSeconds}`;
           }
 

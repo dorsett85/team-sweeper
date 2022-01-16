@@ -13,7 +13,7 @@ const SinglePlayer: React.FC = () => {
     <div className={styles[`layout-${difficulty}`]}>
       <GameControl />
       <GameBoard className={styles.gameBoard} />
-      <GameScore />
+      <GameScore className={styles.gameScore} />
       <GameModal />
     </div>
   );
