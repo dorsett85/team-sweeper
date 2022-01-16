@@ -70,6 +70,7 @@ public class GameService {
         // If this is the first click then set a started timestamp
         if (game.getStartedAt() == null) {
             game.setStartedAt(Instant.now());
+            callback.startGame(true);
         }
 
         // Early exit if the game is already over since all the cells have or
@@ -198,6 +199,11 @@ public class GameService {
     }
 
     public interface UncoveredCellMessageCallback {
+        /**
+         * Fired when the first cell is uncovered
+         */
+        void startGame(boolean started) throws IOException;
+
         /**
          * Fired when the cell is uncovered and notifies the frontend that it
          * has been revealed.

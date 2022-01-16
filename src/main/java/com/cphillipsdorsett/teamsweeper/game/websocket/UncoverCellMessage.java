@@ -1,8 +1,7 @@
 package com.cphillipsdorsett.teamsweeper.game.websocket;
 
-public class UncoverCellMessage extends GameMessage<UncoverCellMessage.UncoverCellPayload> {
-    public static GameSocketMessageType TYPE = GameSocketMessageType.UNCOVER_CELL;
-    public UncoverCellPayload payload;
+public class UncoverCellMessage extends GameMessage<GameMessageReceiveType, UncoverCellMessage.UncoverCellPayload> {
+    public static GameMessageReceiveType TYPE = GameMessageReceiveType.UNCOVER_CELL;
 
     public static class UncoverCellPayload {
         public int gameId;

@@ -17,13 +17,13 @@ public class GameSocketHandler extends TextWebSocketHandler {
     private final GameSocketDispatch gameSocketDispatch;
 
     public GameSocketHandler(GameSocketDispatch gameSocketDispatch) {
-     this.gameSocketDispatch = gameSocketDispatch;
+        this.gameSocketDispatch = gameSocketDispatch;
     }
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         JsonNode msgNode = om.readTree(message.getPayload());
-        GameSocketMessageType messageType = GameSocketMessageType.valueOf(msgNode.get("type").asText());
+        GameMessageReceiveType messageType = GameMessageReceiveType.valueOf(msgNode.get("type").asText());
 
         // We'll parse/dispatch the payload property based on the message type
         gameSocketDispatch.dispatchMap

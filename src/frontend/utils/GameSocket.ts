@@ -16,11 +16,17 @@ interface ReadyStateHandlers {
 }
 
 /**
- * Allowed values for the type property when sending/receiving socket messages.
- * If we start having different values between sending and receiving then we can
- * have separate types.
+ * Values for the type property when sending socket messages.
  */
-export enum SocketMessageType {
+export enum SocketMessageSendType {
+  UNCOVER_CELL = 'UNCOVER_CELL'
+}
+
+/**
+ * Values for the type property when sending socket messages.
+ */
+export enum SocketMessageReceiveType {
+  START_GAME = 'START_GAME',
   UNCOVER_CELL = 'UNCOVER_CELL',
   END_GAME = 'END_GAME'
 }
@@ -30,7 +36,7 @@ export enum SocketMessageType {
  * action to dispatch based on the type as well as know what the corresponding
  * payload is.
  */
-interface SocketMessage<TType extends SocketMessageType, TPayload> {
+interface SocketMessage<TType, TPayload> {
   /**
    * Type of the message which will be used to dispatch actions on the server
    */
@@ -41,37 +47,44 @@ interface SocketMessage<TType extends SocketMessageType, TPayload> {
   payload: TPayload;
 }
 
-type SocketSend = SocketMessage<
-  SocketMessageType.UNCOVER_CELL,
+type SocketMessageSend = SocketMessage<
+  SocketMessageSendType.UNCOVER_CELL,
   CellIndexes & { gameId: GameStart['id'] }
 >;
 
 type UncoverCellParam = Pick<Cell, 'rowIdx' | 'colIdx' | 'value'>;
 type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
 
+type StartGameCallback = (startGame: boolean) => void;
+
 type UncoverCellCallback = (value: Cell['value']) => void;
 
 type EndGameCallback = (gameEnd: GameEnd) => void;
 
 interface DispatchMap {
-  [SocketMessageType.UNCOVER_CELL]: (payload: UncoverCellParam) => void;
-  [SocketMessageType.END_GAME]: EndGameCallback;
+  [SocketMessageReceiveType.START_GAME]: (payload: boolean) => void;
+  [SocketMessageReceiveType.UNCOVER_CELL]: (payload: UncoverCellParam) => void;
+  [SocketMessageReceiveType.END_GAME]: EndGameCallback;
 }
 
 export class GameSocket {
-  private sock: WebSocket;
+  private readonly sock: WebSocket;
+  /**
+   * Set of callbacks to fire when the game starts
+   */
+  private readonly onStartGameSet: Set<StartGameCallback> = new Set();
   /**
    * A map where the keys represent the row and column index of a given cell in
    * the format "<ROW_IDX>-<COLUMN_IDX>", and the value is a callback function
    * that is called when the cell is uncovered.
    */
-  private onUncoverCellMap: Record<string, UncoverCellCallback> = {};
+  private readonly onUncoverCellMap: Record<string, UncoverCellCallback> = {};
   /**
-   * Map of callbacks to fire when the game ends
+   * Set of callbacks to fire when the game ends
    */
-  private onEndGameMap: Map<number, EndGameCallback> = new Map();
+  private readonly onEndGameSet: Set<EndGameCallback> = new Set();
   /**
-   * This map will lookup the correct dispatch method to call with the payload
+   * This map will look up the correct dispatch method to call with the payload
    * property as the argument. The lookup is based on the "type" property sent
    * from the server.
    */
@@ -83,8 +96,9 @@ export class GameSocket {
 
     // Instantiate all of our message handlers
     this.dispatchMap = {
-      [SocketMessageType.UNCOVER_CELL]: (payload) => this.handleOnUncoverCell(payload),
-      [SocketMessageType.END_GAME]: (status) => this.handleOnEndGame(status)
+      [SocketMessageReceiveType.START_GAME]: (payload) => this.handleOnStartGame(payload),
+      [SocketMessageReceiveType.UNCOVER_CELL]: (payload) => this.handleOnUncoverCell(payload),
+      [SocketMessageReceiveType.END_GAME]: (status) => this.handleOnEndGame(status)
     };
   }
 
@@ -108,10 +122,10 @@ export class GameSocket {
     this.sock.onmessage = (e) => {
       try {
         // Parse the type and payload properties from the server. The type
-        // property will lookup the correct dispatch method to call with the
+        // property will look up the correct dispatch method to call with the
         // payload property as the argument.
         const { type, payload } = JSON.parse(e.data);
-        this.dispatchMap[type as SocketMessageType](payload);
+        this.dispatchMap[type as SocketMessageReceiveType](payload);
       } catch (e) {
         console.error('Unable to handle the server message: ', e);
       }
@@ -121,20 +135,41 @@ export class GameSocket {
   /**
    * Same as Websocket send method, but serializes to json first
    */
-  public sendMsg(data: SocketSend): void {
+  public sendMsg(data: SocketMessageSend): void {
     this.sock.send(JSON.stringify(data));
   }
 
   /**
-   * Add a callback function to the onUncoverCellMap. This is the uncover cell
-   * event "subscription".
+   * Add a callback to the onStartGame set
+   */
+  public addOnStartGame(callback: StartGameCallback): void {
+    this.onStartGameSet.add(callback);
+  }
+
+  /**
+   * Remove a callback from the onStartGame set
+   */
+  public removeOnStartGame(callback: StartGameCallback): boolean {
+    return this.onStartGameSet.delete(callback);
+  }
+
+  /**
+   * Handler for when the server says the game starts
+   */
+  private handleOnStartGame(startGame: boolean) {
+    this.onStartGameSet.forEach((callback) => callback(startGame));
+  }
+
+  /**
+   * Add a callback to the onUncoverCellMap. This is the uncover cell event
+   * "subscription".
    */
   public addOnUncoverCell({ rowIdx, colIdx }: CellIndexes, callback: UncoverCellCallback): void {
     this.onUncoverCellMap[`${rowIdx}-${colIdx}`] = callback;
   }
 
   /**
-   * Remove the callback function to the onUncoverCellMap
+   * Remove a callback from the onUncoverCellMap
    */
   public removeOnUncoverCell({ rowIdx, colIdx }: CellIndexes): void {
     delete this.onUncoverCellMap[`${rowIdx}-${colIdx}`];
@@ -148,26 +183,23 @@ export class GameSocket {
   }
 
   /**
-   * Add a callback function to be fired when the game ends. Returns the key of
-   * the callback (useful to remove the callback from the end game map).
+   * Add a callback to the onEndGame set
    */
-  public addOnEndGame(callback: (gameEnd: GameEnd) => void): number {
-    const key = this.onEndGameMap.size;
-    this.onEndGameMap.set(key, callback);
-    return key;
+  public addOnEndGame(callback: EndGameCallback): void {
+    this.onEndGameSet.add(callback);
   }
 
   /**
-   * Remove a callback function to be fired when the game ends.
+   * Remove a callback from the onEndGame set
    */
-  public removeOnEndGame(key: number): boolean {
-    return this.onEndGameMap.delete(key);
+  public removeOnEndGame(callback: EndGameCallback): boolean {
+    return this.onEndGameSet.delete(callback);
   }
 
   /**
    * Handler for when the server says the game has either been won or lost
    */
   private handleOnEndGame(gameEnd: GameEnd): void {
-    this.onEndGameMap.forEach((callback) => callback(gameEnd));
+    this.onEndGameSet.forEach((callback) => callback(gameEnd));
   }
 }

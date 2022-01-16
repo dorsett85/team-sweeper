@@ -6,9 +6,13 @@ import { useAppDispatch, useAppSelector } from '../../pages/single-player/single
 import { setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { fetchJson } from '../../utils/fetchJson';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
-import { SocketMessageType } from '../../utils/GameSocket';
+import { SocketMessageSendType } from '../../utils/GameSocket';
 
-const GameBoard: React.FC = () => {
+interface GameBoardProps {
+  className?: string;
+}
+
+const GameBoard: React.FC<GameBoardProps> = ({ className = '' }) => {
   const [game, setGame] = useState<GameStart>();
   const [loadingError, setLoadingError] = useState(false);
   const difficulty = useAppSelector((state) => state.difficulty);
@@ -50,7 +54,7 @@ const GameBoard: React.FC = () => {
             key={`${difficulty}-${r}-${c}`}
             onClick={() => {
               sock.sendMsg({
-                type: SocketMessageType.UNCOVER_CELL,
+                type: SocketMessageSendType.UNCOVER_CELL,
                 payload: { gameId: game.id, rowIdx: r, colIdx: c }
               });
             }}
@@ -64,7 +68,7 @@ const GameBoard: React.FC = () => {
     gameBoard = tempBoard;
   }
 
-  return <div className={styles[`board-${difficulty}`]}>{gameBoard}</div>;
+  return <div className={`${styles[`board-${difficulty}`]} ${className}`}>{gameBoard}</div>;
 };
 
 export default GameBoard;

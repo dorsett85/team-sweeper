@@ -13,12 +13,11 @@ const GameModal: React.FC = () => {
   const { sock } = useGameSocket();
 
   useEffect(() => {
-    const callbackKey = sock.addOnEndGame((gameEnd) => {
-      setGameEnd(gameEnd);
-    });
+    const handleOnEndGame = (gameEnd: GameEnd) => setGameEnd(gameEnd);
+    sock.addOnEndGame(handleOnEndGame);
 
     return () => {
-      sock.removeOnEndGame(callbackKey);
+      sock.removeOnEndGame(handleOnEndGame);
     };
   }, [sock]);
 
