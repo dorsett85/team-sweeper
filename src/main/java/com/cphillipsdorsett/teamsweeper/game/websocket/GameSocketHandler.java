@@ -1,5 +1,6 @@
 package com.cphillipsdorsett.teamsweeper.game.websocket;
 
+import com.cphillipsdorsett.teamsweeper.game.websocket.message.GameReceiveMessageType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -23,11 +24,11 @@ public class GameSocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         JsonNode msgNode = om.readTree(message.getPayload());
-        GameMessageReceiveType messageType = GameMessageReceiveType.valueOf(msgNode.get("type").asText());
+        GameReceiveMessageType messageType = GameReceiveMessageType.valueOf(msgNode.get("type").asText());
 
         // We'll parse/dispatch the payload property based on the message type
         gameSocketDispatch.dispatchMap
             .get(messageType)
-            .call(msgNode, session, sessions);
+            .dispatch(msgNode, session, sessions);
     }
 }

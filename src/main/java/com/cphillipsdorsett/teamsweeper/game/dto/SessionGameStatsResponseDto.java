@@ -9,22 +9,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SessionGameStatsDto {
+public class SessionGameStatsResponseDto {
     /**
      * Aggregate game statistics by difficulty and status
      */
     public final Map<String, GameDifficultyStats> games;
 
-    public SessionGameStatsDto(Map<String, GameDifficultyStats> games) {
+    public SessionGameStatsResponseDto(Map<String, GameDifficultyStats> games) {
         this.games = games;
     }
 
     /**
      * Maps a {@code List<SessionGameStats>} to a {@code SessGameStatsDto}
      */
-    public static SessionGameStatsDto fromSessionGameStatsList(List<SessionGameStats> sessionGameStatsList) {
+    public static SessionGameStatsResponseDto fromSessionGameStatsList(List<SessionGameStats> sessionGameStatsList) {
         Map<String, GameDifficultyStats> gameStats = generateGameStats(sessionGameStatsList);
-        return new SessionGameStatsDto(gameStats);
+        return new SessionGameStatsResponseDto(gameStats);
     }
 
     /**

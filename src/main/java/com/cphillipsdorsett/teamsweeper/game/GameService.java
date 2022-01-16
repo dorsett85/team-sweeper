@@ -1,10 +1,11 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
 import com.cphillipsdorsett.teamsweeper.game.dao.*;
-import com.cphillipsdorsett.teamsweeper.game.dto.GameEndDto;
-import com.cphillipsdorsett.teamsweeper.game.dto.GameStartDto;
-import com.cphillipsdorsett.teamsweeper.game.dto.SessionGameStatsDto;
-import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellMessage.UncoverCellPayload;
+import com.cphillipsdorsett.teamsweeper.game.dto.GameEndResponseDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.GameStartResponseDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.SessionGameStatsResponseDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellRequestDto;
+import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellMessageCallback;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +27,7 @@ public class GameService {
         this.sessionGameDao = sessionGameDao;
     }
 
-    public GameStartDto newGame(String sessionId, GameDifficulty difficulty) throws JsonProcessingException {
+    public GameStartResponseDto newGame(String sessionId, GameDifficulty difficulty) throws JsonProcessingException {
 
         GameBuilder gameBuilder = new GameBuilder(difficulty);
 
@@ -40,7 +41,7 @@ public class GameService {
         SessionGame sessionGame = new SessionGame(sessionId, game.getId());
         sessionGameDao.create(sessionGame);
 
-        return new GameStartDto(game, GameBuilder.getBoardConfig(game.getDifficulty()));
+        return new GameStartResponseDto(game, GameBuilder.getBoardConfig(game.getDifficulty()));
     }
 
     /**
@@ -62,8 +63,8 @@ public class GameService {
      */
     public void uncoverCell(
         String sessionId,
-        UncoverCellPayload payload,
-        UncoveredCellMessageCallback callback
+        UncoverCellRequestDto payload,
+        UncoverCellMessageCallback callback
     ) throws IOException {
         Game game = gameDao.findCurrent(sessionId, payload.gameId);
 
@@ -136,7 +137,7 @@ public class GameService {
         Cell cell,
         Cell[][] board,
         Game game,
-        UncoveredCellMessageCallback callback,
+        UncoverCellMessageCallback callback,
         boolean uncoverAll
     ) throws IOException {
         // Early exit if the cell is already uncovered or if we're not
@@ -155,7 +156,7 @@ public class GameService {
         // the cell has been revealed.
         game.setBoard(om.writeValueAsString(board));
         new Thread(() -> gameDao.update(game)).start();
-        callback.reveal(cell);
+        callback.uncover(cell);
 
         // TODO - if multiplayer
         // Read updated game in case of changes from the other player
@@ -182,37 +183,19 @@ public class GameService {
         }
     }
 
-    public SessionGameStatsDto findSessionGameStats(String sessionId) {
+    public SessionGameStatsResponseDto findSessionGameStats(String sessionId) {
         List<SessionGameStats> sessionGameStatsList = sessionGameDao.findSessionGameStats(sessionId);
-        return SessionGameStatsDto.fromSessionGameStatsList(sessionGameStatsList);
+        return SessionGameStatsResponseDto.fromSessionGameStatsList(sessionGameStatsList);
     }
 
-    private void sendEndGame(Game game, UncoveredCellMessageCallback callback) throws IOException {
+    private void sendEndGame(Game game, UncoverCellMessageCallback callback) throws IOException {
         long duration = Duration.between(game.getStartedAt(), game.getEndedAt()).toMillis();
-        GameEndDto gameEndDto = new GameEndDto(game.getStatus(), duration);
+        GameEndResponseDto gameEndDto = new GameEndResponseDto(game.getStatus(), duration);
         callback.endGame(gameEndDto);
     }
 
     private Cell[][] getDeSerializedBoard(String board) throws JsonProcessingException {
         return om.readValue(board, new TypeReference<>() {
         });
-    }
-
-    public interface UncoveredCellMessageCallback {
-        /**
-         * Fired when the first cell is uncovered
-         */
-        void startGame(boolean started) throws IOException;
-
-        /**
-         * Fired when the cell is uncovered and notifies the frontend that it
-         * has been revealed.
-         */
-        void reveal(Cell cell) throws IOException;
-
-        /**
-         * Notifies the frontend that the game is over (either won or lost)
-         */
-        void endGame(GameEndDto gameEndDto) throws IOException;
     }
 }

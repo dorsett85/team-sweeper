@@ -1,8 +1,7 @@
 package com.cphillipsdorsett.teamsweeper.game.websocket;
 
-import com.cphillipsdorsett.teamsweeper.game.Cell;
 import com.cphillipsdorsett.teamsweeper.game.GameService;
-import com.cphillipsdorsett.teamsweeper.game.dto.GameEndDto;
+import com.cphillipsdorsett.teamsweeper.game.websocket.message.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,7 @@ import java.util.Map;
 public class GameSocketDispatch {
     private final ObjectMapper om = new ObjectMapper();
     private final GameService gameService;
-    public final Map<GameMessageReceiveType, MessageDispatch> dispatchMap;
+    public final Map<GameReceiveMessageType, MessageDispatch> dispatchMap;
 
     public GameSocketDispatch(GameService gameService) {
         this.gameService = gameService;
@@ -26,38 +25,23 @@ public class GameSocketDispatch {
         // This is key. Our socket handler will call the values in this map
         // based on the type property in the json message.
         dispatchMap = new HashMap<>() {{
-            put(UncoverCellMessage.TYPE, (node, session, sessions) -> uncoverCell(node, session));
+            put(UncoverCellReceiveMessage.TYPE, (node, session, sessions) -> uncoverCell(node, session));
         }};
     }
 
     public void uncoverCell(JsonNode node, WebSocketSession session) throws IOException {
-        UncoverCellMessage msg = om.treeToValue(node, UncoverCellMessage.class);
+        UncoverCellReceiveMessage msg = om.treeToValue(node, UncoverCellReceiveMessage.class);
         String sessionId = (String) session.getAttributes().get("sessionId");
 
-        gameService.uncoverCell(sessionId, msg.getPayload(), new GameService.UncoveredCellMessageCallback() {
-            @Override
-            public void startGame(boolean started) throws IOException {
-                sendMessage(GameMessageSendType.START_GAME, started, session);
-            }
-
-            @Override
-            public void reveal(Cell cell) throws IOException {
-                sendMessage(GameMessageSendType.UNCOVER_CELL, cell, session);
-            }
-
-            @Override
-            public void endGame(GameEndDto gameEndDto) throws IOException {
-                sendMessage(GameMessageSendType.END_GAME, gameEndDto, session);
-            }
-        });
+        SendableMessage sm = (gameSendMessage) -> sendMessage(gameSendMessage, session);
+        gameService.uncoverCell(sessionId, msg.getPayload(), new UncoverCellMessageCallback(sm));
     }
 
     /**
      * Send a socket message to the client with "type" and "payload" properties
      */
-    private <P> void sendMessage(GameMessageSendType type, P payload, WebSocketSession session) throws IOException {
-        GameMessage<GameMessageSendType, P> gameMessage = new GameMessageSend<>(type, payload);
-        TextMessage textMessage = new TextMessage(om.writeValueAsString(gameMessage));
+    private void sendMessage(GameSendMessage gameSendMessage, WebSocketSession session) throws IOException {
+        TextMessage textMessage = new TextMessage(om.writeValueAsString(gameSendMessage));
         session.sendMessage(textMessage);
     }
 
@@ -65,6 +49,6 @@ public class GameSocketDispatch {
      * Lambda expression as our dispatch map value
      */
     interface MessageDispatch {
-        void call(JsonNode node, WebSocketSession session, ArrayList<WebSocketSession> sessions) throws IOException;
+        void dispatch(JsonNode node, WebSocketSession session, ArrayList<WebSocketSession> sessions) throws IOException;
     }
 }

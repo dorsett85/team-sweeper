@@ -6,14 +6,14 @@ import com.cphillipsdorsett.teamsweeper.game.dao.Game;
 /**
  * Data sent to the frontend when a new game starts
  */
-public class GameStartDto {
+public class GameStartResponseDto {
     private final int id;
     private final String difficulty;
     private final int rows;
     private final int cols;
     private final int mines;
 
-    public GameStartDto(Game game, BoardConfig boardConfig) {
+    public GameStartResponseDto(Game game, BoardConfig boardConfig) {
         this.id = game.getId();
         this.difficulty = game.getDifficulty().getValue();
         this.rows = boardConfig.rows;

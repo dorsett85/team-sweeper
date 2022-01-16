@@ -3,7 +3,7 @@ package com.cphillipsdorsett.teamsweeper.game;
 import com.cphillipsdorsett.teamsweeper.BundleManifest;
 
 import com.cphillipsdorsett.teamsweeper.game.dao.GameDifficulty;
-import com.cphillipsdorsett.teamsweeper.game.dto.GameStartDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.GameStartResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +32,7 @@ public class GameController {
     }
 
     @GetMapping("/new-game")
-    public ResponseEntity<GameStartDto> newGame(
+    public ResponseEntity<GameStartResponseDto> newGame(
         @RequestParam(value = "difficulty", defaultValue = "e") String difficulty,
         HttpSession session
     ) throws JsonProcessingException {
@@ -41,7 +41,7 @@ public class GameController {
             .getNameByValue(difficulty)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "difficulty param must be (e|m|h)"));
 
-        GameStartDto gameStartDto = gameService.newGame(session.getId(), gameDifficulty);
+        GameStartResponseDto gameStartDto = gameService.newGame(session.getId(), gameDifficulty);
 
         return ResponseEntity.ok(gameStartDto);
     }
