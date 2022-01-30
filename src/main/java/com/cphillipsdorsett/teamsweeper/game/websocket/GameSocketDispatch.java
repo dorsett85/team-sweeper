@@ -1,7 +1,9 @@
 package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 import com.cphillipsdorsett.teamsweeper.game.GameService;
-import com.cphillipsdorsett.teamsweeper.game.websocket.message.*;
+import com.cphillipsdorsett.teamsweeper.game.websocket.message.GameReceiveMessageType;
+import com.cphillipsdorsett.teamsweeper.game.websocket.message.GameSendMessage;
+import com.cphillipsdorsett.teamsweeper.game.websocket.message.UncoverCellReceiveMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -34,7 +36,7 @@ public class GameSocketDispatch {
         String sessionId = (String) session.getAttributes().get("sessionId");
 
         SendableMessage sm = (gameSendMessage) -> sendMessage(gameSendMessage, session);
-        gameService.uncoverCell(sessionId, msg.getPayload(), new UncoverCellMessageCallback(sm));
+        gameService.uncoverCell(sessionId, msg.getPayload(), new UncoverCellHandler(sm));
     }
 
     /**

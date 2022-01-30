@@ -9,35 +9,34 @@ import com.cphillipsdorsett.teamsweeper.game.websocket.message.UncoverCellSendMe
 import java.io.IOException;
 
 /**
- * Contains callback methods to send messages to the client while a cell is
- * being uncovered.
+ * Contains methods to call while a cell is being uncovered
  */
-public class UncoverCellMessageCallback {
+public class UncoverCellHandler {
     private final SendableMessage sm;
 
-    public UncoverCellMessageCallback(SendableMessage sm) {
+    public UncoverCellHandler(SendableMessage sm) {
         this.sm = sm;
     }
 
     /**
-     * Fired when the first cell is uncovered
+     * Fired when the game starts
      */
-    public void startGame(boolean started) throws IOException {
+    public void onStartGame(boolean started) throws IOException {
         sm.send(new StartGameSendMessage(started));
     }
 
     /**
-     * Fired when the cell is uncovered and notifies the frontend that it
+     * Fired when a cell is uncovered and notifies the frontend that it
      * has been revealed.
      */
-    public void uncover(Cell cell) throws IOException {
+    public void onUncover(Cell cell) throws IOException {
         sm.send(new UncoverCellSendMessage(cell));
     }
 
     /**
-     * Notifies the frontend that the game is over (either won or lost)
+     * Fired when the game is over (either won or lost)
      */
-    public void endGame(GameEndResponseDto gameEndDto) throws IOException {
+    public void onEndGame(GameEndResponseDto gameEndDto) throws IOException {
         sm.send(new EndGameSendMessage(gameEndDto));
     }
 }

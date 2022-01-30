@@ -5,7 +5,7 @@ import com.cphillipsdorsett.teamsweeper.game.dto.GameEndResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.GameStartResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.SessionGameStatsResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellRequestDto;
-import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellMessageCallback;
+import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,14 +64,14 @@ public class GameService {
     public void uncoverCell(
         String sessionId,
         UncoverCellRequestDto payload,
-        UncoverCellMessageCallback callback
+        UncoverCellHandler handler
     ) throws IOException {
         Game game = gameDao.findCurrent(sessionId, payload.gameId);
 
         // If this is the first click then set a started timestamp
         if (game.getStartedAt() == null) {
             game.setStartedAt(Instant.now());
-            callback.startGame(true);
+            handler.onStartGame(true);
         }
 
         // Early exit if the game is already over since all the cells have or
@@ -90,13 +90,13 @@ public class GameService {
         if (uncoveredCell.value.equals("x")) {
             game.setStatus(GameStatus.LOST);
             game.setEndedAt(Instant.now());
-            uncoverCellCascade(uncoveredCell, board, game, callback, true);
-            sendEndGame(game, callback);
+            uncoverCellCascade(uncoveredCell, board, game, handler, true);
+            sendEndGame(game, handler);
             return;
         }
 
         // Mine was not clicked and the game is still in progress
-        uncoverCellCascade(uncoveredCell, board, game, callback, false);
+        uncoverCellCascade(uncoveredCell, board, game, handler, false);
 
         // Once the cell cascade has finished, we'll check to see if the game
         // has been won.
@@ -119,8 +119,8 @@ public class GameService {
                     game.setStatus(GameStatus.WON);
                     game.setEndedAt(Instant.now());
                     gameDao.update(game);
-                    uncoverCellCascade(cell, board, game, callback, true);
-                    sendEndGame(game, callback);
+                    uncoverCellCascade(cell, board, game, handler, true);
+                    sendEndGame(game, handler);
                 }
             }
         }
@@ -137,7 +137,7 @@ public class GameService {
         Cell cell,
         Cell[][] board,
         Game game,
-        UncoverCellMessageCallback callback,
+        UncoverCellHandler handler,
         boolean uncoverAll
     ) throws IOException {
         // Early exit if the cell is already uncovered or if we're not
@@ -156,7 +156,7 @@ public class GameService {
         // the cell has been revealed.
         game.setBoard(om.writeValueAsString(board));
         new Thread(() -> gameDao.update(game)).start();
-        callback.uncover(cell);
+        handler.onUncover(cell);
 
         // TODO - if multiplayer
         // Read updated game in case of changes from the other player
@@ -175,7 +175,7 @@ public class GameService {
                         board[rIdx][cIdx],
                         board,
                         game,
-                        callback,
+                        handler,
                         uncoverAll
                     );
                 }
@@ -188,10 +188,10 @@ public class GameService {
         return SessionGameStatsResponseDto.fromSessionGameStatsList(sessionGameStatsList);
     }
 
-    private void sendEndGame(Game game, UncoverCellMessageCallback callback) throws IOException {
+    private void sendEndGame(Game game, UncoverCellHandler callback) throws IOException {
         long duration = Duration.between(game.getStartedAt(), game.getEndedAt()).toMillis();
         GameEndResponseDto gameEndDto = new GameEndResponseDto(game.getStatus(), duration);
-        callback.endGame(gameEndDto);
+        callback.onEndGame(gameEndDto);
     }
 
     private Cell[][] getDeSerializedBoard(String board) throws JsonProcessingException {
