@@ -5,7 +5,6 @@ import com.cphillipsdorsett.teamsweeper.game.dto.GameEndResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.GameStartResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.SessionGameStatsResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellRequestDto;
-import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

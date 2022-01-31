@@ -7,6 +7,6 @@ import java.io.IOException;
 /**
  * Callback method to prepare and send messages to the client
  */
-interface SendableMessage {
+public interface SendableMessage {
     void send(GameSendMessage message) throws IOException;
 }

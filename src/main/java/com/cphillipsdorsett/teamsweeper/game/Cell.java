@@ -17,17 +17,18 @@ public class Cell {
     @NonNull
     public String value = "0";
     /**
-     * Whether or not the cell is covered
+     * Whether the cell is covered
      */
     public boolean covered = true;
     /**
-     * Whether or not the cell has been checked to uncover. This is important
-     * when a user loses/wins the game and we uncover all of the remaining,
-     * but don't want infinite recursion.
+     * Whether the cell has been checked to uncover. This is important when a
+     * user loses/wins the game and we uncover all the remaining cells, but
+     * don't want infinite recursion.
      */
     public boolean checked = false;
 
-    public Cell() {}
+    public Cell() {
+    }
 
     public Cell(int rIdx, int cIdx) {
         this.rowIdx = rIdx;
