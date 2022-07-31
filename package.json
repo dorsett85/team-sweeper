@@ -21,6 +21,7 @@
     "@types/mini-css-extract-plugin": "^2.4.0",
     "@types/react": "^17.0.38",
     "@types/react-dom": "^17.0.11",
+    "@types/react-redux": "^7.1.24",
     "@types/webpack": "^5.28.0",
     "@types/webpack-dev-server": "^4.5.0",
     "@types/webpack-manifest-plugin": "^3.0.5",
@@ -47,5 +48,6 @@
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.7.1",
     "webpack-manifest-plugin": "^4.0.2"
-  }
+  },
+  "packageManager": "yarn@3.2.2"
 }

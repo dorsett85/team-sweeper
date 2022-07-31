@@ -1,5 +1,8 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
+/**
+ * Basic configuration of the game board
+ */
 public class BoardConfig {
     public int rows;
     public int cols;
