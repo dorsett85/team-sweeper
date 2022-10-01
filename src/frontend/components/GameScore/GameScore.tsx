@@ -43,6 +43,9 @@ const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
     return () => {
       sock.removeOnStartGame(handleOnStartGame);
       sock.removeOnEndGame(handleOnEndGame);
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
     };
   }, [sock]);
 
