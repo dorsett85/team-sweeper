@@ -7,20 +7,29 @@ import ModalTitle from '../Modal/ModalTitle';
 import styles from './GameSocketNotOpen.module.less';
 import buttonStyles from '../../styles/button.module.less';
 
-interface GameSocketNotOpenProps {
+interface GameSocketNotOpenProps extends Pick<CloseEvent, 'reason'> {
   readyState: ReadyState;
+  /**
+   * Callback when an attempt to reestablish a websocket connection is made
+   */
   onReconnectClick: () => void;
 }
 
 const MODAL_HEADING_ID = 'websocket-modal-heading';
 
-const GameSocketNotOpen: React.FC<GameSocketNotOpenProps> = ({ readyState, onReconnectClick }) => {
+const GameSocketNotOpen: React.FC<GameSocketNotOpenProps> = ({
+  readyState,
+  onReconnectClick,
+  reason
+}) => {
   const dispatch = useAppDispatch();
 
   const handleOnReconnectClick = () => {
     dispatch(setIsLoading(true));
     onReconnectClick();
   };
+
+  const message = reason || 'You may have been idle for too long or the server disconnected';
 
   return (
     <Modal
@@ -31,7 +40,7 @@ const GameSocketNotOpen: React.FC<GameSocketNotOpenProps> = ({ readyState, onRec
     >
       <ModalTitle id={MODAL_HEADING_ID} title='Connection lost!' />
       <section className={styles.modalContentSection}>
-        <p>You may have been idle for too long or the server disconnected</p>
+        <p>{message}</p>
         <div className='text-center'>
           <button className={buttonStyles.baseButton} onClick={handleOnReconnectClick}>
             Restart connection

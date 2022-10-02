@@ -10,8 +10,12 @@ renderReactDom(
   <Provider store={singlePlayerStore}>
     <GameSocketProvider
       url='ws://localhost:8080/game/publish'
-      renderGameSocketNotOpen={(readyState, connectToGameSocket) => (
-        <GameSocketNotOpen readyState={readyState} onReconnectClick={connectToGameSocket} />
+      renderGameSocketNotOpen={({ readyState, onSocketConnect, reason }) => (
+        <GameSocketNotOpen
+          readyState={readyState}
+          onReconnectClick={onSocketConnect}
+          reason={reason}
+        />
       )}
     >
       <SinglePlayer />

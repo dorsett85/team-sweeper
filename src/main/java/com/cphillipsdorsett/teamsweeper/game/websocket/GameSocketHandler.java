@@ -29,7 +29,18 @@ public class GameSocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         JsonNode msgNode = om.readTree(message.getPayload());
-        GameReceiveMessageType messageType = GameReceiveMessageType.valueOf(msgNode.get("type").asText());
+
+        // Attempt to get the type value (key on the dispatch map)
+        GameReceiveMessageType messageType;
+        try {
+            messageType = GameReceiveMessageType.valueOf(msgNode.get("type").asText());
+        } catch (Exception e) {
+            String errMsg = "Type field not found on message";
+            logger.error(errMsg, e);
+            String reason = errMsg + ": " + e.getMessage();
+            session.close(CloseStatus.BAD_DATA.withReason(reason));
+            return;
+        }
 
         // We'll dispatch the payload property based on the message type
         try {
