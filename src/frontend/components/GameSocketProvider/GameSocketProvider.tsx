@@ -1,13 +1,26 @@
-import React, { createContext, useMemo, useState } from 'react';
+import React, { createContext, useState } from 'react';
 import { GameSocket } from '../../utils/GameSocket';
-import styles from './GameSocketProvider.module.less';
+
+export type ReadyState = 'CONNECTING' | 'OPEN' | 'CLOSED';
 
 interface GameSocketState {
   sock: GameSocket;
+}
+
+interface GameSocketProviderProps {
   /**
-   * State of the websocket connection
+   * Url for the websocket connection
    */
-  readyState: 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
+  url: string;
+
+  /**
+   * Returns a jsx element to be rendered when the websocket is not open. This
+   * has a function parameter that will attempt to establish a new connection.
+   */
+  renderGameSocketNotOpen(
+    readyState: ReadyState,
+    onConnectToGameSocket: () => void
+  ): React.ReactElement;
 }
 
 const GameSocketContext = createContext<GameSocketState | undefined>(undefined);
@@ -20,28 +33,35 @@ export const useGameSocket = (): GameSocketState => {
   return context;
 };
 
-const GameSocketProvider: React.FC = ({ children }) => {
-  const [readyState, setReadyState] = useState<GameSocketState['readyState']>('CONNECTING');
-  const sock = useMemo(
-    () =>
-      new GameSocket('ws://localhost:8080/game/publish', {
-        onOpen: () => setReadyState('OPEN'),
-        onError: () => setReadyState('CLOSED'),
-        onClose: () => setReadyState('CLOSED')
-      }),
-    []
-  );
+const GameSocketProvider: React.FC<GameSocketProviderProps> = ({
+  url,
+  renderGameSocketNotOpen,
+  children
+}) => {
+  const [readyState, setReadyState] = useState<ReadyState>('CONNECTING');
+  const connectToGameSocket = () =>
+    new GameSocket(url, {
+      onOpen: () => setReadyState('OPEN'),
+      onError: (e) => {
+        console.error(e);
+        setReadyState('CLOSED');
+      },
+      onClose: (e) => {
+        console.warn('websocket closed:', e);
+        setReadyState('CLOSED');
+      }
+    });
+  const [sock, setSock] = useState<GameSocket>(() => connectToGameSocket());
+
+  const handleOnConnectToGameSocket = () => {
+    setSock(connectToGameSocket());
+  };
 
   return (
-    <GameSocketContext.Provider value={{ readyState, sock }}>
-      {readyState === 'OPEN' ? (
-        children
-      ) : readyState === 'CLOSED' ? (
-        <div className={styles.socketClosed} role='alert'>
-          <p>WEBSOCKET CONNECTION IS CLOSED</p>
-          <p>TRY REFRESHING THE PAGE</p>
-        </div>
-      ) : null}
+    <GameSocketContext.Provider value={{ sock }}>
+      {readyState === 'OPEN'
+        ? children
+        : renderGameSocketNotOpen(readyState, handleOnConnectToGameSocket)}
     </GameSocketContext.Provider>
   );
 };

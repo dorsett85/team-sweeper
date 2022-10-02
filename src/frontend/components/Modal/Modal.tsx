@@ -5,7 +5,7 @@ import styles from './Modal.module.less';
 interface ModalProps
   extends Pick<React.HTMLAttributes<HTMLDivElement>, 'aria-labelledby' | 'aria-describedby'> {
   /**
-   * Whether or not the modal is open
+   * Whether the modal is open
    */
   open: boolean;
   /**
@@ -13,7 +13,7 @@ interface ModalProps
    */
   onClose: () => void;
   /**
-   * Whether or not to show the close button
+   * Whether to show the close button
    */
   showCloseButton?: boolean;
   /**
@@ -30,7 +30,7 @@ const Modal: React.FC<ModalProps> = ({
   dialogClassName,
   ...rest
 }) => {
-  const backdropRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     // Map of key down listeners

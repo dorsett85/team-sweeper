@@ -4,9 +4,16 @@ import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 import styles from './GameModal.module.less';
 import { GameEnd } from '../../types/game';
 import GameModalContent from './GameModalContent';
-import GameModalTitle from './GameModalTitle';
+import ModalTitle from '../Modal/ModalTitle';
+import { GameStatus } from '../../types/gameStatus';
 
 const HEADING_ID = 'game-modal-heading';
+
+const statusTextMap: Record<GameStatus, string> = {
+  IN_PROGRESS: 'in-progress',
+  WON: 'won',
+  LOST: 'lost'
+};
 
 const GameModal: React.FC = () => {
   const [gameEnd, setGameEnd] = useState<GameEnd>();
@@ -30,8 +37,7 @@ const GameModal: React.FC = () => {
     >
       {gameEnd && (
         <>
-          <GameModalTitle id={HEADING_ID} gameEnd={gameEnd} />
-          <hr />
+          <ModalTitle id={HEADING_ID} title={`You ${statusTextMap[gameEnd.status]}!`} />
           <GameModalContent gameEnd={gameEnd} />
         </>
       )}

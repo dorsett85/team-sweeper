@@ -24,9 +24,10 @@ public class GameSocketInterceptor implements HandshakeInterceptor {
         if (request instanceof ServletServerHttpRequest) {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
 
-            // Always create a new session for the app to use
+            // Always create a new http session for the app to use. This is NOT
+            // the same as the websocket session id!
             HttpSession session = servletRequest.getServletRequest().getSession(true);
-            attributes.put("sessionId", session.getId());
+            attributes.put("httpSessionId", session.getId());
             return true;
         }
         // This should never happen coming from the client side

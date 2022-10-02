@@ -23,8 +23,12 @@ public class WebSessionListener implements HttpSessionListener {
 
     @Override
     public void sessionDestroyed(HttpSessionEvent sessionEvent) {
-        String sessionId = sessionEvent.getSession().getId();
-        int countDeleted = gameService.deleteExpiredSessionGames(sessionId);
-        logger.info("Expired session games deleted: {}", countDeleted);
+        try {
+            String sessionId = sessionEvent.getSession().getId();
+            int countDeleted = gameService.deleteExpiredSessionGames(sessionId);
+            logger.info("Expired session games deleted: {}", countDeleted);
+        } catch (Exception e) {
+            logger.error("Error deleting expired session games", e);
+        }
     }
 }

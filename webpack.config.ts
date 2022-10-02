@@ -1,5 +1,4 @@
 import path from 'path';
-import webpack from 'webpack';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import ESLintPlugin from 'eslint-webpack-plugin';
 import { WebpackManifestPlugin } from 'webpack-manifest-plugin';
@@ -10,7 +9,6 @@ const OUTPUT_PATH = path.join(__dirname, 'src/main/resources/static/bundles');
 
 const plugins = [
   new ForkTsCheckerWebpackPlugin(),
-  new webpack.HotModuleReplacementPlugin(),
   new ESLintPlugin({ extensions: ['js', 'jsx', 'ts', 'tsx'] }),
   new WebpackManifestPlugin({
     // Only return the basename for the keys with the preceding path

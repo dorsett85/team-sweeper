@@ -1,5 +1,6 @@
 import React, { FormEventHandler } from 'react';
 import styles from './GameControl.module.less';
+import buttonStyles from '../../styles/button.module.less';
 import {
   SinglePlayerState,
   setDifficulty,
@@ -50,7 +51,7 @@ const GameControl: React.FC = () => {
         </select>
         <span className={styles.dropdownIcon}>▼</span>
       </div>
-      <button onClick={handleOnResetClick} className={styles.gameControlResetBtn}>
+      <button onClick={handleOnResetClick} className={buttonStyles.baseButton}>
         Reset Game
       </button>
     </div>

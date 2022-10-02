@@ -1,26 +1,13 @@
+@import (reference) "../../styles/button.module.less";
+
 .gameControlContainer {
   display: flex;
   justify-content: space-around;
 }
 
-.gameControl {
-  font-weight: bold;
-  padding: 8px;
-  border: none;
-  border-radius: 5px;
-  background-color: rgb(239, 239, 239);
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.gameControlHover() {
-  &:hover {
-    background-color: lightgrey;
-  }
-}
-
 .gameControlSelectWrapper {
   position: relative;
+
   .dropdownIcon {
     position: absolute;
     top: 50%;
@@ -31,16 +18,11 @@
 }
 
 .gameControlDifficultySelect {
-  &:extend(.gameControl);
-  .gameControlHover();
+  &:extend(.baseButton);
   appearance: none;
   min-width: 88px;
+
   option {
     background-color: rgb(239, 239, 239);
   }
-}
-
-.gameControlResetBtn {
-  &:extend(.gameControl);
-  .gameControlHover();
 }
