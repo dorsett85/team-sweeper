@@ -12,7 +12,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,14 +26,14 @@ public class GameSocketDispatch {
 
         // This is key. Our socket handler will call the values in this map
         // based on the type property in the json message.
-        dispatchMap = new HashMap<>() {{
-            put(UncoverCellReceiveMessage.TYPE, (node, session, sessions) -> uncoverCell(node, session));
+        this.dispatchMap = new HashMap<>() {{
+            put(UncoverCellReceiveMessage.TYPE, (node, session) -> uncoverCell(node, session));
         }};
     }
 
     public void uncoverCell(JsonNode node, WebSocketSession session) throws IOException {
         UncoverCellReceiveMessage msg = om.treeToValue(node, UncoverCellReceiveMessage.class);
-        String sessionId = (String) session.getAttributes().get("httpSessionId");
+        String sessionId = GameSocketUtil.getHttpSessionId(session);
 
         SendableMessage sm = (gameSendMessage) -> sendMessage(gameSendMessage, session);
         gameService.uncoverCell(sessionId, msg.getPayload(), new UncoverCellSinglePlayerHandler(sm));
@@ -52,6 +51,6 @@ public class GameSocketDispatch {
      * Lambda expression as our dispatch map value
      */
     interface MessageDispatch {
-        void dispatch(JsonNode node, WebSocketSession session, ArrayList<WebSocketSession> sessions) throws IOException;
+        void dispatch(JsonNode node, WebSocketSession session) throws IOException;
     }
 }

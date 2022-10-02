@@ -13,17 +13,17 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 @Component
 public class GameSocketHandler extends TextWebSocketHandler {
     private final Logger logger = LogManager.getLogger(GameSocketHandler.class);
-    private final ArrayList<WebSocketSession> sessions = new ArrayList<>();
     private final ObjectMapper om = new ObjectMapper();
     private final GameSocketDispatch gameSocketDispatch;
+    private final GameSocketSessionManager gameSocketSessionManager;
 
-    public GameSocketHandler(GameSocketDispatch gameSocketDispatch) {
+    public GameSocketHandler(GameSocketDispatch gameSocketDispatch, GameSocketSessionManager gameSocketSessionManager) {
         this.gameSocketDispatch = gameSocketDispatch;
+        this.gameSocketSessionManager = gameSocketSessionManager;
     }
 
     @Override
@@ -31,11 +31,11 @@ public class GameSocketHandler extends TextWebSocketHandler {
         JsonNode msgNode = om.readTree(message.getPayload());
         GameReceiveMessageType messageType = GameReceiveMessageType.valueOf(msgNode.get("type").asText());
 
-        // We'll parse/dispatch the payload property based on the message type
+        // We'll dispatch the payload property based on the message type
         try {
             gameSocketDispatch.dispatchMap
                 .get(messageType)
-                .dispatch(msgNode, session, sessions);
+                .dispatch(msgNode, session);
         } catch (Exception e) {
             String errMsg = "An error occurred handling your message";
             logger.error(errMsg, e);
@@ -46,11 +46,13 @@ public class GameSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        sessions.add(session);
+        String key = GameSocketUtil.getHttpSessionId(session);
+        gameSocketSessionManager.putByHttpSessionId(key, session);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        sessions.remove(session);
+        String key = GameSocketUtil.getHttpSessionId(session);
+        gameSocketSessionManager.removeByHttpSessionId(key);
     }
 }
