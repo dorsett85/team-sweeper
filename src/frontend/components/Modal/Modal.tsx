@@ -27,7 +27,7 @@ const Modal: React.FC<ModalProps> = ({
   onClose,
   showCloseButton = true,
   children,
-  dialogClassName,
+  dialogClassName = '',
   ...rest
 }) => {
   const backdropRef = useRef<HTMLDivElement | null>(null);
@@ -97,7 +97,7 @@ const Modal: React.FC<ModalProps> = ({
     <div ref={backdropRef} onClick={handleOnBackdropClick} className={styles.modalBackdrop}>
       <div
         role='dialog'
-        className={`${styles.modal} ${dialogClassName || ''}`}
+        className={`${styles.modal} ${dialogClassName}`}
         aria-labelledby={rest['aria-labelledby']}
         aria-describedby={rest['aria-describedby']}
         aria-modal

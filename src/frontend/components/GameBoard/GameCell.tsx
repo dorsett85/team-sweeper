@@ -2,16 +2,15 @@ import React, { memo, useEffect, useRef, useState } from 'react';
 import styles from './GameCell.module.less';
 import { Cell, GameStart } from '../../types/game';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
+import { SocketMessageSendType } from '../../utils/GameSocket';
+import GameCellOuter from './GameCellOuter';
 
 interface GameCellProps extends Pick<Cell, 'rowIdx' | 'colIdx'> {
   difficulty: GameStart['difficulty'];
-  /**
-   * Callback fired when the coveredCell button is clicked
-   */
-  onClick: () => void;
+  gameId: GameStart['id'];
 }
 
-const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx }) => {
+const GameCell: React.FC<GameCellProps> = ({ difficulty, gameId, rowIdx, colIdx }) => {
   const [value, setValue] = useState<Cell['value']>();
   const { sock } = useGameSocket();
   const coveredCellRef = useRef<HTMLButtonElement | null>(null);
@@ -62,14 +61,17 @@ const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx
   const handleOnCoveredCellClick = () => {
     // Leaving this as a separate handler for now, may add more behavior here
     isCellClicked.current = true;
-    onClick();
+    sock.sendMsg({
+      type: SocketMessageSendType.UNCOVER_CELL,
+      payload: { gameId, rowIdx, colIdx }
+    });
   };
 
   const isMine = value === 'x';
   const isClicked = isCellClicked.current;
 
   return (
-    <div className={styles[`cellContainer-${difficulty}`]}>
+    <GameCellOuter difficulty={difficulty}>
       <button
         ref={coveredCellRef}
         className={`${styles.coveredCell} ${value ? styles.coveredCellRemoved : ''}`}
@@ -87,7 +89,7 @@ const GameCell: React.FC<GameCellProps> = ({ onClick, difficulty, rowIdx, colIdx
           </div>
         )}
       </div>
-    </div>
+    </GameCellOuter>
   );
 };
 

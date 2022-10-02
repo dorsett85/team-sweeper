@@ -1,7 +1,7 @@
 @import (reference) '../../styles/variables.less';
 
 each(@difficulty, {
-  .cellContainer-@{value} {
+  .cellOuter-@{value} {
     display: flex;
     flex-basis: calc(100% / extract(@difficultyRowCells, @index));
     position: relative;
@@ -30,6 +30,7 @@ each(@difficulty, {
   transform: scale(1);
   transform-origin: bottom;
   transition: transform 0.5s, border-radius 0.5s, opacity 0.5s;
+
   &:hover {
     background-color: rgb(66, 66, 66);
   }
@@ -82,7 +83,13 @@ each(@colors, {
 }
 
 @keyframes grow {
-  0% { transform: scale(1, 1); }
-  50% { transform: scale(1.5, 1.5); }
-  100% { transform: scale(1, 1); }
+  0% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.5, 1.5);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
 }

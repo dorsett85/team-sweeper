@@ -16,10 +16,10 @@ interface GameModalTitleProps {
   className?: string;
 }
 
-const ModalTitle: React.FC<GameModalTitleProps> = ({ id, title, className }) => {
+const ModalTitle: React.FC<GameModalTitleProps> = ({ id, title, className = '' }) => {
   return (
     <>
-      <h2 id={id} className={`${styles.modalHeading} ${className || ''}`}>
+      <h2 id={id} className={`${styles.modalHeading} ${className}`}>
         {title}
       </h2>
       <hr />

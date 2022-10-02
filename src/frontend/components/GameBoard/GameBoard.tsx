@@ -5,8 +5,6 @@ import GameCell from './GameCell';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { fetchJson } from '../../utils/fetchJson';
-import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
-import { SocketMessageSendType } from '../../utils/GameSocket';
 
 interface GameBoardProps {
   className?: string;
@@ -18,7 +16,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ className = '' }) => {
   const difficulty = useAppSelector((state) => state.difficulty);
   const isLoading = useAppSelector((state) => state.isLoading);
   const dispatch = useAppDispatch();
-  const { sock } = useGameSocket();
 
   // We'll refetch a new board whenever the difficulty or loading state changes,
   // which will occur on any page refresh or game control change.
@@ -51,14 +48,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ className = '' }) => {
       for (let c = 0; c < game.cols; c++) {
         tempBoard.push(
           <GameCell
-            key={`${difficulty}-${r}-${c}`}
-            onClick={() => {
-              sock.sendMsg({
-                type: SocketMessageSendType.UNCOVER_CELL,
-                payload: { gameId: game.id, rowIdx: r, colIdx: c }
-              });
-            }}
-            difficulty={difficulty}
+            key={`${game.difficulty}-${r}-${c}`}
+            gameId={game.id}
+            difficulty={game.difficulty}
             rowIdx={r}
             colIdx={c}
           />
