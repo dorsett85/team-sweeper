@@ -2,7 +2,6 @@ import React, { memo, useEffect, useRef, useState } from 'react';
 import styles from './GameCell.module.less';
 import { Cell, GameStart } from '../../types/game';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
-import { SocketMessageSendType } from '../../utils/GameSocket';
 import GameCellOuter from './GameCellOuter';
 
 interface GameCellProps extends Pick<Cell, 'rowIdx' | 'colIdx'> {
@@ -62,7 +61,7 @@ const GameCell: React.FC<GameCellProps> = ({ difficulty, gameId, rowIdx, colIdx 
     // Leaving this as a separate handler for now, may add more behavior here
     isCellClicked.current = true;
     sock.sendMsg({
-      type: SocketMessageSendType.UNCOVER_CELL,
+      type: 'UNCOVER_CELL',
       payload: { gameId, rowIdx, colIdx }
     });
   };

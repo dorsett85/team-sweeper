@@ -18,25 +18,21 @@ interface ReadyStateHandlers {
 /**
  * Values for the type property when sending socket messages
  */
-export enum SocketMessageSendType {
-  UNCOVER_CELL = 'UNCOVER_CELL'
-}
+export type SocketMessageSendType = 'UNCOVER_CELL';
 
 /**
  * Values for the type property when receiving socket messages
  */
-export enum SocketMessageReceiveType {
-  START_GAME = 'START_GAME',
-  UNCOVER_CELL = 'UNCOVER_CELL',
-  END_GAME = 'END_GAME'
-}
+export type SocketMessageReceiveType = 'START_GAME' | 'UNCOVER_CELL' | 'END_GAME';
+
+type SocketMessageType = SocketMessageSendType | SocketMessageReceiveType;
 
 /**
  * Object for sending and receiving socket messages. The server will know which
  * action to dispatch based on the type as well as know what the corresponding
  * payload is.
  */
-interface SocketMessage<TType, TPayload> {
+interface SocketMessage<TType extends SocketMessageType, TPayload> {
   /**
    * Type of the message which will be used to dispatch actions
    */
@@ -47,9 +43,13 @@ interface SocketMessage<TType, TPayload> {
   payload: TPayload;
 }
 
-type SocketMessageSend = SocketMessage<
-  SocketMessageSendType.UNCOVER_CELL,
-  CellIndexes & { gameId: GameStart['id'] }
+type SocketMessageSendPayloadMap = {
+  UNCOVER_CELL: CellIndexes & { gameId: GameStart['id'] };
+};
+
+export type SocketMessageSend<TType extends SocketMessageSendType> = SocketMessage<
+  TType,
+  SocketMessageSendPayloadMap[TType]
 >;
 
 type UncoverCellParam = Pick<Cell, 'rowIdx' | 'colIdx' | 'value'>;
@@ -62,9 +62,9 @@ type UncoverCellCallback = (value: Cell['value']) => void;
 type EndGameCallback = (gameEnd: GameEnd) => void;
 
 interface DispatchMap {
-  [SocketMessageReceiveType.START_GAME]: (payload: boolean) => void;
-  [SocketMessageReceiveType.UNCOVER_CELL]: (payload: UncoverCellParam) => void;
-  [SocketMessageReceiveType.END_GAME]: EndGameCallback;
+  START_GAME: (payload: boolean) => void;
+  UNCOVER_CELL: (payload: UncoverCellParam) => void;
+  END_GAME: EndGameCallback;
 }
 
 export class GameSocket {
@@ -96,9 +96,9 @@ export class GameSocket {
 
     // Instantiate all of our message handlers
     this.dispatchMap = {
-      [SocketMessageReceiveType.START_GAME]: (payload) => this.handleOnStartGame(payload),
-      [SocketMessageReceiveType.UNCOVER_CELL]: (payload) => this.handleOnUncoverCell(payload),
-      [SocketMessageReceiveType.END_GAME]: (status) => this.handleOnEndGame(status)
+      START_GAME: (payload) => this.handleOnStartGame(payload),
+      UNCOVER_CELL: (payload) => this.handleOnUncoverCell(payload),
+      END_GAME: (status) => this.handleOnEndGame(status)
     };
   }
 
@@ -135,7 +135,7 @@ export class GameSocket {
   /**
    * Same as Websocket send method, but serializes to json first
    */
-  public sendMsg(data: SocketMessageSend): void {
+  public sendMsg<TType extends SocketMessageSendType>(data: SocketMessageSend<TType>): void {
     this.sock.send(JSON.stringify(data));
   }
 
