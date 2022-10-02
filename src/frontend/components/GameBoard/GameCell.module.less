@@ -21,6 +21,31 @@ each(@difficulty, {
   background-clip: padding-box;
 }
 
+.cellLoading {
+  &:extend(.cell);
+  overflow: hidden;
+  background-color: gray;
+
+  &::after {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    transform: translateX(-100%);
+    background-image: linear-gradient(90deg,
+    rgba(#fff, 0) 0,
+    rgba(#fff, 0.4) 50%,
+    rgba(#fff, 0));
+    animation: shimmer 1s linear infinite;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .coveredCell {
   &:extend(.cell);
   background-color: black;

@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './GameCell.module.less';
-import { GameDifficulty } from '../../types/gamedifficulty';
+import { GameDifficulty } from '../../types/gameDifficulty';
 
 interface GameCellOuterProps {
   difficulty: GameDifficulty;

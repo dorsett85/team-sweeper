@@ -1,4 +1,4 @@
-import { GameDifficulty } from './gamedifficulty';
+import { GameDifficulty } from './gameDifficulty';
 import { GameStatus } from './gameStatus';
 
 export interface Cell {
@@ -9,13 +9,16 @@ export interface Cell {
   checked: boolean;
 }
 
-export interface GameStart {
-  id: number;
-  difficulty: GameDifficulty;
-  status: GameStatus;
+export interface GameBoardConfig {
   rows: number;
   cols: number;
   mines: number;
+}
+
+export interface GameStart extends GameBoardConfig {
+  id: number;
+  difficulty: GameDifficulty;
+  status: GameStatus;
 }
 
 export interface GameEnd {

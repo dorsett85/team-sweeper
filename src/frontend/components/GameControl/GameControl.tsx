@@ -1,4 +1,4 @@
-import React, { FormEventHandler } from 'react';
+import React, { FormEventHandler, memo } from 'react';
 import styles from './GameControl.module.less';
 import buttonStyles from '../../styles/button.module.less';
 import {
@@ -24,18 +24,23 @@ const difficultyOptions = Object.entries(difficultyMap).map(([key, value]) => (
 
 const GameControl: React.FC = () => {
   const difficulty = useAppSelector((state) => state.difficulty);
+  const isLoading = useAppSelector((state) => state.isLoading);
   const dispatch = useAppDispatch();
 
   const handleOnSelect: FormEventHandler<HTMLSelectElement> = ({ currentTarget }) => {
-    // Save the difficulty setting for when the user returns to the page
-    localStorage.setItem(DIFFICULTY, currentTarget.value);
+    if (!isLoading) {
+      // Save the difficulty setting for when the user returns to the page
+      localStorage.setItem(DIFFICULTY, currentTarget.value);
 
-    dispatch(setIsLoading(true));
-    dispatch(setDifficulty(currentTarget.value as SinglePlayerState['difficulty']));
+      dispatch(setIsLoading(true));
+      dispatch(setDifficulty(currentTarget.value as SinglePlayerState['difficulty']));
+    }
   };
 
   const handleOnResetClick = () => {
-    dispatch(setIsLoading(true));
+    if (!isLoading) {
+      dispatch(setIsLoading(true));
+    }
   };
 
   return (
@@ -58,4 +63,4 @@ const GameControl: React.FC = () => {
   );
 };
 
-export default GameControl;
+export default memo(GameControl);

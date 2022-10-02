@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { GameEnd } from '../../types/game';
 import styles from '../GameModal/GameModal.module.less';
-import { GameDifficulty } from '../../types/gamedifficulty';
+import { GameDifficulty } from '../../types/gameDifficulty';
 import { SessionGameStats } from '../../types/sessionGameStats';
 import { fetchJson } from '../../utils/fetchJson';
 import { useAppSelector } from '../../pages/single-player/singlePlayerStore';

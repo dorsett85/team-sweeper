@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import styles from './GameBoard.module.less';
+import cellStyles from './GameCell.module.less';
 import { GameStart } from '../../types/game';
 import GameCell from './GameCell';
 import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { fetchJson } from '../../utils/fetchJson';
+import GameCellOuter from './GameCellOuter';
+import GameCellList from './GameCellList';
+import { boardConfigMap } from '../../utils/constants/boardConfigMap';
 
 interface GameBoardProps {
   className?: string;
@@ -37,27 +41,49 @@ const GameBoard: React.FC<GameBoardProps> = ({ className = '' }) => {
 
   let gameBoard: React.ReactNode;
   if (loadingError || isLoading) {
+    const { rows, cols } = boardConfigMap[difficulty];
     gameBoard = (
-      <span className={styles.boardMessage}>
-        {loadingError ? 'Failed to load the game, try refreshing' : 'loading...'}
-      </span>
+      <>
+        {loadingError && (
+          <div role='alert' className={styles.errorMessage}>
+            <span>Failed to load the game, try resetting</span>
+          </div>
+        )}
+        <GameCellList
+          rows={rows}
+          cols={cols}
+          renderCell={({ rIdx, cIdx }) => {
+            return (
+              <GameCellOuter
+                key={`${difficulty}-${rIdx}-${cIdx}`}
+                difficulty={difficulty}
+                className={cellStyles.loadingShimmer}
+              >
+                <div className={cellStyles.cellLoading} />
+              </GameCellOuter>
+            );
+          }}
+        />
+      </>
     );
   } else if (game) {
-    const tempBoard: React.ReactElement[] = [];
-    for (let r = 0; r < game.rows; r++) {
-      for (let c = 0; c < game.cols; c++) {
-        tempBoard.push(
-          <GameCell
-            key={`${game.difficulty}-${r}-${c}`}
-            gameId={game.id}
-            difficulty={game.difficulty}
-            rowIdx={r}
-            colIdx={c}
-          />
-        );
-      }
-    }
-    gameBoard = tempBoard;
+    gameBoard = (
+      <GameCellList
+        rows={game.rows}
+        cols={game.cols}
+        renderCell={({ rIdx, cIdx }) => {
+          return (
+            <GameCell
+              key={`${game.difficulty}-${rIdx}-${cIdx}`}
+              gameId={game.id}
+              difficulty={game.difficulty}
+              rowIdx={rIdx}
+              colIdx={cIdx}
+            />
+          );
+        }}
+      />
+    );
   }
 
   return <div className={`${styles[`board-${difficulty}`]} ${className}`}>{gameBoard}</div>;

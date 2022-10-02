@@ -1,4 +1,4 @@
-import { GameDifficulty } from './gamedifficulty';
+import { GameDifficulty } from './gameDifficulty';
 import { GameStatus } from './gameStatus';
 
 interface CommonStats {
