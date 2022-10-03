@@ -33,10 +33,10 @@ public class GameSocketDispatch {
 
     public void uncoverCell(JsonNode node, WebSocketSession session) throws IOException {
         UncoverCellReceiveMessage msg = om.treeToValue(node, UncoverCellReceiveMessage.class);
-        String sessionId = GameSocketUtil.getHttpSessionId(session);
+        String httpSessionId = GameSocketUtil.getHttpSessionId(session);
 
         SendableMessage sm = (gameSendMessage) -> sendMessage(gameSendMessage, session);
-        gameService.uncoverCell(sessionId, msg.getPayload(), new UncoverCellSinglePlayerHandler(sm));
+        gameService.uncoverCell(httpSessionId, msg.getPayload(), new UncoverCellSinglePlayerHandler(sm));
     }
 
     /**

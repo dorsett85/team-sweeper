@@ -56,8 +56,8 @@ public class GameBoard {
             int rowIndex = new Random().nextInt(rows);
             int colIndex = new Random().nextInt(cols);
             Cell cell = board[rowIndex][colIndex];
-            if (!cell.value.equals("x")) {
-                cell.value = "x";
+            if (!cell.getValue().equals("x")) {
+                cell.setValue("x");
 
                 // Now that we've made this cell a mine, add to the mine count
                 // value of all surrounding cells.
@@ -75,17 +75,17 @@ public class GameBoard {
     private void addNearbyMineCount(Cell cellWithMine) {
 
         for (int[] cellTuple : surroundingCells) {
-            int rIdx = cellWithMine.rowIdx + cellTuple[0];
-            int cIdx = cellWithMine.colIdx + cellTuple[1];
+            int rIdx = cellWithMine.getRowIdx() + cellTuple[0];
+            int cIdx = cellWithMine.getColIdx() + cellTuple[1];
 
             // Check that the indexes are not out of bounds
             boolean isRowOob = rIdx < 0 || rIdx + 1 > board.length;
             boolean isColOob = cIdx < 0 || cIdx + 1 > board[0].length;
             if (!isRowOob && !isColOob) {
                 Cell nearbyCell = board[rIdx][cIdx];
-                if (!nearbyCell.value.equals("x")) {
-                    int newValue = Integer.parseInt(nearbyCell.value) + 1;
-                    nearbyCell.value = Integer.toString(newValue);
+                if (!nearbyCell.getValue().equals("x")) {
+                    int newValue = Integer.parseInt(nearbyCell.getValue()) + 1;
+                    nearbyCell.setValue(Integer.toString(newValue));
                 }
             }
         }
@@ -106,14 +106,6 @@ public class GameBoard {
     public String getSerializedBoard() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(board);
     }
-
-    /**
-     * TODO Remove this method once live game is implemented
-     */
-    public static BoardConfig getBoardConfig(GameDifficulty difficulty) {
-        return boardConfigMap.get(difficulty);
-    }
-
 
     public static int[][] getSurroundingCells() {
         return surroundingCells;

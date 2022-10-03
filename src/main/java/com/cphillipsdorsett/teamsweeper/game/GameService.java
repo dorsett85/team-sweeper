@@ -6,7 +6,6 @@ import com.cphillipsdorsett.teamsweeper.game.dto.GameStartResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.SessionGameStatsResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellRequestDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
@@ -31,10 +30,6 @@ public class GameService {
     public GameStartResponseDto newGame(String sessionId, GameDifficulty difficulty) throws JsonProcessingException {
         GameBoard gameBoard = new GameBoard(difficulty);
 
-        // Create a live game (this will replace any existing session game)
-        LiveGame liveGame = new LiveGame(gameBoard);
-        liveGameDao.add(sessionId, liveGame);
-
         // Add records to the db, need to serialize the board for the db
         // insertion.
         Game gameToInsert = new Game(difficulty, gameBoard.getSerializedBoard());
@@ -45,7 +40,16 @@ public class GameService {
         SessionGame sessionGame = new SessionGame(sessionId, game.getId());
         sessionGameDao.create(sessionGame);
 
+        // Create a live game (this will replace any existing session game)
+        LiveGame liveGame = new LiveGame(game.getId(), gameBoard);
+        liveGameDao.add(sessionId, liveGame);
+
         return new GameStartResponseDto(game, gameBoard.getBoardConfig());
+    }
+
+    public SessionGameStatsResponseDto findSessionGameStats(String sessionId) {
+        List<SessionGameStats> sessionGameStatsList = sessionGameDao.findSessionGameStats(sessionId);
+        return SessionGameStatsResponseDto.fromSessionGameStatsList(sessionGameStatsList);
     }
 
     /**
@@ -66,11 +70,17 @@ public class GameService {
      * Called when a user clicks/touches a cell on the board
      */
     public void uncoverCell(
-        String sessionId,
+        String httpSessionId,
         UncoverCellRequestDto payload,
         UncoverCellHandler handler
     ) throws IOException {
-        Game game = gameDao.findCurrent(sessionId, payload.gameId);
+        LiveGame game = liveGameDao.get(httpSessionId);
+
+        // Early exit if the game is already over since all the cells have or
+        // will be uncovered.
+        if (game == null || game.getStatus() != GameStatus.IN_PROGRESS) {
+            return;
+        }
 
         // If this is the first click then set a started timestamp
         if (game.getStartedAt() == null) {
@@ -78,55 +88,26 @@ public class GameService {
             handler.onStartGame(true);
         }
 
-        // Early exit if the game is already over since all the cells have or
-        // will be uncovered.
-        if (game.getStatus() != GameStatus.IN_PROGRESS) {
-            return;
-        }
-
-        Cell[][] board = getDeSerializedBoard(game.getBoard());
+        Cell[][] board = game.getBoard();
         Cell uncoveredCell = board[payload.rowIdx][payload.colIdx];
 
         // Check if a mine was clicked
-        // TODO It's possible that a mine was uncovered while the backend was
-        //  still processing if the game had been won. We may want to add status
-        //  queue to make sure the clicks and processing get handled in order.
-        if (uncoveredCell.value.equals("x")) {
-            game.setStatus(GameStatus.LOST);
-            game.setEndedAt(Instant.now());
-            uncoverCellCascade(uncoveredCell, board, game, handler, true);
-            sendEndGame(game, handler);
+        if (uncoveredCell.getValue().equals("x")) {
+            Game dbGame = endGame(httpSessionId, GameStatus.LOST, game);
+            uncoverCellCascade(uncoveredCell, game, handler, true);
+            sendEndGame(dbGame, handler);
             return;
         }
 
         // Mine was not clicked and the game is still in progress
-        uncoverCellCascade(uncoveredCell, board, game, handler, false);
+        uncoverCellCascade(uncoveredCell, game, handler, false);
 
         // Once the cell cascade has finished, we'll check to see if the game
         // has been won.
-        BoardConfig boardConfig = GameBoard.getBoardConfig(game.getDifficulty());
-
-        // To see if the game has been won, we'll compare the total non-mine
-        // cells on the board to the number of cells that have been
-        // uncovered. The game is won if they're equal.
-        int totalCellsToUncover = (boardConfig.getRows() * boardConfig.getRows()) - boardConfig.getMines();
-        int uncoveredCellCount = 0;
-        for (Cell[] row : board) {
-            for (Cell cell : row) {
-                if (!cell.covered) {
-                    uncoveredCellCount++;
-                }
-
-                // Whoop, game is won, uncover the rest of the cells and let
-                // the frontend know.
-                if (totalCellsToUncover == uncoveredCellCount) {
-                    game.setStatus(GameStatus.WON);
-                    game.setEndedAt(Instant.now());
-                    gameDao.update(game);
-                    uncoverCellCascade(cell, board, game, handler, true);
-                    sendEndGame(game, handler);
-                }
-            }
+        if (game.getUncoveredCells() >= game.getUncoveredCellsNeededToWin()) {
+            Game dbGame = endGame(httpSessionId, GameStatus.WON, game);
+            uncoverCellCascade(uncoveredCell, game, handler, true);
+            sendEndGame(dbGame, handler);
         }
     }
 
@@ -139,45 +120,41 @@ public class GameService {
      */
     private void uncoverCellCascade(
         Cell cell,
-        Cell[][] board,
-        Game game,
+        LiveGame game,
         UncoverCellHandler handler,
         boolean uncoverAll
     ) throws IOException {
         // Early exit if the cell is already uncovered or if we're not
         // uncovering everything and the cell has already been checked.
-        if ((!cell.covered && !uncoverAll) || (uncoverAll && cell.checked)) {
+        if ((!cell.isCovered() && !uncoverAll) || (uncoverAll && cell.isChecked())) {
             return;
         }
 
-        cell.covered = false;
+        cell.setCovered(false);
 
         if (uncoverAll) {
-            cell.checked = true;
+            cell.setChecked(true);
         }
 
-        // Store the updated game in the database and tell the frontend that
-        // the cell has been revealed.
-        game.setBoard(om.writeValueAsString(board));
-        new Thread(() -> gameDao.update(game)).start();
+        // TODO we'll need to update our live game cache with the updated board
+        //  state.
         handler.onUncover(cell);
+        game.incrementUncoveredCells();
 
-        // TODO - if multiplayer
-        // Read updated game in case of changes from the other player
+        Cell[][] board = game.getBoard();
 
         // If the cell isn't near any mines we'll uncover the surrounding
         // cells as well.
-        if (cell.value.equals("0") || uncoverAll) {
+        if (cell.getValue().equals("0") || uncoverAll) {
             for (int[] cellTuple : GameBoard.getSurroundingCells()) {
-                int rIdx = cell.rowIdx + cellTuple[0];
-                int cIdx = cell.colIdx + cellTuple[1];
+                int rIdx = cell.getRowIdx() + cellTuple[0];
+                int cIdx = cell.getColIdx() + cellTuple[1];
 
                 boolean rowInBounds = rIdx >= 0 && rIdx < board.length;
                 boolean colInBounds = cIdx >= 0 && cIdx < board[0].length;
                 if (rowInBounds && colInBounds) {
                     uncoverCellCascade(
                         board[rIdx][cIdx],
-                        board,
                         game,
                         handler,
                         uncoverAll
@@ -187,19 +164,27 @@ public class GameService {
         }
     }
 
-    public SessionGameStatsResponseDto findSessionGameStats(String sessionId) {
-        List<SessionGameStats> sessionGameStatsList = sessionGameDao.findSessionGameStats(sessionId);
-        return SessionGameStatsResponseDto.fromSessionGameStatsList(sessionGameStatsList);
+    /**
+     * Update the db game and remove the live game
+     */
+    private Game endGame(String httpSessionId, GameStatus newStatus, LiveGame game) throws JsonProcessingException {
+        // Update end of game fields in db
+        Game dbGame = gameDao.findCurrent(httpSessionId, game.getId());
+        dbGame.setStatus(newStatus);
+        dbGame.setStartedAt(game.getStartedAt());
+        dbGame.setEndedAt(Instant.now());
+        dbGame.setBoard(om.writeValueAsString(game.getBoard()));
+        gameDao.update(dbGame);
+
+        // Game is persisted, safe to remove the live game
+        liveGameDao.remove(httpSessionId);
+
+        return dbGame;
     }
 
     private void sendEndGame(Game game, UncoverCellHandler callback) throws IOException {
         long duration = Duration.between(game.getStartedAt(), game.getEndedAt()).toMillis();
         GameEndResponseDto gameEndDto = new GameEndResponseDto(game.getStatus(), duration);
         callback.onEndGame(gameEndDto);
-    }
-
-    private Cell[][] getDeSerializedBoard(String board) throws JsonProcessingException {
-        return om.readValue(board, new TypeReference<>() {
-        });
     }
 }
