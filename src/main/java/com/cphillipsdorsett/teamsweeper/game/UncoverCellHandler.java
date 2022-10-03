@@ -1,5 +1,6 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
+import com.cphillipsdorsett.teamsweeper.game.dao.Cell;
 import com.cphillipsdorsett.teamsweeper.game.dto.GameEndResponseDto;
 
 import java.io.IOException;

@@ -16,9 +16,9 @@ public class GameStartResponseDto {
     public GameStartResponseDto(Game game, BoardConfig boardConfig) {
         this.id = game.getId();
         this.difficulty = game.getDifficulty().getValue();
-        this.rows = boardConfig.rows;
-        this.cols = boardConfig.cols;
-        this.mines = boardConfig.mines;
+        this.rows = boardConfig.getRows();
+        this.cols = boardConfig.getCols();
+        this.mines = boardConfig.getMines();
     }
 
     public int getId() {

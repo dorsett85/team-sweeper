@@ -1,6 +1,6 @@
 package com.cphillipsdorsett.teamsweeper.game.websocket.message;
 
-import com.cphillipsdorsett.teamsweeper.game.Cell;
+import com.cphillipsdorsett.teamsweeper.game.dao.Cell;
 
 public class UncoverCellSendMessage extends GameSendMessage {
 

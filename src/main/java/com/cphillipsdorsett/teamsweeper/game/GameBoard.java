@@ -1,5 +1,6 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
+import com.cphillipsdorsett.teamsweeper.game.dao.Cell;
 import com.cphillipsdorsett.teamsweeper.game.dao.GameDifficulty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,13 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class GameBuilder {
-    public final int rows;
-    public final int cols;
-    public final int mines;
-    public final int nonMines;
-    public final int totalCells;
-    public final Cell[][] board;
+public class GameBoard {
+    private final Cell[][] board;
+    private final GameDifficulty difficulty;
+    private final int uncoveredCellsNeededToWin;
     private static final Map<GameDifficulty, BoardConfig> boardConfigMap = new HashMap<>() {{
         put(GameDifficulty.E, new BoardConfig(9, 9, 10));
         put(GameDifficulty.M, new BoardConfig(16, 16, 40));
@@ -24,7 +22,7 @@ public class GameBuilder {
      * 2d array of surrounding cells starting in top left corner moving
      * clockwise.
      */
-    public static final int[][] surroundingCells = {
+    private static final int[][] surroundingCells = {
         {-1, -1},
         {-1, 0},
         {-1, 1},
@@ -35,15 +33,15 @@ public class GameBuilder {
         {0, -1},
     };
 
-    public GameBuilder(GameDifficulty difficulty) {
+    public GameBoard(GameDifficulty difficulty) {
         BoardConfig boardConfig = boardConfigMap.get(difficulty);
-        rows = boardConfig.rows;
-        cols = boardConfig.cols;
-        mines = boardConfig.mines;
+        int rows = boardConfig.getRows();
+        int cols = boardConfig.getCols();
+        int mines = boardConfig.getMines();
 
-        board = new Cell[rows][cols];
-        totalCells = rows * cols;
-        nonMines = totalCells - mines;
+        this.board = new Cell[rows][cols];
+        this.difficulty = difficulty;
+        this.uncoveredCellsNeededToWin = rows * cols - mines;
 
         // Adds cells to the rows and columns
         for (int row = 0; row < rows; row++) {
@@ -93,12 +91,32 @@ public class GameBuilder {
         }
     }
 
+    public Cell[][] getBoard() {
+        return board;
+    }
+
+    public BoardConfig getBoardConfig() {
+        return boardConfigMap.get(difficulty);
+    }
+
+    public int getUncoveredCellsNeededToWin() {
+        return uncoveredCellsNeededToWin;
+    }
+
     public String getSerializedBoard() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(board);
     }
 
+    /**
+     * TODO Remove this method once live game is implemented
+     */
     public static BoardConfig getBoardConfig(GameDifficulty difficulty) {
         return boardConfigMap.get(difficulty);
+    }
+
+
+    public static int[][] getSurroundingCells() {
+        return surroundingCells;
     }
 
 }

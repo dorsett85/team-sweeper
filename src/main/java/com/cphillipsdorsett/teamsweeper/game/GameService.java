@@ -19,20 +19,25 @@ import java.util.List;
 public class GameService {
     private final GameDao gameDao;
     private final SessionGameDao sessionGameDao;
+    private final LiveGameDao liveGameDao;
     private final ObjectMapper om = new ObjectMapper();
 
-    public GameService(GameDao gameDao, SessionGameDao sessionGameDao) {
+    public GameService(GameDao gameDao, SessionGameDao sessionGameDao, LiveGameDao liveGameDao) {
         this.gameDao = gameDao;
         this.sessionGameDao = sessionGameDao;
+        this.liveGameDao = liveGameDao;
     }
 
     public GameStartResponseDto newGame(String sessionId, GameDifficulty difficulty) throws JsonProcessingException {
+        GameBoard gameBoard = new GameBoard(difficulty);
 
-        GameBuilder gameBuilder = new GameBuilder(difficulty);
+        // Create a live game (this will replace any existing session game)
+        LiveGame liveGame = new LiveGame(gameBoard);
+        liveGameDao.add(sessionId, liveGame);
 
         // Add records to the db, need to serialize the board for the db
         // insertion.
-        Game gameToInsert = new Game(difficulty, gameBuilder.getSerializedBoard());
+        Game gameToInsert = new Game(difficulty, gameBoard.getSerializedBoard());
         Game game = gameDao.create(gameToInsert);
 
         // Also need a session_game record so we can match the game based on the
@@ -40,7 +45,7 @@ public class GameService {
         SessionGame sessionGame = new SessionGame(sessionId, game.getId());
         sessionGameDao.create(sessionGame);
 
-        return new GameStartResponseDto(game, GameBuilder.getBoardConfig(game.getDifficulty()));
+        return new GameStartResponseDto(game, gameBoard.getBoardConfig());
     }
 
     /**
@@ -99,12 +104,12 @@ public class GameService {
 
         // Once the cell cascade has finished, we'll check to see if the game
         // has been won.
-        BoardConfig boardConfig = GameBuilder.getBoardConfig(game.getDifficulty());
+        BoardConfig boardConfig = GameBoard.getBoardConfig(game.getDifficulty());
 
         // To see if the game has been won, we'll compare the total non-mine
         // cells on the board to the number of cells that have been
         // uncovered. The game is won if they're equal.
-        int totalCellsToUncover = (boardConfig.cols * boardConfig.rows) - boardConfig.mines;
+        int totalCellsToUncover = (boardConfig.getRows() * boardConfig.getRows()) - boardConfig.getMines();
         int uncoveredCellCount = 0;
         for (Cell[] row : board) {
             for (Cell cell : row) {
@@ -163,7 +168,7 @@ public class GameService {
         // If the cell isn't near any mines we'll uncover the surrounding
         // cells as well.
         if (cell.value.equals("0") || uncoverAll) {
-            for (int[] cellTuple : GameBuilder.surroundingCells) {
+            for (int[] cellTuple : GameBoard.getSurroundingCells()) {
                 int rIdx = cell.rowIdx + cellTuple[0];
                 int cIdx = cell.colIdx + cellTuple[1];
 
