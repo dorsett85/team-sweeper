@@ -19,11 +19,11 @@ public class GameSocketHandler extends TextWebSocketHandler {
     private final Logger logger = LogManager.getLogger(GameSocketHandler.class);
     private final ObjectMapper om = new ObjectMapper();
     private final GameSocketDispatch gameSocketDispatch;
-    private final GameSocketSessionDao gameSocketSessionDao;
+    private final GameSocketSessionStore gameSocketSessionStore;
 
-    public GameSocketHandler(GameSocketDispatch gameSocketDispatch, GameSocketSessionDao gameSocketSessionDao) {
+    public GameSocketHandler(GameSocketDispatch gameSocketDispatch, GameSocketSessionStore gameSocketSessionStore) {
         this.gameSocketDispatch = gameSocketDispatch;
-        this.gameSocketSessionDao = gameSocketSessionDao;
+        this.gameSocketSessionStore = gameSocketSessionStore;
     }
 
     @Override
@@ -58,12 +58,12 @@ public class GameSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         String key = GameSocketUtil.getHttpSessionId(session);
-        gameSocketSessionDao.putByHttpSessionId(key, session);
+        gameSocketSessionStore.putByHttpSessionId(key, session);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         String key = GameSocketUtil.getHttpSessionId(session);
-        gameSocketSessionDao.removeByHttpSessionId(key);
+        gameSocketSessionStore.removeByHttpSessionId(key);
     }
 }

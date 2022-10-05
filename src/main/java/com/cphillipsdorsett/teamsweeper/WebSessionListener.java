@@ -2,7 +2,7 @@ package com.cphillipsdorsett.teamsweeper;
 
 import com.cphillipsdorsett.teamsweeper.game.GameService;
 import com.cphillipsdorsett.teamsweeper.game.dao.LiveGameDao;
-import com.cphillipsdorsett.teamsweeper.game.websocket.GameSocketSessionDao;
+import com.cphillipsdorsett.teamsweeper.game.websocket.GameSocketSessionStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -14,16 +14,16 @@ import javax.servlet.http.HttpSessionListener;
 public class WebSessionListener implements HttpSessionListener {
     private final Logger logger = LogManager.getLogger(WebSessionListener.class);
     private final GameService gameService;
-    private final GameSocketSessionDao gameSocketSessionDao;
+    private final GameSocketSessionStore gameSocketSessionStore;
     private final LiveGameDao liveGameDao;
 
     public WebSessionListener(
         GameService gameService,
-        GameSocketSessionDao gameSocketSessionDao,
+        GameSocketSessionStore gamesocketSessionStore,
         LiveGameDao liveGameDao
     ) {
         this.gameService = gameService;
-        this.gameSocketSessionDao = gameSocketSessionDao;
+        this.gameSocketSessionStore = gamesocketSessionStore;
         this.liveGameDao = liveGameDao;
     }
 
@@ -46,7 +46,7 @@ public class WebSessionListener implements HttpSessionListener {
 
         // Close related websocket connections
         try {
-            gameSocketSessionDao.getByHttpId(sessionId).close();
+            gameSocketSessionStore.getByHttpId(sessionId).close();
         } catch (Exception e) {
             logger.error("Error closing websocket session", e);
         }

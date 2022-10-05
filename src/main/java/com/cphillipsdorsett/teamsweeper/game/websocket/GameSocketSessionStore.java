@@ -15,7 +15,7 @@ import java.util.Map;
  * with one another.
  */
 @Component
-public class GameSocketSessionDao {
+public class GameSocketSessionStore {
     /**
      * Map whose key is the http session id and the value is the associated
      * websocket session.
