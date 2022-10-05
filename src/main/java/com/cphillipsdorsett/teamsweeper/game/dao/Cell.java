@@ -68,6 +68,14 @@ public class Cell {
         this.checked = checked;
     }
 
+    public boolean isMine() {
+        return this.value.equals("x");
+    }
+
+    public boolean isNearMine() {
+        return !this.value.equals("0");
+    }
+
     @Override
     public String toString() {
         return "{ value: " + value + ", covered: " + covered + ", checked: " + checked + " }";

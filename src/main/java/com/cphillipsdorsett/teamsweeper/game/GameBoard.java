@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public class GameBoard {
     private final Cell[][] board;
@@ -22,7 +23,7 @@ public class GameBoard {
      * 2d array of surrounding cells starting in top left corner moving
      * clockwise.
      */
-    private static final int[][] surroundingCells = {
+    private static final int[][] nearbyCells = {
         {-1, -1},
         {-1, 0},
         {-1, 1},
@@ -56,12 +57,12 @@ public class GameBoard {
             int rowIndex = new Random().nextInt(rows);
             int colIndex = new Random().nextInt(cols);
             Cell cell = board[rowIndex][colIndex];
-            if (!cell.getValue().equals("x")) {
+            if (!cell.isMine()) {
                 cell.setValue("x");
 
                 // Now that we've made this cell a mine, add to the mine count
                 // value of all surrounding cells.
-                addNearbyMineCount(cell);
+                addNearbyMineCount(cell, board);
 
                 mineCount--;
             }
@@ -70,25 +71,15 @@ public class GameBoard {
 
     /**
      * Add 1 to value of all surrounding cells of the passed in Cell. The
-     * passed in Cell must be one has a mine on it.
+     * passed in Cell must be one with a mine on it.
      */
-    private void addNearbyMineCount(Cell cellWithMine) {
-
-        for (int[] cellTuple : surroundingCells) {
-            int rIdx = cellWithMine.getRowIdx() + cellTuple[0];
-            int cIdx = cellWithMine.getColIdx() + cellTuple[1];
-
-            // Check that the indexes are not out of bounds
-            boolean isRowOob = rIdx < 0 || rIdx + 1 > board.length;
-            boolean isColOob = cIdx < 0 || cIdx + 1 > board[0].length;
-            if (!isRowOob && !isColOob) {
-                Cell nearbyCell = board[rIdx][cIdx];
-                if (!nearbyCell.getValue().equals("x")) {
-                    int newValue = Integer.parseInt(nearbyCell.getValue()) + 1;
-                    nearbyCell.setValue(Integer.toString(newValue));
-                }
+    private void addNearbyMineCount(Cell cellWithMine, Cell[][] board) {
+        nearbyCellsForEach(cellWithMine, board, (nearbyCell) -> {
+            if (!nearbyCell.isMine()) {
+                int newValue = Integer.parseInt(nearbyCell.getValue()) + 1;
+                nearbyCell.setValue(Integer.toString(newValue));
             }
-        }
+        });
     }
 
     public Cell[][] getBoard() {
@@ -107,8 +98,28 @@ public class GameBoard {
         return new ObjectMapper().writeValueAsString(board);
     }
 
-    public static int[][] getSurroundingCells() {
-        return surroundingCells;
+    /**
+     * For a given row and column index, check if the cell would be in bounds.
+     */
+    public static boolean isInBounds(int rIdx, int cIdx, Cell[][] board) {
+        boolean rowInBounds = rIdx >= 0 && rIdx < board.length;
+        boolean colInBounds = cIdx >= 0 && cIdx < board[0].length;
+        return rowInBounds && colInBounds;
+    }
+
+    /**
+     * Loop through surrounding cells. The BiConsumer function returns the cell
+     * indexes of the surrounding cells.
+     */
+    public static void nearbyCellsForEach(Cell cell, Cell[][] board, Consumer<Cell> biConsumer) {
+        for (int[] cellIndexes : nearbyCells) {
+            int rIdx = cell.getRowIdx() + cellIndexes[0];
+            int cIdx = cell.getColIdx() + cellIndexes[1];
+
+            if (isInBounds(rIdx, cIdx, board)) {
+                biConsumer.accept(board[rIdx][cIdx]);
+            }
+        }
     }
 
 }
