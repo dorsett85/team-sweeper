@@ -124,8 +124,8 @@ public class GameService {
         UncoverCellHandler handler,
         boolean uncoverAll
     ) throws IOException {
-        // Early exit if the cell is already uncovered or if we're not
-        // uncovering everything and the cell has already been checked.
+        // Early exit if the cell is already uncovered or if we're uncovering
+        // everything and the cell has already been checked.
         if ((!cell.isCovered() && !uncoverAll) || (uncoverAll && cell.isChecked())) {
             return;
         }
