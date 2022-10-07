@@ -38,10 +38,11 @@ public class WebSessionListener implements HttpSessionListener {
         // Remove all games related to the session
         liveGameDao.remove(sessionId);
         try {
-            int countDeleted = gameService.deleteExpiredSessionGames(sessionId);
-            logger.info("Expired session games deleted: {}", countDeleted);
+
+            int[] deletedCounts = gameService.deleteExpiredSessionGames(sessionId);
+            logger.info("Deleted: session_games {}, games {}", deletedCounts[0], deletedCounts[1]);
         } catch (Exception e) {
-            logger.error("Error deleting expired session games", e);
+            logger.error("Error deleting expired session games with session id: {}", sessionId, e);
         }
 
         // Close related websocket connections

@@ -82,28 +82,16 @@ public class GameDao implements GameRepository {
     }
 
     /**
-     * Only delete games that have a single session id linked to them. If
-     * there's another session linked to a game that means it's still active
-     * (e.g., multiplayer) and we don't want to delete it.
+     * Delete games that don't a http session associated with them
      */
     @Transactional
-    public int deleteBySingleSessionReference(String sessionId) {
+    public int deleteGamesWithoutSession() {
         em
             .createNativeQuery("" +
                 "DELETE FROM game g " +
-                "WHERE g.id IN (" +
-                "    SELECT sg.game_id" +
-                "    FROM session_game sg" +
-                "    WHERE sg.session_id = :sessionId" +
-                "        AND sg.game_id IN (" +
-                "            SELECT game_id" +
-                "            FROM session_game" +
-                "            GROUP BY session_game.game_id" +
-                "            HAVING COUNT(*) = 1" +
-                "        )" +
-                ")"
+                "LEFT JOIN session_game sg ON sg.game_id = g.id " +
+                "WHERE sg.session_id IS NULL"
             )
-            .setParameter("sessionId", sessionId)
             .executeUpdate();
         BigInteger deletedCount = (BigInteger) em
             .createNativeQuery("" +

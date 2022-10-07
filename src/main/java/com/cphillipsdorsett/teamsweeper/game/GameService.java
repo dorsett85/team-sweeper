@@ -53,17 +53,15 @@ public class GameService {
     }
 
     /**
-     * Delete related game table records when a session expires
+     * Delete related session game records, and any games that no longer have
+     * any associated http session.
      *
-     * @return number of games that were deleted
+     * @return tuple of session_games and games deleted
      */
-    public int deleteExpiredSessionGames(String sessionId) {
-        int deletedCount = gameDao.deleteBySingleSessionReference(sessionId);
-
-        // Clean up the session_game records as well
-        sessionGameDao.deleteBySessionId(sessionId);
-
-        return deletedCount;
+    public int[] deleteExpiredSessionGames(String sessionId) {
+        int sessionGamesDeleted = sessionGameDao.deleteBySessionId(sessionId);
+        int gamesDeleted = gameDao.deleteGamesWithoutSession();
+        return new int[]{sessionGamesDeleted, gamesDeleted};
     }
 
     /**

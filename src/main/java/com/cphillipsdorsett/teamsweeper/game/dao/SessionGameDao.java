@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,7 +53,7 @@ public class SessionGameDao implements SessionGameRepository {
     }
 
     @Transactional
-    public void deleteBySessionId(String sessionId) {
+    public int deleteBySessionId(String sessionId) {
         em
             .createNativeQuery("" +
                 "DELETE FROM session_game sg " +
@@ -60,6 +61,12 @@ public class SessionGameDao implements SessionGameRepository {
             )
             .setParameter("sessionId", sessionId)
             .executeUpdate();
+        BigInteger deletedCount = (BigInteger) em
+            .createNativeQuery("" +
+                "SELECT ROW_COUNT()"
+            )
+            .getSingleResult();
+        return deletedCount.intValue();
     }
 
     @Override
