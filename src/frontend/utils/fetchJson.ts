@@ -1,4 +1,18 @@
 /**
+ * Non 2xx/3xx fetch responses that contain the original response object.
+ */
+export class FetchJsonError extends Error {
+  public response: Response;
+
+  constructor(res: Response) {
+    super(`response status ${res.status}`);
+    this.response = res;
+    this.name = FetchJsonError.name;
+    Object.setPrototypeOf(this, FetchJsonError.prototype);
+  }
+}
+
+/**
  * Fetch wrapper that returns json
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -11,6 +25,5 @@ export const fetchJson = async <T extends Record<string, any>>(
     return res.json();
   }
 
-  // TODO return custom error object with cloned response
-  throw new Error(`Request failed with status ${res.status}`);
+  throw new FetchJsonError(res);
 };
