@@ -8,11 +8,12 @@ import GameModal from '../../components/GameModal/GameModal';
 
 const SinglePlayer: React.FC = () => {
   const difficulty = useAppSelector((state) => state.difficulty);
+  const isLoading = useAppSelector((state) => state.isLoading);
 
   return (
     <div className={styles[`layout-${difficulty}`]}>
-      <GameControl />
-      <GameBoard className={styles.gameBoard} />
+      <GameControl difficulty={difficulty} isLoading={isLoading} />
+      <GameBoard difficulty={difficulty} isLoading={isLoading} className={styles.gameBoard} />
       <GameScore className={styles.gameScore} />
       <GameModal />
     </div>

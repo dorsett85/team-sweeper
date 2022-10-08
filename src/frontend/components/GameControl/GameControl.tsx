@@ -6,9 +6,15 @@ import {
   setDifficulty,
   setIsLoading
 } from '../../pages/single-player/singlePlayerSlice';
-import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
+import { useAppDispatch } from '../../pages/single-player/singlePlayerStore';
 import { DIFFICULTY } from '../../pages/single-player/constants/difficulty';
 import { GameStart } from '../../types/game';
+import { GameDifficulty } from '../../types/gameDifficulty';
+
+interface GameControlProps {
+  difficulty: GameDifficulty;
+  isLoading: boolean;
+}
 
 const difficultyMap: Record<GameStart['difficulty'], string> = {
   e: 'Easy',
@@ -22,9 +28,7 @@ const difficultyOptions = Object.entries(difficultyMap).map(([key, value]) => (
   </option>
 ));
 
-const GameControl: React.FC = () => {
-  const difficulty = useAppSelector((state) => state.difficulty);
-  const isLoading = useAppSelector((state) => state.isLoading);
+const GameControl: React.FC<GameControlProps> = ({ difficulty, isLoading }) => {
   const dispatch = useAppDispatch();
 
   const handleOnSelect: FormEventHandler<HTMLSelectElement> = ({ currentTarget }) => {

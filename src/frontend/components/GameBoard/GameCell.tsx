@@ -60,10 +60,7 @@ const GameCell: React.FC<GameCellProps> = ({ difficulty, gameId, rowIdx, colIdx 
   const handleOnCoveredCellClick = () => {
     // Leaving this as a separate handler for now, may add more behavior here
     isCellClicked.current = true;
-    sock.sendMsg({
-      type: 'UNCOVER_CELL',
-      payload: { gameId, rowIdx, colIdx }
-    });
+    sock.sendMsg('UNCOVER_CELL', { gameId, rowIdx, colIdx });
   };
 
   const isMine = value === 'x';

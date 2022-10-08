@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -70,7 +71,7 @@ public class GameService {
     public void uncoverCell(
         String httpSessionId,
         UncoverCellRequestDto payload,
-        UncoverCellHandler handler
+        UncoverCellHandler messageHandler
     ) throws IOException {
         LiveGame game = liveGameDao.get(httpSessionId);
 
@@ -83,84 +84,166 @@ public class GameService {
         // If this is the first click then set a started timestamp
         if (game.getStartedAt() == null) {
             game.setStartedAt(Instant.now());
-            handler.onStartGame(true);
+            messageHandler.onStartGame(true);
         }
 
         Cell[][] board = game.getBoard();
-        Cell uncoveredCell = board[payload.rowIdx][payload.colIdx];
+        Cell uncoveredCell = board[payload.getRowIdx()][payload.getColIdx()];
 
         // Check if a mine was clicked
-        if (uncoveredCell.getValue().equals("x")) {
+        if (uncoveredCell.isMine()) {
             Game dbGame = endGame(httpSessionId, GameStatus.LOST, game);
-            uncoverCellCascade(uncoveredCell, game, handler, true);
-            sendEndGame(dbGame, handler);
+            uncoverCellCascadeAll(uncoveredCell, game, messageHandler);
+            sendEndGame(dbGame, messageHandler);
             return;
         }
 
         // Mine was not clicked and the game is still in progress
-        uncoverCellCascade(uncoveredCell, game, handler, false);
+        uncoverCellCascade(uncoveredCell, game, messageHandler);
 
         // Once the cell cascade has finished, we'll check to see if the game
         // has been won.
         if (game.getUncoveredCells() >= game.getUncoveredCellsNeededToWin()) {
             Game dbGame = endGame(httpSessionId, GameStatus.WON, game);
-            uncoverCellCascade(uncoveredCell, game, handler, true);
-            sendEndGame(dbGame, handler);
+            uncoverCellCascadeAll(uncoveredCell, game, messageHandler);
+            sendEndGame(dbGame, messageHandler);
         }
     }
 
     /**
      * Uncover a cell and recursively uncover surrounding cells if it isn't
      * near a mine.
-     * <p>
-     * When the cell is covered we'll also call a handler notifying the web
-     * socket that we can add the cell to the message queue.
      */
     private void uncoverCellCascade(
         Cell cell,
         LiveGame game,
-        UncoverCellHandler handler,
-        boolean uncoverAll
+        UncoverCellHandler handler
     ) throws IOException {
-        // Early exit if the cell is already uncovered or if we're uncovering
-        // everything and the cell has already been checked.
-        if ((!cell.isCovered() && !uncoverAll) || (uncoverAll && cell.isChecked())) {
+        // Early exit if the cell is already uncovered
+        if (!cell.isCovered()) {
             return;
         }
 
         cell.setCovered(false);
-
-        if (uncoverAll) {
-            cell.setChecked(true);
-        }
 
         // TODO we'll need to update our live game cache with the updated board
         //  state.
         handler.onUncover(cell);
         game.incrementUncoveredCells();
 
-        Cell[][] board = game.getBoard();
-
         // If the cell isn't near any mines we'll uncover the surrounding
         // cells as well.
-        if (cell.getValue().equals("0") || uncoverAll) {
-            for (int[] cellTuple : GameBoard.getSurroundingCells()) {
-                int rIdx = cell.getRowIdx() + cellTuple[0];
-                int cIdx = cell.getColIdx() + cellTuple[1];
-
-                boolean rowInBounds = rIdx >= 0 && rIdx < board.length;
-                boolean colInBounds = cIdx >= 0 && cIdx < board[0].length;
-                if (rowInBounds && colInBounds) {
+        if (!cell.isNearMine()) {
+            GameBoard.nearbyCellsForEach(cell, game.getBoard(), (nearbyCell) -> {
+                try {
                     uncoverCellCascade(
-                        board[rIdx][cIdx],
+                        nearbyCell,
                         game,
-                        handler,
-                        uncoverAll
+                        handler
                     );
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-            }
+            });
         }
     }
+
+    /**
+     * Uncover all the cells
+     */
+    private void uncoverCellCascadeAll(
+        Cell cell,
+        LiveGame game,
+        UncoverCellHandler handler
+    ) throws IOException {
+        // Early exit if we've already checked this cell
+        if (cell.isChecked()) {
+            return;
+        }
+
+        cell.setCovered(false);
+        cell.setChecked(true);
+
+
+        // TODO we'll need to update our live game cache with the updated board
+        //  state.
+        handler.onUncover(cell);
+
+        GameBoard.nearbyCellsForEach(cell, game.getBoard(), (nearbyCell) -> {
+            try {
+                uncoverCellCascadeAll(
+                    nearbyCell,
+                    game,
+                    handler
+                );
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+//    private void uncoverCellNonRecursive(
+//        Cell cell,
+//        LiveGame game,
+//        UncoverCellHandler handler,
+//        boolean uncoverAll
+//    ) throws IOException {
+//        // Early exit if the cell is already uncovered or if we're uncovering
+//        // everything and the cell has already been checked.
+//        if ((!cell.isCovered() && !uncoverAll) || (uncoverAll && cell.isChecked())) {
+//            return;
+//        }
+//
+//        cell.setCovered(false);
+//
+//        if (uncoverAll) {
+//            cell.setChecked(true);
+//        }
+//
+//        // TODO we'll need to update our live game cache with the updated board
+//        //  state.
+//        handler.onUncover(cell);
+//        game.incrementUncoveredCells();
+//
+//        // stop here if the cell is near a mine or we're not uncovering
+//        // everything.
+//        if (cell.isNearMine()) {
+//            return;
+//        }
+//
+//        Cell[][] board = game.getBoard();
+//
+//        List<int[]> nextCellsToCheck = Arrays.asList(new int[]{cell.getRowIdx(), cell.getColIdx()});
+//
+//        while (true) {
+//            for (int[] cellTuple : GameBoard.getSurroundingCells()) {
+//                int[] cellToCheck = nextCellsToCheck.get(0);
+//                if (cellToCheck == null) {
+//                    break;
+//                }
+//                int rIdx = cellToCheck[0] + cellTuple[0];
+//                int cIdx = cellToCheck[1] + cellTuple[1];
+//
+//                if (GameBoard.isInBounds(rIdx, cIdx, board)) {
+//                    Cell nearbyCell = board[rIdx][cIdx];
+//                    if (!nearbyCell.isCovered() && !nearbyCell.isNearMine() || (uncoverAll && !nearbyCell.isChecked())) {
+//                        nextCellsToCheck.add(new int[]{rIdx, cIdx});
+//                    }
+//
+//                    nearbyCell.setCovered(false);
+//
+//                    if (uncoverAll) {
+//                        nearbyCell.setCovered(false);
+//                    }
+//                    // TODO we'll need to update our live game cache with the updated board
+//                    //  state.
+//                    handler.onUncover(cell);
+//                    game.incrementUncoveredCells();
+//                    nextCellsToCheck.remove(0);
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Update the db game and remove the live game

@@ -3,88 +3,89 @@ import styles from './GameBoard.module.less';
 import cellStyles from './GameCell.module.less';
 import { GameStart } from '../../types/game';
 import GameCell from './GameCell';
-import { useAppDispatch, useAppSelector } from '../../pages/single-player/singlePlayerStore';
+import { useAppDispatch } from '../../pages/single-player/singlePlayerStore';
 import { setIsLoading } from '../../pages/single-player/singlePlayerSlice';
-import { fetchJson } from '../../utils/fetchJson';
 import GameCellOuter from './GameCellOuter';
 import GameCellList from './GameCellList';
 import { boardConfigMap } from '../../utils/constants/boardConfigMap';
+import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
+import { GameDifficulty } from '../../types/gameDifficulty';
 
 interface GameBoardProps {
+  difficulty: GameDifficulty;
+  isLoading: boolean;
   className?: string;
 }
 
-const GameBoard: React.FC<GameBoardProps> = ({ className = '' }) => {
-  const [game, setGame] = useState<GameStart>();
-  const [loadingError, setLoadingError] = useState(false);
-  const difficulty = useAppSelector((state) => state.difficulty);
-  const isLoading = useAppSelector((state) => state.isLoading);
-  const dispatch = useAppDispatch();
+const LoadingBoard: React.FC<{ difficulty: GameDifficulty }> = ({ difficulty }) => {
+  const { rows, cols } = boardConfigMap[difficulty];
+  return (
+    <GameCellList
+      rows={rows}
+      cols={cols}
+      renderCell={({ rIdx, cIdx }) => {
+        return (
+          <GameCellOuter key={`${difficulty}-${rIdx}-${cIdx}`} difficulty={difficulty}>
+            <div className={cellStyles.cellLoading} />
+          </GameCellOuter>
+        );
+      }}
+    />
+  );
+};
 
-  // We'll refetch a new board whenever the difficulty or loading state changes,
+const ReadyBoard: React.FC<{ game: GameStart }> = ({ game }) => {
+  return (
+    <GameCellList
+      rows={game.rows}
+      cols={game.cols}
+      renderCell={({ rIdx, cIdx }) => {
+        return (
+          <GameCell
+            key={`${game.difficulty}-${rIdx}-${cIdx}`}
+            gameId={game.id}
+            difficulty={game.difficulty}
+            rowIdx={rIdx}
+            colIdx={cIdx}
+          />
+        );
+      }}
+    />
+  );
+};
+
+const GameBoard: React.FC<GameBoardProps> = ({ difficulty, isLoading, className = '' }) => {
+  const [game, setGame] = useState<GameStart>();
+  const dispatch = useAppDispatch();
+  const { sock } = useGameSocket();
+
+  // We'll request a new game whenever the difficulty or loading state changes,
   // which will occur on any page refresh or game control change.
   useEffect(() => {
     if (isLoading) {
-      setLoadingError(false);
-      fetchJson<GameStart>(`/game/new-game?difficulty=${difficulty}`)
-        .then((newGame) => {
-          setGame(newGame);
-        })
-        .catch(() => {
-          setLoadingError(true);
-        })
-        .finally(() => {
-          dispatch(setIsLoading(false));
-        });
+      sock.sendMsg('NEW_GAME', { difficulty });
     }
-  }, [difficulty, dispatch, isLoading]);
+  }, [difficulty, isLoading, sock]);
 
-  let gameBoard: React.ReactNode;
-  if (loadingError || isLoading) {
-    const { rows, cols } = boardConfigMap[difficulty];
-    gameBoard = (
-      <>
-        {loadingError && (
-          <div role='alert' className={styles.errorMessage}>
-            <span>Failed to load the game, try resetting</span>
-          </div>
-        )}
-        <GameCellList
-          rows={rows}
-          cols={cols}
-          renderCell={({ rIdx, cIdx }) => {
-            return (
-              <GameCellOuter
-                key={`${difficulty}-${rIdx}-${cIdx}`}
-                difficulty={difficulty}
-                className={cellStyles.loadingShimmer}
-              >
-                <div className={cellStyles.cellLoading} />
-              </GameCellOuter>
-            );
-          }}
-        />
-      </>
-    );
-  } else if (game) {
-    gameBoard = (
-      <GameCellList
-        rows={game.rows}
-        cols={game.cols}
-        renderCell={({ rIdx, cIdx }) => {
-          return (
-            <GameCell
-              key={`${game.difficulty}-${rIdx}-${cIdx}`}
-              gameId={game.id}
-              difficulty={game.difficulty}
-              rowIdx={rIdx}
-              colIdx={cIdx}
-            />
-          );
-        }}
-      />
-    );
-  }
+  // Subscribes to new game socket event
+  useEffect(() => {
+    const handleOnNewGame = (gameStart: GameStart) => {
+      setGame(gameStart);
+      dispatch(setIsLoading(false));
+    };
+
+    sock.addOnNewGame(handleOnNewGame);
+
+    return () => {
+      sock.removeOnNewGame(handleOnNewGame);
+    };
+  }, [dispatch, sock]);
+
+  const gameBoard = isLoading ? (
+    <LoadingBoard difficulty={difficulty} />
+  ) : game ? (
+    <ReadyBoard game={game} />
+  ) : null;
 
   return <div className={`${styles[`board-${difficulty}`]} ${className}`}>{gameBoard}</div>;
 };

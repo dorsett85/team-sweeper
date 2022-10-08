@@ -88,7 +88,7 @@ public class GameDao implements GameRepository {
     public int deleteGamesWithoutSession() {
         em
             .createNativeQuery("" +
-                "DELETE FROM game g " +
+                "DELETE g FROM game g " +
                 "LEFT JOIN session_game sg ON sg.game_id = g.id " +
                 "WHERE sg.session_id IS NULL"
             )

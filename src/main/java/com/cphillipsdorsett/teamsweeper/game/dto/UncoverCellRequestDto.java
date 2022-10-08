@@ -1,9 +1,9 @@
 package com.cphillipsdorsett.teamsweeper.game.dto;
 
 public class UncoverCellRequestDto {
-    public int gameId;
-    public int rowIdx;
-    public int colIdx;
+    private int gameId;
+    private int rowIdx;
+    private int colIdx;
 
     public int getGameId() {
         return gameId;

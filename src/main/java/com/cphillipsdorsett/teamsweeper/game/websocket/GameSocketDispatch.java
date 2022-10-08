@@ -2,12 +2,13 @@ package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 import com.cphillipsdorsett.teamsweeper.game.GameService;
 import com.cphillipsdorsett.teamsweeper.game.UncoverCellSinglePlayerHandler;
-import com.cphillipsdorsett.teamsweeper.game.websocket.message.GameReceiveMessageType;
-import com.cphillipsdorsett.teamsweeper.game.websocket.message.GameSendMessage;
-import com.cphillipsdorsett.teamsweeper.game.websocket.message.UncoverCellReceiveMessage;
+import com.cphillipsdorsett.teamsweeper.game.dao.GameDifficulty;
+import com.cphillipsdorsett.teamsweeper.game.dto.GameStartResponseDto;
+import com.cphillipsdorsett.teamsweeper.game.websocket.message.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -27,8 +28,20 @@ public class GameSocketDispatch {
         // This is key. Our socket handler will call the values in this map
         // based on the type property in the json message.
         this.dispatchMap = new HashMap<>() {{
+            put(NewGameReceiveMessage.TYPE, (node, session) -> newGame(node, session));
             put(UncoverCellReceiveMessage.TYPE, (node, session) -> uncoverCell(node, session));
         }};
+    }
+
+    public void newGame(JsonNode node, WebSocketSession session) throws IOException, GameSocketException {
+        NewGameReceiveMessage msg = om.treeToValue(node, NewGameReceiveMessage.class);
+        String httpSessionId = GameSocketUtil.getHttpSessionId(session);
+        GameDifficulty difficulty = GameDifficulty
+            .getNameByValue(msg.getPayload().getDifficulty())
+            .orElseThrow(() -> new GameSocketException(CloseStatus.BAD_DATA, "difficulty param must be (e|m|h)"));
+
+        GameStartResponseDto responseDto = gameService.newGame(httpSessionId, difficulty);
+        sendMessage(new NewGameSendMessage(responseDto), session);
     }
 
     public void uncoverCell(JsonNode node, WebSocketSession session) throws IOException {
@@ -51,6 +64,6 @@ public class GameSocketDispatch {
      * Lambda expression as our dispatch map value
      */
     interface MessageDispatch {
-        void dispatch(JsonNode node, WebSocketSession session) throws IOException;
+        void dispatch(JsonNode node, WebSocketSession session) throws IOException, GameSocketException;
     }
 }

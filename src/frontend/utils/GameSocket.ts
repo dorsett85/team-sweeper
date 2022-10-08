@@ -1,4 +1,5 @@
 import { Cell, GameEnd, GameStart } from '../types/game';
+import { GameDifficulty } from '../types/gameDifficulty';
 
 interface ReadyStateHandlers {
   /**
@@ -15,15 +16,35 @@ interface ReadyStateHandlers {
   onClose: (e: CloseEvent) => void;
 }
 
+type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
+
+/**
+ * Key/value pairs of socket message send types and corresponding payload
+ */
+type MessageSendPayloadMap = {
+  NEW_GAME: { difficulty: GameDifficulty };
+  UNCOVER_CELL: CellIndexes & { gameId: GameStart['id'] };
+};
+
+/**
+ * Key/value pairs of socket message receive types and corresponding payload
+ */
+type MessageReceivePayloadMap = {
+  NEW_GAME: GameStart;
+  START_GAME: boolean;
+  UNCOVER_CELL: CellIndexes & Pick<Cell, 'value'>;
+  END_GAME: GameEnd;
+};
+
 /**
  * Values for the type property when sending socket messages
  */
-export type SocketMessageSendType = 'UNCOVER_CELL';
+export type SocketMessageSendType = keyof MessageSendPayloadMap;
 
 /**
  * Values for the type property when receiving socket messages
  */
-export type SocketMessageReceiveType = 'START_GAME' | 'UNCOVER_CELL' | 'END_GAME';
+export type SocketMessageReceiveType = keyof MessageReceivePayloadMap;
 
 type SocketMessageType = SocketMessageSendType | SocketMessageReceiveType;
 
@@ -43,32 +64,30 @@ interface SocketMessage<TType extends SocketMessageType, TPayload> {
   payload: TPayload;
 }
 
-type SocketMessageSendPayloadMap = {
-  UNCOVER_CELL: CellIndexes & { gameId: GameStart['id'] };
-};
-
 export type SocketMessageSend<TType extends SocketMessageSendType> = SocketMessage<
   TType,
-  SocketMessageSendPayloadMap[TType]
+  MessageSendPayloadMap[TType]
 >;
 
-type UncoverCellParam = Pick<Cell, 'rowIdx' | 'colIdx' | 'value'>;
-type CellIndexes = Pick<Cell, 'rowIdx' | 'colIdx'>;
-
-type StartGameCallback = (startGame: boolean) => void;
-
-type UncoverCellCallback = (value: Cell['value']) => void;
-
-type EndGameCallback = (gameEnd: GameEnd) => void;
-
 interface DispatchMap {
-  START_GAME: (payload: boolean) => void;
-  UNCOVER_CELL: (payload: UncoverCellParam) => void;
-  END_GAME: EndGameCallback;
+  NEW_GAME: (gameStart: MessageReceivePayloadMap['NEW_GAME']) => void;
+  START_GAME: (startGame: MessageReceivePayloadMap['START_GAME']) => void;
+  UNCOVER_CELL: (payload: MessageReceivePayloadMap['UNCOVER_CELL']) => void;
+  END_GAME: (gameEnd: MessageReceivePayloadMap['END_GAME']) => void;
 }
+
+type NewGameCallback = DispatchMap['NEW_GAME'];
+type StartGameCallback = DispatchMap['START_GAME'];
+type EndGameCallback = DispatchMap['END_GAME'];
+type UncoverCellParam = MessageReceivePayloadMap['UNCOVER_CELL'];
+type UncoverCellCallback = (value: Cell['value']) => void;
 
 export class GameSocket {
   private readonly sock: WebSocket;
+  /**
+   * Set of callbacks to fire when the game starts
+   */
+  private readonly onNewGameSet: Set<NewGameCallback> = new Set();
   /**
    * Set of callbacks to fire when the game starts
    */
@@ -96,6 +115,7 @@ export class GameSocket {
 
     // Instantiate all of our message handlers
     this.dispatchMap = {
+      NEW_GAME: (payload) => this.handleOnNewGame(payload),
       START_GAME: (payload) => this.handleOnStartGame(payload),
       UNCOVER_CELL: (payload) => this.handleOnUncoverCell(payload),
       END_GAME: (status) => this.handleOnEndGame(status)
@@ -135,8 +155,32 @@ export class GameSocket {
   /**
    * Same as Websocket send method, but serializes to json first
    */
-  public sendMsg<TType extends SocketMessageSendType>(data: SocketMessageSend<TType>): void {
-    this.sock.send(JSON.stringify(data));
+  public sendMsg<TType extends SocketMessageSendType>(
+    type: TType,
+    payload: SocketMessageSend<TType>['payload']
+  ): void {
+    this.sock.send(JSON.stringify({ type, payload }));
+  }
+
+  /**
+   * Add a callback to the onNewGame set
+   */
+  public addOnNewGame(callback: NewGameCallback): void {
+    this.onNewGameSet.add(callback);
+  }
+
+  /**
+   * Remove a callback from the onNewGame set
+   */
+  public removeOnNewGame(callback: NewGameCallback): boolean {
+    return this.onNewGameSet.delete(callback);
+  }
+
+  /**
+   * Handler for when a new game is received
+   */
+  public handleOnNewGame(gameStart: GameStart): void {
+    this.onNewGameSet.forEach((callback) => callback(gameStart));
   }
 
   /**

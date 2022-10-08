@@ -18,7 +18,6 @@ export interface GameBoardConfig {
 export interface GameStart extends GameBoardConfig {
   id: number;
   difficulty: GameDifficulty;
-  status: GameStatus;
 }
 
 export interface GameEnd {

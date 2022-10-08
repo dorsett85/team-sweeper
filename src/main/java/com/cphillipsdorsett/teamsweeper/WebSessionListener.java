@@ -40,7 +40,7 @@ public class WebSessionListener implements HttpSessionListener {
         try {
 
             int[] deletedCounts = gameService.deleteExpiredSessionGames(sessionId);
-            logger.info("Deleted: session_games {}, games {}", deletedCounts[0], deletedCounts[1]);
+            logger.info("Deleted {} session_games, {} games", deletedCounts[0], deletedCounts[1]);
         } catch (Exception e) {
             logger.error("Error deleting expired session games with session id: {}", sessionId, e);
         }
