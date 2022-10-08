@@ -12,8 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class GameService {
@@ -181,69 +180,6 @@ public class GameService {
             }
         });
     }
-
-//    private void uncoverCellNonRecursive(
-//        Cell cell,
-//        LiveGame game,
-//        UncoverCellHandler handler,
-//        boolean uncoverAll
-//    ) throws IOException {
-//        // Early exit if the cell is already uncovered or if we're uncovering
-//        // everything and the cell has already been checked.
-//        if ((!cell.isCovered() && !uncoverAll) || (uncoverAll && cell.isChecked())) {
-//            return;
-//        }
-//
-//        cell.setCovered(false);
-//
-//        if (uncoverAll) {
-//            cell.setChecked(true);
-//        }
-//
-//        // TODO we'll need to update our live game cache with the updated board
-//        //  state.
-//        handler.onUncover(cell);
-//        game.incrementUncoveredCells();
-//
-//        // stop here if the cell is near a mine or we're not uncovering
-//        // everything.
-//        if (cell.isNearMine()) {
-//            return;
-//        }
-//
-//        Cell[][] board = game.getBoard();
-//
-//        List<int[]> nextCellsToCheck = Arrays.asList(new int[]{cell.getRowIdx(), cell.getColIdx()});
-//
-//        while (true) {
-//            for (int[] cellTuple : GameBoard.getSurroundingCells()) {
-//                int[] cellToCheck = nextCellsToCheck.get(0);
-//                if (cellToCheck == null) {
-//                    break;
-//                }
-//                int rIdx = cellToCheck[0] + cellTuple[0];
-//                int cIdx = cellToCheck[1] + cellTuple[1];
-//
-//                if (GameBoard.isInBounds(rIdx, cIdx, board)) {
-//                    Cell nearbyCell = board[rIdx][cIdx];
-//                    if (!nearbyCell.isCovered() && !nearbyCell.isNearMine() || (uncoverAll && !nearbyCell.isChecked())) {
-//                        nextCellsToCheck.add(new int[]{rIdx, cIdx});
-//                    }
-//
-//                    nearbyCell.setCovered(false);
-//
-//                    if (uncoverAll) {
-//                        nearbyCell.setCovered(false);
-//                    }
-//                    // TODO we'll need to update our live game cache with the updated board
-//                    //  state.
-//                    handler.onUncover(cell);
-//                    game.incrementUncoveredCells();
-//                    nextCellsToCheck.remove(0);
-//                }
-//            }
-//        }
-//    }
 
     /**
      * Update the db game and remove the live game
