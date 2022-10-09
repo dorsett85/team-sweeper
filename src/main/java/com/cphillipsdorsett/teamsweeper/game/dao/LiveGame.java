@@ -3,19 +3,23 @@ package com.cphillipsdorsett.teamsweeper.game.dao;
 import com.cphillipsdorsett.teamsweeper.game.GameBoard;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LiveGame {
     private final int id;
     private GameStatus status = GameStatus.IN_PROGRESS;
     private final Cell[][] board;
     private Instant startedAt;
-    private int uncoveredCells = 0;
+    private int uncoveredCells;
     private final int uncoveredCellsNeededToWin;
+    private final Map<String, SessionInfo> sessions = new HashMap<>();
 
-    public LiveGame(int id, GameBoard gameBoard) {
+    public LiveGame(int id, String httpSessionId, GameBoard gameBoard) {
         this.id = id;
         this.board = gameBoard.getBoard();
         this.uncoveredCellsNeededToWin = gameBoard.getUncoveredCellsNeededToWin();
+        sessions.put(httpSessionId, new SessionInfo());
     }
 
     public int getId() {
@@ -56,5 +60,35 @@ public class LiveGame {
 
     public boolean isInProgress() {
         return status == GameStatus.IN_PROGRESS;
+    }
+
+    public int getSessionCount() {
+        return sessions.size();
+    }
+
+    public void adjustSessionPoints(String httpSessionId, int points) {
+        SessionInfo sessionInfo = sessions.get(httpSessionId);
+        if (sessionInfo != null) {
+            sessionInfo.setPoints(sessionInfo.getPoints() + points);
+        }
+    }
+
+    public void removeSessionId(String httpSessionId) {
+        sessions.remove(httpSessionId);
+    }
+
+    /**
+     * Any session specific info associated with the live game
+     */
+    private static class SessionInfo {
+        private int points;
+
+        public int getPoints() {
+            return points;
+        }
+
+        public void setPoints(int points) {
+            this.points = points;
+        }
     }
 }

@@ -38,9 +38,9 @@ public class GameService {
         SessionGame sessionGame = new SessionGame(sessionId, game.getId());
         sessionGameDao.create(sessionGame);
 
-        // Create a live game (this will replace any existing session game)
-        LiveGame liveGame = new LiveGame(game.getId(), gameBoard);
-        liveGameDao.add(sessionId, liveGame);
+        // Create a live game
+        LiveGame liveGame = new LiveGame(game.getId(), sessionId, gameBoard);
+        liveGameDao.updateSessionGame(sessionId, liveGame);
 
         return new GameStartResponseDto(game, gameBoard.getBoardConfig());
     }
@@ -57,6 +57,7 @@ public class GameService {
      * @return tuple of session_games and games deleted
      */
     public int[] deleteExpiredSessionGames(String sessionId) {
+        liveGameDao.remove(sessionId);
         int sessionGamesDeleted = sessionGameDao.deleteBySessionId(sessionId);
         int gamesDeleted = gameDao.deleteGamesWithoutSession();
         return new int[]{sessionGamesDeleted, gamesDeleted};
@@ -70,7 +71,10 @@ public class GameService {
         UncoverCellRequestDto payload,
         UncoverCellMessageHandler messageHandler
     ) throws IOException {
-        LiveGame game = liveGameDao.get(httpSessionId);
+        LiveGame game = liveGameDao.get(httpSessionId).orElseThrow(() -> {
+            // TODO create a custom game service exception
+            throw new NullPointerException("Couldn't find an active game for session id: " + httpSessionId);
+        });
 
         // Early exit if the game is already over since all the cells have or
         // will be uncovered.
@@ -96,7 +100,7 @@ public class GameService {
         }
 
         // Mine was not clicked and the game is still in progress
-        uncoverCellCascade(uncoveredCell, game, messageHandler, 1);
+        uncoverCellCascade(uncoveredCell, game, messageHandler, httpSessionId, 1);
 
         // Once the cell cascade has finished, we'll check to see if the game
         // has been won.
@@ -115,6 +119,7 @@ public class GameService {
         Cell cell,
         LiveGame game,
         UncoverCellMessageHandler handler,
+        String httpSessionId,
         Integer points
     ) throws IOException {
         // Early exit if the cell is already uncovered
@@ -127,6 +132,7 @@ public class GameService {
         cell.setCovered(false);
         handler.onUncover(new UncoverCellResponseDto(cell));
         if (points != null) {
+            game.adjustSessionPoints(httpSessionId, points);
             handler.onAdjustPoints(new PointsResponseDto(points));
         }
         game.incrementUncoveredCells();
@@ -145,6 +151,7 @@ public class GameService {
                     nearbyCell,
                     game,
                     handler,
+                    httpSessionId,
                     null
                 );
             } catch (IOException e) {

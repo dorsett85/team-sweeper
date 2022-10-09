@@ -1,7 +1,6 @@
 package com.cphillipsdorsett.teamsweeper;
 
 import com.cphillipsdorsett.teamsweeper.game.GameService;
-import com.cphillipsdorsett.teamsweeper.game.dao.LiveGameDao;
 import com.cphillipsdorsett.teamsweeper.game.websocket.GameSocketSessionStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,16 +14,13 @@ public class WebSessionListener implements HttpSessionListener {
     private final Logger logger = LogManager.getLogger(WebSessionListener.class);
     private final GameService gameService;
     private final GameSocketSessionStore gameSocketSessionStore;
-    private final LiveGameDao liveGameDao;
 
     public WebSessionListener(
         GameService gameService,
-        GameSocketSessionStore gamesocketSessionStore,
-        LiveGameDao liveGameDao
+        GameSocketSessionStore gamesocketSessionStore
     ) {
         this.gameService = gameService;
         this.gameSocketSessionStore = gamesocketSessionStore;
-        this.liveGameDao = liveGameDao;
     }
 
     @Override
@@ -35,10 +31,7 @@ public class WebSessionListener implements HttpSessionListener {
     public void sessionDestroyed(HttpSessionEvent sessionEvent) {
         String sessionId = sessionEvent.getSession().getId();
 
-        // Remove all games related to the session
-        liveGameDao.remove(sessionId);
         try {
-
             int[] deletedCounts = gameService.deleteExpiredSessionGames(sessionId);
             logger.info("Deleted {} session_games, {} games", deletedCounts[0], deletedCounts[1]);
         } catch (Exception e) {
