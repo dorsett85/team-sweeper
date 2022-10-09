@@ -7,9 +7,9 @@ import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellResponseDto;
 import java.io.IOException;
 
 /**
- * Event related methods to call when a cell is being uncovered
+ * Event related callbacks to call when a cell is being uncovered
  */
-public interface UncoverCellMessageHandler {
+public interface UncoverCellHandler {
 
     /**
      * Fired when the game starts

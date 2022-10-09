@@ -2,7 +2,7 @@ package com.cphillipsdorsett.teamsweeper.game;
 
 import com.cphillipsdorsett.teamsweeper.game.dao.*;
 import com.cphillipsdorsett.teamsweeper.game.dto.*;
-import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellMessageHandler;
+import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,10 @@ public class GameService {
 
     public GameStartResponseDto newGame(String sessionId, GameDifficulty difficulty) throws JsonProcessingException {
         // Any current live games need to be saved before they're overwritten
-        saveInProgressLiveGame(sessionId);
+        LiveGame currentLiveGame = liveGameDao.get(sessionId).orElse(null);
+        if (currentLiveGame != null && currentLiveGame.isInProgress()) {
+            saveLiveGame(sessionId, currentLiveGame);
+        }
 
         GameBoard gameBoard = new GameBoard(difficulty);
 
@@ -70,13 +73,13 @@ public class GameService {
      * Called when a user clicks/touches a cell on the board
      */
     public void uncoverCell(
-        String httpSessionId,
+        String sessionId,
         UncoverCellRequestDto payload,
-        UncoverCellMessageHandler messageHandler
+        UncoverCellHandler eventHandler
     ) throws IOException {
-        LiveGame game = liveGameDao.get(httpSessionId).orElseThrow(() -> {
+        LiveGame game = liveGameDao.get(sessionId).orElseThrow(() -> {
             // TODO create a custom game service exception
-            throw new NullPointerException("Couldn't find an active game for session id: " + httpSessionId);
+            throw new NullPointerException("Couldn't find an active game for session id: " + sessionId);
         });
 
         // Early exit if the game is already over since all the cells have or
@@ -88,7 +91,7 @@ public class GameService {
         // If this is the first click then set a started timestamp
         if (game.getStartedAt() == null) {
             game.setStartedAt(Instant.now());
-            messageHandler.onStartGame(true);
+            eventHandler.onStartGame(true);
         }
 
         Cell[][] board = game.getBoard();
@@ -96,21 +99,25 @@ public class GameService {
 
         // Check if a mine was clicked
         if (uncoveredCell.isMine()) {
-            Game dbGame = endGame(httpSessionId, GameStatus.LOST, game);
-            uncoverCellCascadeAll(uncoveredCell, game, messageHandler);
-            sendEndGameMessage(dbGame, messageHandler);
+            game.setStatus(GameStatus.LOST);
+            game.setEndedAt(Instant.now());
+            endGame(sessionId, game);
+            uncoverCellCascadeAll(uncoveredCell, game, eventHandler);
+            sendEndGameMessage(sessionId, game, eventHandler);
             return;
         }
 
         // Mine was not clicked and the game is still in progress
-        uncoverCellCascade(uncoveredCell, game, messageHandler, httpSessionId, 1);
+        uncoverCellCascade(uncoveredCell, game, eventHandler, sessionId, 1);
 
         // Once the cell cascade has finished, we'll check to see if the game
         // has been won.
         if (game.getUncoveredCells() >= game.getUncoveredCellsNeededToWin()) {
-            Game dbGame = endGame(httpSessionId, GameStatus.WON, game);
-            uncoverCellCascadeAll(uncoveredCell, game, messageHandler);
-            sendEndGameMessage(dbGame, messageHandler);
+            game.setStatus(GameStatus.WON);
+            game.setEndedAt(Instant.now());
+            endGame(sessionId, game);
+            uncoverCellCascadeAll(uncoveredCell, game, eventHandler);
+            sendEndGameMessage(sessionId, game, eventHandler);
         }
     }
 
@@ -121,8 +128,8 @@ public class GameService {
     private void uncoverCellCascade(
         Cell cell,
         LiveGame game,
-        UncoverCellMessageHandler handler,
-        String httpSessionId,
+        UncoverCellHandler eventHandler,
+        String sessionId,
         Integer points
     ) throws IOException {
         // Early exit if the cell is already uncovered
@@ -133,10 +140,10 @@ public class GameService {
         // TODO we'll need to update our live game cache with the updated board
         //  state.
         cell.setCovered(false);
-        handler.onUncover(new UncoverCellResponseDto(cell));
+        eventHandler.onUncover(new UncoverCellResponseDto(cell));
         if (points != null) {
-            game.adjustSessionPoints(httpSessionId, points);
-            handler.onAdjustPoints(new PointsResponseDto(points));
+            game.adjustSessionPoints(sessionId, points);
+            eventHandler.onAdjustPoints(new PointsResponseDto(points));
         }
         game.incrementUncoveredCells();
 
@@ -153,8 +160,8 @@ public class GameService {
                 uncoverCellCascade(
                     nearbyCell,
                     game,
-                    handler,
-                    httpSessionId,
+                    eventHandler,
+                    sessionId,
                     null
                 );
             } catch (IOException e) {
@@ -169,7 +176,7 @@ public class GameService {
     private void uncoverCellCascadeAll(
         Cell cell,
         LiveGame game,
-        UncoverCellMessageHandler handler
+        UncoverCellHandler handler
     ) throws IOException {
         // Early exit if we've already checked this cell
         if (cell.isChecked()) {
@@ -196,34 +203,26 @@ public class GameService {
     }
 
     /**
-     * Update the db game and remove the live game
+     * Update the db game and session game
      */
-    private Game endGame(String httpSessionId, GameStatus newStatus, LiveGame liveGame) throws JsonProcessingException {
+    private void endGame(String sessionId, LiveGame liveGame) throws JsonProcessingException {
         // Update the game
-        Game dbGame = gameDao.findCurrent(httpSessionId, liveGame.getId());
-        dbGame.setStatus(newStatus);
+        Game dbGame = gameDao.findCurrent(sessionId, liveGame.getId());
+        dbGame.setStatus(liveGame.getStatus());
         dbGame.setStartedAt(liveGame.getStartedAt());
-        dbGame.setEndedAt(Instant.now());
+        dbGame.setEndedAt(liveGame.getEndedAt());
         dbGame.setBoard(om.writeValueAsString(liveGame.getBoard()));
         gameDao.update(dbGame);
 
         // Update the session game
-        updateSessionGame(httpSessionId, liveGame, dbGame);
-
-        return dbGame;
+        updateSessionGame(sessionId, dbGame.getId(), liveGame);
     }
 
     /**
      * Save an in-progress live game. This enables data to be persisted before
      * a new game overrides the session live game.
      */
-    private void saveInProgressLiveGame(String sessionId) throws JsonProcessingException {
-        LiveGame liveGame = liveGameDao.get(sessionId).orElse(null);
-
-        if (liveGame == null || !liveGame.isInProgress()) {
-            return;
-        }
-
+    private void saveLiveGame(String sessionId, LiveGame liveGame) throws JsonProcessingException {
         // Update the game
         Game dbGame = gameDao.findCurrent(sessionId, liveGame.getId());
         dbGame.setStartedAt(liveGame.getStartedAt());
@@ -231,11 +230,11 @@ public class GameService {
         gameDao.update(dbGame);
 
         // Update the session game
-        updateSessionGame(sessionId, liveGame, dbGame);
+        updateSessionGame(sessionId, dbGame.getId(), liveGame);
     }
 
-    private void updateSessionGame(String sessionId, LiveGame liveGame, Game dbGame) {
-        SessionGame sessionGame = sessionGameDao.findCurrent(sessionId, dbGame.getId());
+    private void updateSessionGame(String sessionId, int gameId, LiveGame liveGame) {
+        SessionGame sessionGame = sessionGameDao.findCurrent(sessionId, gameId);
         sessionGame.setPoints(liveGame.getSessionPoints(sessionId));
         sessionGameDao.update(sessionGame);
     }
@@ -243,9 +242,10 @@ public class GameService {
     /**
      * Sends message to the frontend when a game has been won or lost
      */
-    private void sendEndGameMessage(Game game, UncoverCellMessageHandler callback) throws IOException {
+    private void sendEndGameMessage(String sessionId, LiveGame game, UncoverCellHandler callback) throws IOException {
         long duration = Duration.between(game.getStartedAt(), game.getEndedAt()).toMillis();
-        GameEndResponseDto gameEndDto = new GameEndResponseDto(game.getStatus(), duration);
+        int points = game.getSessionPoints(sessionId);
+        GameEndResponseDto gameEndDto = new GameEndResponseDto(game.getStatus(), duration, points);
         callback.onEndGame(gameEndDto);
     }
 }

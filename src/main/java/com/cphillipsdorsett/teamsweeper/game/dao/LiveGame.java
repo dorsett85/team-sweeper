@@ -11,6 +11,7 @@ public class LiveGame {
     private GameStatus status = GameStatus.IN_PROGRESS;
     private final Cell[][] board;
     private Instant startedAt;
+    private Instant endedAt;
     private int uncoveredCells;
     private final int uncoveredCellsNeededToWin;
     private final Map<String, SessionInfo> sessions = new HashMap<>();
@@ -44,6 +45,14 @@ public class LiveGame {
 
     public void setStartedAt(Instant startedAt) {
         this.startedAt = startedAt;
+    }
+
+    public Instant getEndedAt() {
+        return endedAt;
+    }
+
+    public void setEndedAt(Instant endedAt) {
+        this.endedAt = endedAt;
     }
 
     public int getUncoveredCells() {

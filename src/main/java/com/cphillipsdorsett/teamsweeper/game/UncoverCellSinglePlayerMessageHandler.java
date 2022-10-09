@@ -4,12 +4,12 @@ import com.cphillipsdorsett.teamsweeper.game.dto.GameEndResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.PointsResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.websocket.SendableMessage;
-import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellMessageHandler;
+import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellHandler;
 import com.cphillipsdorsett.teamsweeper.game.websocket.message.GameSendMessage;
 
 import java.io.IOException;
 
-public class UncoverCellSinglePlayerMessageHandler implements UncoverCellMessageHandler {
+public class UncoverCellSinglePlayerMessageHandler implements UncoverCellHandler {
     private final SendableMessage sm;
 
     public UncoverCellSinglePlayerMessageHandler(SendableMessage sm) {
