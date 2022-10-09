@@ -13,15 +13,24 @@ public class SessionGameStats {
     private int count;
     @Column(name = "fastest_time")
     private Long fastestTime;
+    @Column(name = "highest_points")
+    private int highestPoints;
 
     protected SessionGameStats() {
     }
 
-    public SessionGameStats(GameDifficulty difficulty, GameStatus status, int count, Long fastestTime) {
+    public SessionGameStats(
+        GameDifficulty difficulty,
+        GameStatus status,
+        int count,
+        Long fastestTime,
+        int highestPoints
+    ) {
         this.difficulty = difficulty;
         this.status = status;
         this.count = count;
         this.fastestTime = fastestTime;
+        this.highestPoints = highestPoints;
     }
 
     public Long getId() {
@@ -42,5 +51,9 @@ public class SessionGameStats {
 
     public Long getFastestTime() {
         return fastestTime;
+    }
+
+    public int getHighestPoints() {
+        return highestPoints;
     }
 }

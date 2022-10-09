@@ -26,6 +26,7 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ gameEnd, onProcess
   const [statsItems, setStatsItems] = useState<[React.ReactElement[], React.ReactElement[]]>();
 
   useEffect(() => {
+    let mounted = true;
     if (statsItems) {
       return;
     }
@@ -33,6 +34,9 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ gameEnd, onProcess
     // Fetch session stats
     fetchJson<SessionGameStats>('/game/session-stats')
       .then((sessionGameStats) => {
+        if (!mounted) {
+          return;
+        }
         // Loop through all the game difficulty stats to populate different list
         // sections.
         const fastestTimesListItems: ReactElement[] = [];
@@ -91,6 +95,10 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ gameEnd, onProcess
       .catch((e) => {
         console.warn("Couldn't fetch session stats:", e);
       });
+
+    return () => {
+      mounted = false;
+    };
   }, [gameDifficulty, gameEnd.duration, gameEnd.status, onProcessedStats, statsItems]);
 
   // TODO add loading indicator

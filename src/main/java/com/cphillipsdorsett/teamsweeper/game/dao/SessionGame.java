@@ -12,6 +12,8 @@ public class SessionGame {
     private String sessionId;
     @Column(name = "game_id")
     private int gameId;
+    @Column
+    private int points;
 
     protected SessionGame() {
     }
@@ -31,5 +33,13 @@ public class SessionGame {
 
     public int getGameId() {
         return gameId;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
     }
 }

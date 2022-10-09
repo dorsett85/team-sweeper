@@ -42,6 +42,7 @@ public class SessionGameStatsResponseDto {
             gameDifficultyStats.count += sessionGameStats.getCount();
             gameDifficultyStats.statuses.get(statusKey).count = sessionGameStats.getCount();
             gameDifficultyStats.statuses.get(statusKey).fastestTime = sessionGameStats.getFastestTime();
+            gameDifficultyStats.statuses.get(statusKey).highestPoints = sessionGameStats.getHighestPoints();
         });
         return baseGamesStats;
     }
@@ -72,11 +73,12 @@ public class SessionGameStatsResponseDto {
     }
 
     private static class GameStatusStats {
-        public int count = 0;
+        public int count;
         /**
          * Fastest time from start to end in milliseconds
          */
         public Long fastestTime;
+        public int highestPoints;
 
         public GameStatusStats() {
         }

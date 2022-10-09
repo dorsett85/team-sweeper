@@ -66,6 +66,11 @@ public class LiveGame {
         return sessions.size();
     }
 
+    public int getSessionPoints(String httpSessionId) {
+        SessionInfo sessionInfo = sessions.get(httpSessionId);
+        return sessionInfo.getPoints();
+    }
+
     public void adjustSessionPoints(String httpSessionId, int points) {
         SessionInfo sessionInfo = sessions.get(httpSessionId);
         if (sessionInfo != null) {

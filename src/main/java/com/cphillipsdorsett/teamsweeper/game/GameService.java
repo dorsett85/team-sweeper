@@ -26,6 +26,9 @@ public class GameService {
     }
 
     public GameStartResponseDto newGame(String sessionId, GameDifficulty difficulty) throws JsonProcessingException {
+        // Any current live games need to be saved before they're overwritten
+        saveInProgressLiveGame(sessionId);
+
         GameBoard gameBoard = new GameBoard(difficulty);
 
         // Add records to the db, need to serialize the board for the db
@@ -34,7 +37,7 @@ public class GameService {
         Game game = gameDao.create(gameToInsert);
 
         // Also need a session_game record so we can match the game based on the
-        // session for the websocket connect.
+        // session.
         SessionGame sessionGame = new SessionGame(sessionId, game.getId());
         sessionGameDao.create(sessionGame);
 
@@ -95,7 +98,7 @@ public class GameService {
         if (uncoveredCell.isMine()) {
             Game dbGame = endGame(httpSessionId, GameStatus.LOST, game);
             uncoverCellCascadeAll(uncoveredCell, game, messageHandler);
-            sendEndGame(dbGame, messageHandler);
+            sendEndGameMessage(dbGame, messageHandler);
             return;
         }
 
@@ -107,7 +110,7 @@ public class GameService {
         if (game.getUncoveredCells() >= game.getUncoveredCellsNeededToWin()) {
             Game dbGame = endGame(httpSessionId, GameStatus.WON, game);
             uncoverCellCascadeAll(uncoveredCell, game, messageHandler);
-            sendEndGame(dbGame, messageHandler);
+            sendEndGameMessage(dbGame, messageHandler);
         }
     }
 
@@ -195,19 +198,52 @@ public class GameService {
     /**
      * Update the db game and remove the live game
      */
-    private Game endGame(String httpSessionId, GameStatus newStatus, LiveGame game) throws JsonProcessingException {
-        // Update end of game fields in db
-        Game dbGame = gameDao.findCurrent(httpSessionId, game.getId());
+    private Game endGame(String httpSessionId, GameStatus newStatus, LiveGame liveGame) throws JsonProcessingException {
+        // Update the game
+        Game dbGame = gameDao.findCurrent(httpSessionId, liveGame.getId());
         dbGame.setStatus(newStatus);
-        dbGame.setStartedAt(game.getStartedAt());
+        dbGame.setStartedAt(liveGame.getStartedAt());
         dbGame.setEndedAt(Instant.now());
-        dbGame.setBoard(om.writeValueAsString(game.getBoard()));
+        dbGame.setBoard(om.writeValueAsString(liveGame.getBoard()));
         gameDao.update(dbGame);
+
+        // Update the session game
+        updateSessionGame(httpSessionId, liveGame, dbGame);
 
         return dbGame;
     }
 
-    private void sendEndGame(Game game, UncoverCellMessageHandler callback) throws IOException {
+    /**
+     * Save an in-progress live game. This enables data to be persisted before
+     * a new game overrides the session live game.
+     */
+    private void saveInProgressLiveGame(String sessionId) throws JsonProcessingException {
+        LiveGame liveGame = liveGameDao.get(sessionId).orElse(null);
+
+        if (liveGame == null || !liveGame.isInProgress()) {
+            return;
+        }
+
+        // Update the game
+        Game dbGame = gameDao.findCurrent(sessionId, liveGame.getId());
+        dbGame.setStartedAt(liveGame.getStartedAt());
+        dbGame.setBoard(om.writeValueAsString(liveGame.getBoard()));
+        gameDao.update(dbGame);
+
+        // Update the session game
+        updateSessionGame(sessionId, liveGame, dbGame);
+    }
+
+    private void updateSessionGame(String sessionId, LiveGame liveGame, Game dbGame) {
+        SessionGame sessionGame = sessionGameDao.findCurrent(sessionId, dbGame.getId());
+        sessionGame.setPoints(liveGame.getSessionPoints(sessionId));
+        sessionGameDao.update(sessionGame);
+    }
+
+    /**
+     * Sends message to the frontend when a game has been won or lost
+     */
+    private void sendEndGameMessage(Game game, UncoverCellMessageHandler callback) throws IOException {
         long duration = Duration.between(game.getStartedAt(), game.getEndedAt()).toMillis();
         GameEndResponseDto gameEndDto = new GameEndResponseDto(game.getStatus(), duration);
         callback.onEndGame(gameEndDto);

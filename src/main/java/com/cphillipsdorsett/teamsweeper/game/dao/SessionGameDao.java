@@ -31,19 +31,51 @@ public class SessionGameDao implements SessionGameRepository {
     }
 
     @Transactional
+    public SessionGame findCurrent(String sessionId, int gameId) {
+        return (SessionGame) em
+            .createNativeQuery(
+                "" +
+                    "SELECT * " +
+                    "FROM session_game " +
+                    "WHERE session_id = :sessionId" +
+                    "    AND game_id = :gameId",
+                SessionGame.class
+            )
+            .setParameter("sessionId", sessionId)
+            .setParameter("gameId", gameId)
+            .getSingleResult();
+    }
+
+    @Transactional
+    public void update(SessionGame sessionGame) {
+        em
+            .createNativeQuery(
+                "" +
+                    "UPDATE session_game " +
+                    "SET" +
+                    "    points = :points " +
+                    "WHERE id = :id"
+            )
+            .setParameter("points", sessionGame.getPoints())
+            .setParameter("id", sessionGame.getId())
+            .executeUpdate();
+    }
+
+    @Transactional
     public List<SessionGameStats> findSessionGameStats(String sessionId) {
         return (List<SessionGameStats>) em
             .createNativeQuery(
                 "" +
                     "SELECT" +
-                    "    ROW_NUMBER() OVER ( ORDER BY g.difficulty) id," +
+                    "    ROW_NUMBER() OVER ( ORDER BY g.difficulty) as id," +
                     "    g.difficulty," +
                     "    g.status," +
                     "    COUNT(g.status) count," +
-                    "    MIN(TIMESTAMPDIFF(MICROSECOND, g.started_at, g.ended_at) / 1000) as fastest_time " +
+                    "    MIN(TIMESTAMPDIFF(MICROSECOND, g.started_at, g.ended_at) / 1000) as fastest_time," +
+                    "    MAX(sg.points) as highest_points " +
                     "FROM session_game sg " +
                     "INNER JOIN game g ON sg.game_id = g.id " +
-                    "WHERE sg.session_id = :sessionId " +
+                    "WHERE sg.session_id = :sessionId" +
                     "    AND g.started_at IS NOT NULL " +
                     "GROUP BY g.status, g.difficulty",
                 SessionGameStats.class
