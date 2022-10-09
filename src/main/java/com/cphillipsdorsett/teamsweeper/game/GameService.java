@@ -1,10 +1,8 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
 import com.cphillipsdorsett.teamsweeper.game.dao.*;
-import com.cphillipsdorsett.teamsweeper.game.dto.GameEndResponseDto;
-import com.cphillipsdorsett.teamsweeper.game.dto.GameStartResponseDto;
-import com.cphillipsdorsett.teamsweeper.game.dto.SessionGameStatsResponseDto;
-import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellRequestDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.*;
+import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellMessageHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -70,13 +68,13 @@ public class GameService {
     public void uncoverCell(
         String httpSessionId,
         UncoverCellRequestDto payload,
-        UncoverCellHandler messageHandler
+        UncoverCellMessageHandler messageHandler
     ) throws IOException {
         LiveGame game = liveGameDao.get(httpSessionId);
 
         // Early exit if the game is already over since all the cells have or
         // will be uncovered.
-        if (game == null || game.getStatus() != GameStatus.IN_PROGRESS) {
+        if (!game.isInProgress()) {
             return;
         }
 
@@ -98,7 +96,7 @@ public class GameService {
         }
 
         // Mine was not clicked and the game is still in progress
-        uncoverCellCascade(uncoveredCell, game, messageHandler);
+        uncoverCellCascade(uncoveredCell, game, messageHandler, 1);
 
         // Once the cell cascade has finished, we'll check to see if the game
         // has been won.
@@ -116,35 +114,43 @@ public class GameService {
     private void uncoverCellCascade(
         Cell cell,
         LiveGame game,
-        UncoverCellHandler handler
+        UncoverCellMessageHandler handler,
+        Integer points
     ) throws IOException {
         // Early exit if the cell is already uncovered
         if (!cell.isCovered()) {
             return;
         }
 
-        cell.setCovered(false);
-
         // TODO we'll need to update our live game cache with the updated board
         //  state.
-        handler.onUncover(cell);
+        cell.setCovered(false);
+        handler.onUncover(new UncoverCellResponseDto(cell));
+        if (points != null) {
+            handler.onAdjustPoints(new PointsResponseDto(points));
+        }
         game.incrementUncoveredCells();
 
-        // If the cell isn't near any mines we'll uncover the surrounding
-        // cells as well.
-        if (!cell.isNearMine()) {
-            GameBoard.nearbyCellsForEach(cell, game.getBoard(), (nearbyCell) -> {
-                try {
-                    uncoverCellCascade(
-                        nearbyCell,
-                        game,
-                        handler
-                    );
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        if (cell.isNearMine()) {
+            return;
         }
+
+        GameBoard.nearbyCellsForEach(cell, game.getBoard(), (nearbyCell) -> {
+            if (!nearbyCell.isCovered()) {
+                return;
+            }
+
+            try {
+                uncoverCellCascade(
+                    nearbyCell,
+                    game,
+                    handler,
+                    null
+                );
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     /**
@@ -153,20 +159,18 @@ public class GameService {
     private void uncoverCellCascadeAll(
         Cell cell,
         LiveGame game,
-        UncoverCellHandler handler
+        UncoverCellMessageHandler handler
     ) throws IOException {
         // Early exit if we've already checked this cell
         if (cell.isChecked()) {
             return;
         }
 
-        cell.setCovered(false);
-        cell.setChecked(true);
-
-
         // TODO we'll need to update our live game cache with the updated board
         //  state.
-        handler.onUncover(cell);
+        cell.setChecked(true);
+        cell.setCovered(false);
+        handler.onUncover(new UncoverCellResponseDto(cell));
 
         GameBoard.nearbyCellsForEach(cell, game.getBoard(), (nearbyCell) -> {
             try {
@@ -193,13 +197,10 @@ public class GameService {
         dbGame.setBoard(om.writeValueAsString(game.getBoard()));
         gameDao.update(dbGame);
 
-        // Game is persisted, safe to remove the live game
-        liveGameDao.remove(httpSessionId);
-
         return dbGame;
     }
 
-    private void sendEndGame(Game game, UncoverCellHandler callback) throws IOException {
+    private void sendEndGame(Game game, UncoverCellMessageHandler callback) throws IOException {
         long duration = Duration.between(game.getStartedAt(), game.getEndedAt()).toMillis();
         GameEndResponseDto gameEndDto = new GameEndResponseDto(game.getStatus(), duration);
         callback.onEndGame(gameEndDto);

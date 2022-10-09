@@ -1,7 +1,7 @@
 package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 import com.cphillipsdorsett.teamsweeper.game.GameService;
-import com.cphillipsdorsett.teamsweeper.game.UncoverCellSinglePlayerHandler;
+import com.cphillipsdorsett.teamsweeper.game.UncoverCellSinglePlayerMessageHandler;
 import com.cphillipsdorsett.teamsweeper.game.dao.GameDifficulty;
 import com.cphillipsdorsett.teamsweeper.game.dto.GameStartResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.websocket.message.*;
@@ -28,8 +28,8 @@ public class GameSocketDispatch {
         // This is key. Our socket handler will call the values in this map
         // based on the type property in the json message.
         this.dispatchMap = new HashMap<>() {{
-            put(NewGameReceiveMessage.TYPE, (node, session) -> newGame(node, session));
-            put(UncoverCellReceiveMessage.TYPE, (node, session) -> uncoverCell(node, session));
+            put(GameReceiveMessageType.NEW_GAME, (node, session) -> newGame(node, session));
+            put(GameReceiveMessageType.UNCOVER_CELL, (node, session) -> uncoverCell(node, session));
         }};
     }
 
@@ -41,7 +41,7 @@ public class GameSocketDispatch {
             .orElseThrow(() -> new GameSocketException(CloseStatus.BAD_DATA, "difficulty param must be (e|m|h)"));
 
         GameStartResponseDto responseDto = gameService.newGame(httpSessionId, difficulty);
-        sendMessage(new NewGameSendMessage(responseDto), session);
+        sendMessage(GameSendMessage.createNewGame(responseDto), session);
     }
 
     public void uncoverCell(JsonNode node, WebSocketSession session) throws IOException {
@@ -49,7 +49,7 @@ public class GameSocketDispatch {
         String httpSessionId = GameSocketUtil.getHttpSessionId(session);
 
         SendableMessage sm = (gameSendMessage) -> sendMessage(gameSendMessage, session);
-        gameService.uncoverCell(httpSessionId, msg.getPayload(), new UncoverCellSinglePlayerHandler(sm));
+        gameService.uncoverCell(httpSessionId, msg.getPayload(), new UncoverCellSinglePlayerMessageHandler(sm));
     }
 
     /**

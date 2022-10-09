@@ -53,4 +53,8 @@ public class LiveGame {
     public void incrementUncoveredCells() {
         uncoveredCells++;
     }
+
+    public boolean isInProgress() {
+        return status == GameStatus.IN_PROGRESS;
+    }
 }

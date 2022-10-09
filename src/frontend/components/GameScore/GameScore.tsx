@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import styles from './GameScore.module.less';
 import { useGameSocket } from '../GameSocketProvider/GameSocketProvider';
 import { useAppSelector } from '../../pages/single-player/singlePlayerStore';
@@ -11,6 +11,7 @@ interface GameScoreProps {
 const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
   const gameIsLoading = useAppSelector((state) => state.isLoading);
   const [time, setTime] = useState(new Date(0));
+  const [points, setPoints] = useState(0);
   const { sock } = useGameSocket();
   const timerIntervalRef = useRef<NodeJS.Timer>();
 
@@ -25,6 +26,9 @@ const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
   }, [gameIsLoading]);
 
   useEffect(() => {
+    const handleOnNewGame = () => {
+      setPoints(0);
+    };
     // When the game starts, increase the timer every second
     const handleOnStartGame = () => {
       timerIntervalRef.current = setInterval(() => {
@@ -36,13 +40,20 @@ const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
         clearInterval(timerIntervalRef.current);
       }
     };
+    const handleOnAdjustPoints = (newPoints: number) => {
+      setPoints((oldPoints) => oldPoints + newPoints);
+    };
 
+    sock.addOnNewGame(handleOnNewGame);
     sock.addOnStartGame(handleOnStartGame);
     sock.addOnEndGame(handleOnEndGame);
+    sock.addOnAdjustPoints(handleOnAdjustPoints);
 
     return () => {
+      sock.removeOnNewGame(handleOnNewGame);
       sock.removeOnStartGame(handleOnStartGame);
       sock.removeOnEndGame(handleOnEndGame);
+      sock.removeOnAdjustPoints(handleOnAdjustPoints);
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
       }
@@ -58,10 +69,10 @@ const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
         </span>
       </div>
       <div>
-        <span>Points:</span> <span className={styles.pillText}>0</span>
+        <span>Points:</span> <span className={styles.pillText}>{points}</span>
       </div>
     </div>
   );
 };
 
-export default GameScore;
+export default memo(GameScore);

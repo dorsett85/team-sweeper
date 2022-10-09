@@ -32,7 +32,8 @@ type MessageSendPayloadMap = {
 type MessageReceivePayloadMap = {
   NEW_GAME: GameStart;
   START_GAME: boolean;
-  UNCOVER_CELL: CellIndexes & Pick<Cell, 'value'>;
+  UNCOVER_CELL: Pick<Cell, keyof CellIndexes | 'value'> & { points: number };
+  ADJUST_POINTS: { points: number };
   END_GAME: GameEnd;
 };
 
@@ -69,18 +70,17 @@ export type SocketMessageSend<TType extends SocketMessageSendType> = SocketMessa
   MessageSendPayloadMap[TType]
 >;
 
-interface DispatchMap {
-  NEW_GAME: (gameStart: MessageReceivePayloadMap['NEW_GAME']) => void;
-  START_GAME: (startGame: MessageReceivePayloadMap['START_GAME']) => void;
-  UNCOVER_CELL: (payload: MessageReceivePayloadMap['UNCOVER_CELL']) => void;
-  END_GAME: (gameEnd: MessageReceivePayloadMap['END_GAME']) => void;
-}
+type DispatchMap = {
+  [K in keyof MessageReceivePayloadMap]: (payload: MessageReceivePayloadMap[K]) => void;
+};
 
 type NewGameCallback = DispatchMap['NEW_GAME'];
 type StartGameCallback = DispatchMap['START_GAME'];
+type UncoverCellCallback = (value: Cell['value']) => void;
+type AdjustPointsCallback = (points: number) => void;
 type EndGameCallback = DispatchMap['END_GAME'];
 type UncoverCellParam = MessageReceivePayloadMap['UNCOVER_CELL'];
-type UncoverCellCallback = (value: Cell['value']) => void;
+type AdjustPointsParam = MessageReceivePayloadMap['ADJUST_POINTS'];
 
 export class GameSocket {
   private readonly sock: WebSocket;
@@ -101,6 +101,10 @@ export class GameSocket {
   /**
    * Set of callbacks to fire when the game ends
    */
+  private readonly onAdjustPointsSet: Set<AdjustPointsCallback> = new Set();
+  /**
+   * Set of callbacks to fire when the game ends
+   */
   private readonly onEndGameSet: Set<EndGameCallback> = new Set();
   /**
    * This map will look up the correct dispatch method to call with the payload
@@ -118,6 +122,7 @@ export class GameSocket {
       NEW_GAME: (payload) => this.handleOnNewGame(payload),
       START_GAME: (payload) => this.handleOnStartGame(payload),
       UNCOVER_CELL: (payload) => this.handleOnUncoverCell(payload),
+      ADJUST_POINTS: (payload) => this.handleOnAdjustPoints(payload),
       END_GAME: (status) => this.handleOnEndGame(status)
     };
   }
@@ -220,10 +225,31 @@ export class GameSocket {
   }
 
   /**
-   * Fire the uncover cell callback for the given row/column index
+   * Handler for when the server says to uncover a cell
    */
   private handleOnUncoverCell({ rowIdx, colIdx, value }: UncoverCellParam): void {
     this.onUncoverCellMap[`${rowIdx}-${colIdx}`]?.(value);
+  }
+
+  /**
+   * Add a callback to the onAdjustPoints set
+   */
+  public addOnAdjustPoints(callback: AdjustPointsCallback): void {
+    this.onAdjustPointsSet.add(callback);
+  }
+
+  /**
+   * Remove a callback from the onAdjustPoints set
+   */
+  public removeOnAdjustPoints(callback: AdjustPointsCallback): boolean {
+    return this.onAdjustPointsSet.delete(callback);
+  }
+
+  /**
+   * Handler for when the server adjusts the user's points
+   */
+  private handleOnAdjustPoints({ points }: AdjustPointsParam): void {
+    this.onAdjustPointsSet.forEach((callback) => callback(points));
   }
 
   /**

@@ -1,14 +1,15 @@
-package com.cphillipsdorsett.teamsweeper.game;
+package com.cphillipsdorsett.teamsweeper.game.websocket;
 
-import com.cphillipsdorsett.teamsweeper.game.dao.Cell;
 import com.cphillipsdorsett.teamsweeper.game.dto.GameEndResponseDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.PointsResponseDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellResponseDto;
 
 import java.io.IOException;
 
 /**
  * Event related methods to call when a cell is being uncovered
  */
-public interface UncoverCellHandler {
+public interface UncoverCellMessageHandler {
 
     /**
      * Fired when the game starts
@@ -18,7 +19,12 @@ public interface UncoverCellHandler {
     /**
      * Fired when a cell is uncovered
      */
-    void onUncover(Cell cell) throws IOException;
+    void onUncover(UncoverCellResponseDto cellDto) throws IOException;
+
+    /**
+     * Fired when points are adjusted
+     */
+    void onAdjustPoints(PointsResponseDto pointsDto) throws IOException;
 
     /**
      * Fired when the game is over (either won or lost)
