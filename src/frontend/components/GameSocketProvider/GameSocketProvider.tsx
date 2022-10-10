@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import { GameSocket } from '../../utils/GameSocket';
 
 export type ReadyState = 'CONNECTING' | 'OPEN' | 'CLOSED';
@@ -44,6 +44,8 @@ const GameSocketProvider: React.FC<GameSocketProviderProps> = ({
 }) => {
   const [readyState, setReadyState] = useState<ReadyState>('CONNECTING');
   const [reason, setReason] = useState('');
+  const [sock, setSock] = useState<GameSocket>();
+
   const connectToGameSocket = () =>
     new GameSocket(url, {
       onOpen: () => {
@@ -59,7 +61,15 @@ const GameSocketProvider: React.FC<GameSocketProviderProps> = ({
         setReason(e.reason);
       }
     });
-  const [sock, setSock] = useState<GameSocket>(() => connectToGameSocket());
+
+  useEffect(() => {
+    setSock(connectToGameSocket());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!sock) {
+    return null;
+  }
 
   const content =
     readyState === 'OPEN'
