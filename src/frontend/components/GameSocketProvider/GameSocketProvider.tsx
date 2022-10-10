@@ -46,7 +46,9 @@ const GameSocketProvider: React.FC<GameSocketProviderProps> = ({
   const [reason, setReason] = useState('');
   const connectToGameSocket = () =>
     new GameSocket(url, {
-      onOpen: () => setReadyState('OPEN'),
+      onOpen: () => {
+        setReadyState('OPEN');
+      },
       onError: (e) => {
         console.error(e);
         setReadyState('CLOSED');
