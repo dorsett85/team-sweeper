@@ -26,4 +26,8 @@ export interface GameEnd {
    * Time in milliseconds
    */
   duration: number;
+  /**
+   * Amount of points accrued over the course of the game
+   */
+  points: number;
 }
