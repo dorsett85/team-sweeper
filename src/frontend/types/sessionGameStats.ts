@@ -13,6 +13,10 @@ interface StatusStats extends CommonStats {
    * Fastest time from start to end in milliseconds
    */
   fastestTime: number | null;
+  /**
+   * Most points in a game
+   */
+  mostPoints: number | null;
 }
 
 interface DifficultyStats extends CommonStats {

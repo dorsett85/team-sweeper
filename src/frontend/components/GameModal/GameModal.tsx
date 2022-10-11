@@ -16,7 +16,11 @@ const statusTextMap: Record<GameStatus, string> = {
 };
 
 const GameModal: React.FC = () => {
-  const [gameEnd, setGameEnd] = useState<GameEnd>();
+  const [gameEnd, setGameEnd] = useState<GameEnd | undefined>({
+    status: 'WON',
+    duration: 6602,
+    points: 3
+  });
   const { sock } = useGameSocket();
 
   useEffect(() => {

@@ -9,9 +9,20 @@ interface GameModalContentProps {
 }
 
 const GameModalContent: React.FC<GameModalContentProps> = ({ gameEnd }) => {
-  const [isFastestGame, setIsFastestGame] = useState(false);
+  const [fastestWinTime, setFastestWinTime] = useState<null | number>();
+  const [mostWinPoints, setMostWinPoints] = useState<null | number>();
 
   const gameDate = new Date(gameEnd.duration);
+
+  const isFastestGame =
+    fastestWinTime !== undefined &&
+    gameEnd.status === 'WON' &&
+    (fastestWinTime === null || gameEnd.duration <= fastestWinTime);
+
+  const isHighestPoints =
+    mostWinPoints !== undefined &&
+    gameEnd.status === 'WON' &&
+    (mostWinPoints === null || gameEnd.points >= mostWinPoints);
 
   return (
     <>
@@ -27,7 +38,21 @@ const GameModalContent: React.FC<GameModalContentProps> = ({ gameEnd }) => {
         </div>
       </section>
       {isFastestGame && <strong className={styles.fastestWin}>Nice, new fastest time</strong>}
-      <SessionStatsSummary gameEnd={gameEnd} onProcessedStats={setIsFastestGame} />
+      <section className={styles.summary}>
+        <div className={styles.timeBox}>
+          <span className={styles.timeText}>{gameEnd.points}</span>
+          <span className={styles.timeType}>points</span>
+        </div>
+      </section>
+      {isHighestPoints && (
+        <strong className={styles.fastestWin}>Excellent, most points so far!</strong>
+      )}
+      <SessionStatsSummary
+        onStatsLoaded={(time, points) => {
+          setFastestWinTime(time);
+          setMostWinPoints(points);
+        }}
+      />
     </>
   );
 };

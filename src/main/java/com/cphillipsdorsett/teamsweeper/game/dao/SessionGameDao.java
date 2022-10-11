@@ -72,7 +72,7 @@ public class SessionGameDao implements SessionGameRepository {
                     "    g.status," +
                     "    COUNT(g.status) count," +
                     "    MIN(TIMESTAMPDIFF(MICROSECOND, g.started_at, g.ended_at) / 1000) as fastest_time," +
-                    "    MAX(sg.points) as highest_points " +
+                    "    MAX(sg.points) as most_points " +
                     "FROM session_game sg " +
                     "INNER JOIN game g ON sg.game_id = g.id " +
                     "WHERE sg.session_id = :sessionId" +

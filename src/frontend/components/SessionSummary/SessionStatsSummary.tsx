@@ -1,5 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
-import { GameEnd } from '../../types/game';
+import React, { memo, ReactElement, useEffect, useState } from 'react';
 import styles from '../GameModal/GameModal.module.less';
 import { GameDifficulty } from '../../types/gameDifficulty';
 import { SessionGameStats } from '../../types/sessionGameStats';
@@ -8,11 +7,10 @@ import { useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { dateToMinutesString, dateToSecondsString } from '../../utils/dateToUnitString';
 
 interface SessionSummaryProps {
-  gameEnd: GameEnd;
   /**
-   * Callback after the session stats have been fetched and processed
+   * Callback after the session stats have been fetched
    */
-  onProcessedStats: (isFastestGame: boolean) => void;
+  onStatsLoaded: (fastestWinTime: null | number, mostWinPoints: null | number) => void;
 }
 
 const difficultyTextMap: Record<GameDifficulty, string> = {
@@ -21,13 +19,13 @@ const difficultyTextMap: Record<GameDifficulty, string> = {
   h: 'Hard'
 };
 
-const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ gameEnd, onProcessedStats }) => {
+const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ onStatsLoaded }) => {
   const gameDifficulty = useAppSelector((state) => state.difficulty);
-  const [statsItems, setStatsItems] = useState<[React.ReactElement[], React.ReactElement[]]>();
+  const [stats, setStats] = useState<SessionGameStats>();
 
   useEffect(() => {
     let mounted = true;
-    if (statsItems) {
+    if (stats) {
       return;
     }
 
@@ -37,60 +35,10 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ gameEnd, onProcess
         if (!mounted) {
           return;
         }
-        // Loop through all the game difficulty stats to populate different list
-        // sections.
-        const fastestTimesListItems: ReactElement[] = [];
-        const gamesPlayedListItems: ReactElement[] = [];
-        let isFastestGame = false;
-        Object.entries(sessionGameStats.games).forEach(([difficultyKey, { count, statuses }]) => {
-          // Check if this is the fastest win
-          const fastestWinTime = statuses.WON.fastestTime;
-          if (
-            gameEnd.status === 'WON' &&
-            gameDifficulty === difficultyKey &&
-            (fastestWinTime === null || gameEnd.duration <= fastestWinTime)
-          ) {
-            isFastestGame = true;
-          }
-
-          // Add fastest games list items
-          const fastestTimestamp = fastestWinTime ? new Date(fastestWinTime) : null;
-          let fastestTxt = 'NA';
-          if (fastestTimestamp) {
-            const fastestMins = dateToMinutesString(fastestTimestamp);
-            const fastestSeconds = dateToSecondsString(fastestTimestamp);
-            fastestTxt = `${fastestMins}:${fastestSeconds}`;
-          }
-
-          fastestTimesListItems.push(
-            <li key={difficultyKey}>
-              <span className={styles.difficultyStats}>
-                <span className={styles.difficultyStatsType}>
-                  {difficultyTextMap[difficultyKey as GameDifficulty]}
-                </span>{' '}
-                - {fastestTxt}
-              </span>
-            </li>
-          );
-
-          // Add games played list items
-          const winPct = Math.round((statuses.WON.count / count) * 100);
-          const winPctText = isNaN(winPct) ? 'NA' : `${winPct}%`;
-
-          gamesPlayedListItems.push(
-            <li key={difficultyKey}>
-              <span className={styles.difficultyStats}>
-                <span className={styles.difficultyStatsType}>
-                  {difficultyTextMap[difficultyKey as GameDifficulty]}
-                </span>
-                : {statuses.WON.count}/{count} ({winPctText})
-              </span>
-            </li>
-          );
-        });
-
-        setStatsItems([fastestTimesListItems, gamesPlayedListItems]);
-        onProcessedStats(isFastestGame);
+        setStats(sessionGameStats);
+        // Get the fastest previous win for the same difficulty
+        const { fastestTime, mostPoints } = sessionGameStats.games[gameDifficulty].statuses.WON;
+        onStatsLoaded(fastestTime, mostPoints);
       })
       .catch((e) => {
         console.warn("Couldn't fetch session stats:", e);
@@ -99,20 +47,77 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ gameEnd, onProcess
     return () => {
       mounted = false;
     };
-  }, [gameDifficulty, gameEnd.duration, gameEnd.status, onProcessedStats, statsItems]);
+  }, [gameDifficulty, onStatsLoaded, stats]);
 
   // TODO add loading indicator
-  if (!statsItems) {
+  if (!stats) {
     return null;
   }
 
-  const [fastestTimesListItems, gamesPlayedListItems] = statsItems;
+  const fastestTimesListItems: ReactElement[] = [];
+  const mostPointsListItems: ReactElement[] = [];
+  const gamesPlayedListItems: ReactElement[] = [];
+  // Loop through all the game difficulty stats to populate different list
+  // sections.
+  Object.entries(stats.games).forEach(([difficultyKey, { count, statuses }]) => {
+    // Add the fastest games list items
+    const fastestWinTime = statuses.WON.fastestTime;
+    const fastestTimestamp = fastestWinTime && new Date(fastestWinTime);
+    let fastestTxt = 'NA';
+    if (fastestTimestamp) {
+      const fastestMins = dateToMinutesString(fastestTimestamp);
+      const fastestSeconds = dateToSecondsString(fastestTimestamp);
+      fastestTxt = `${fastestMins}:${fastestSeconds}`;
+    }
+
+    fastestTimesListItems.push(
+      <li key={difficultyKey}>
+        <span className={styles.difficultyStats}>
+          <span className={styles.difficultyStatsType}>
+            {difficultyTextMap[difficultyKey as GameDifficulty]}
+          </span>{' '}
+          - {fastestTxt}
+        </span>
+      </li>
+    );
+
+    const mostPoints = statuses.WON.mostPoints;
+    mostPointsListItems.push(
+      <li key={difficultyKey}>
+        <span className={styles.difficultyStats}>
+          <span className={styles.difficultyStatsType}>
+            {difficultyTextMap[difficultyKey as GameDifficulty]}
+          </span>{' '}
+          - {mostPoints}
+        </span>
+      </li>
+    );
+
+    // Add games played list items
+    const winPct = Math.round((statuses.WON.count / count) * 100);
+    const winPctText = isNaN(winPct) ? 'NA' : `${winPct}%`;
+
+    gamesPlayedListItems.push(
+      <li key={difficultyKey}>
+        <span className={styles.difficultyStats}>
+          <span className={styles.difficultyStatsType}>
+            {difficultyTextMap[difficultyKey as GameDifficulty]}
+          </span>
+          : {statuses.WON.count}/{count} ({winPctText})
+        </span>
+      </li>
+    );
+  });
 
   return (
     <>
       <section>
         <h3>Fastest Win Times</h3>
         <ul>{fastestTimesListItems}</ul>
+      </section>
+      <section>
+        <h3>Most Points Won</h3>
+        <ul>{mostPointsListItems}</ul>
       </section>
       <section>
         <h3>Games Played (wins/total)</h3>
@@ -122,4 +127,4 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ gameEnd, onProcess
   );
 };
 
-export default SessionStatsSummary;
+export default memo(SessionStatsSummary);

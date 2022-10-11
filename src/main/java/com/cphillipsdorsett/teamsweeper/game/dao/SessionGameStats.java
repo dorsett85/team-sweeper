@@ -13,8 +13,8 @@ public class SessionGameStats {
     private int count;
     @Column(name = "fastest_time")
     private Long fastestTime;
-    @Column(name = "highest_points")
-    private int highestPoints;
+    @Column(name = "most_points")
+    private int mostPoints;
 
     protected SessionGameStats() {
     }
@@ -24,13 +24,13 @@ public class SessionGameStats {
         GameStatus status,
         int count,
         Long fastestTime,
-        int highestPoints
+        int mostPoints
     ) {
         this.difficulty = difficulty;
         this.status = status;
         this.count = count;
         this.fastestTime = fastestTime;
-        this.highestPoints = highestPoints;
+        this.mostPoints = mostPoints;
     }
 
     public Long getId() {
@@ -53,7 +53,7 @@ public class SessionGameStats {
         return fastestTime;
     }
 
-    public int getHighestPoints() {
-        return highestPoints;
+    public int getMostPoints() {
+        return mostPoints;
     }
 }
