@@ -10,7 +10,11 @@ interface SessionSummaryProps {
   /**
    * Callback after the session stats have been fetched
    */
-  onStatsLoaded: (fastestWinTime: null | number, mostWinPoints: null | number) => void;
+  onStatsLoaded: (
+    fastestWinTime: null | number,
+    mostWinUncovers: null | number,
+    score: null | number
+  ) => void;
 }
 
 const difficultyTextMap: Record<GameDifficulty, string> = {
@@ -37,8 +41,9 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ onStatsLoaded }) =
         }
         setStats(sessionGameStats);
         // Get the fastest previous win for the same difficulty
-        const { fastestTime, mostPoints } = sessionGameStats.games[gameDifficulty].statuses.WON;
-        onStatsLoaded(fastestTime, mostPoints);
+        const { fastestTime, mostUncovers, highestScore } =
+          sessionGameStats.games[gameDifficulty].statuses.WON;
+        onStatsLoaded(fastestTime, mostUncovers, highestScore);
       })
       .catch((e) => {
         console.warn("Couldn't fetch session stats:", e);
@@ -55,7 +60,8 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ onStatsLoaded }) =
   }
 
   const fastestTimesListItems: ReactElement[] = [];
-  const mostPointsListItems: ReactElement[] = [];
+  const mostUncoversListItems: ReactElement[] = [];
+  const highestScoreListItems: ReactElement[] = [];
   const gamesPlayedListItems: ReactElement[] = [];
   // Loop through all the game difficulty stats to populate different list
   // sections.
@@ -81,14 +87,26 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ onStatsLoaded }) =
       </li>
     );
 
-    const mostPoints = statuses.WON.mostPoints;
-    mostPointsListItems.push(
+    const mostWinUncovers = statuses.WON.mostUncovers || 'NA';
+    mostUncoversListItems.push(
       <li key={difficultyKey}>
         <span className={styles.difficultyStats}>
           <span className={styles.difficultyStatsType}>
             {difficultyTextMap[difficultyKey as GameDifficulty]}
           </span>{' '}
-          - {mostPoints}
+          - {mostWinUncovers}
+        </span>
+      </li>
+    );
+
+    const highestWinScore = statuses.WON.highestScore ? statuses.WON.highestScore.toFixed(2) : 'NA';
+    highestScoreListItems.push(
+      <li key={difficultyKey}>
+        <span className={styles.difficultyStats}>
+          <span className={styles.difficultyStatsType}>
+            {difficultyTextMap[difficultyKey as GameDifficulty]}
+          </span>{' '}
+          - {highestWinScore}
         </span>
       </li>
     );
@@ -117,7 +135,11 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ onStatsLoaded }) =
       </section>
       <section>
         <h3>Most Points Won</h3>
-        <ul>{mostPointsListItems}</ul>
+        <ul>{mostUncoversListItems}</ul>
+      </section>
+      <section>
+        <h3>Highest Score Won</h3>
+        <ul>{highestScoreListItems}</ul>
       </section>
       <section>
         <h3>Games Played (wins/total)</h3>

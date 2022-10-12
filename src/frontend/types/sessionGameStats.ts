@@ -14,9 +14,13 @@ interface StatusStats extends CommonStats {
    */
   fastestTime: number | null;
   /**
-   * Most points in a game
+   * Most uncovers in a game
    */
-  mostPoints: number | null;
+  mostUncovers: number | null;
+  /**
+   * Highest score
+   */
+  highestScore: number | null;
 }
 
 interface DifficultyStats extends CommonStats {

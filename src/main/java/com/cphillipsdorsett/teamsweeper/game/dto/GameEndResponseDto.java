@@ -11,12 +11,14 @@ public class GameEndResponseDto {
      * Amount of time the game lasted (in milliseconds)
      */
     private final long duration;
-    private final int points;
+    private final int uncovers;
+    private final float score;
 
-    public GameEndResponseDto(GameStatus status, long duration, int points) {
+    public GameEndResponseDto(GameStatus status, long duration, int uncovers, float score) {
         this.status = status;
         this.duration = duration;
-        this.points = points;
+        this.uncovers = uncovers;
+        this.score = score;
     }
 
     public GameStatus getStatus() {
@@ -27,7 +29,11 @@ public class GameEndResponseDto {
         return duration;
     }
 
-    public int getPoints() {
-        return points;
+    public int getUncovers() {
+        return uncovers;
+    }
+
+    public float getScore() {
+        return score;
     }
 }

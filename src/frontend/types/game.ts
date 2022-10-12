@@ -27,7 +27,11 @@ export interface GameEnd {
    */
   duration: number;
   /**
-   * Amount of points accrued over the course of the game
+   * Amount of cells that a user has directly uncovered (no cascades)
    */
-  points: number;
+  uncovers: number;
+  /**
+   * Combined score between duration and uncovers
+   */
+  score: number;
 }

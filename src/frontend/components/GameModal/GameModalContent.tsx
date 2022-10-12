@@ -10,7 +10,8 @@ interface GameModalContentProps {
 
 const GameModalContent: React.FC<GameModalContentProps> = ({ gameEnd }) => {
   const [fastestWinTime, setFastestWinTime] = useState<null | number>();
-  const [mostWinPoints, setMostWinPoints] = useState<null | number>();
+  const [mostWinUncovers, setMostWinUncovers] = useState<null | number>();
+  const [highestWinScore, sethighestWinScore] = useState<null | number>();
 
   const gameDate = new Date(gameEnd.duration);
 
@@ -19,10 +20,15 @@ const GameModalContent: React.FC<GameModalContentProps> = ({ gameEnd }) => {
     gameEnd.status === 'WON' &&
     (fastestWinTime === null || gameEnd.duration <= fastestWinTime);
 
-  const isHighestPoints =
-    mostWinPoints !== undefined &&
+  const isMostUncovers =
+    mostWinUncovers !== undefined &&
     gameEnd.status === 'WON' &&
-    (mostWinPoints === null || gameEnd.points >= mostWinPoints);
+    (mostWinUncovers === null || gameEnd.uncovers >= mostWinUncovers);
+
+  const isHighestScore =
+    highestWinScore !== undefined &&
+    gameEnd.status === 'WON' &&
+    (highestWinScore === null || gameEnd.score >= highestWinScore);
 
   return (
     <>
@@ -40,17 +46,25 @@ const GameModalContent: React.FC<GameModalContentProps> = ({ gameEnd }) => {
       {isFastestGame && <strong className={styles.fastestWin}>Nice, new fastest time</strong>}
       <section className={styles.summary}>
         <div className={styles.timeBox}>
-          <span className={styles.timeText}>{gameEnd.points}</span>
-          <span className={styles.timeType}>points</span>
+          <span className={styles.timeText}>{gameEnd.uncovers}</span>
+          <span className={styles.timeType}>uncovers</span>
         </div>
       </section>
-      {isHighestPoints && (
+      {isMostUncovers && (
         <strong className={styles.fastestWin}>Excellent, most points so far!</strong>
       )}
+      <section className={styles.summary}>
+        <div className={styles.timeBox}>
+          <span className={styles.timeText}>{gameEnd.score.toFixed(2)}</span>
+          <span className={styles.timeType}>score</span>
+        </div>
+      </section>
+      {isHighestScore && <strong className={styles.fastestWin}>Wow, new high score!</strong>}
       <SessionStatsSummary
-        onStatsLoaded={(time, points) => {
+        onStatsLoaded={(time, uncovers, score) => {
           setFastestWinTime(time);
-          setMostWinPoints(points);
+          setMostWinUncovers(uncovers);
+          sethighestWinScore(score);
         }}
       />
     </>

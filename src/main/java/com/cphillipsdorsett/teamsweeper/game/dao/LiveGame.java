@@ -75,15 +75,15 @@ public class LiveGame {
         return sessions.size();
     }
 
-    public int getSessionPoints(String httpSessionId) {
+    public int getUncoversBySession(String httpSessionId) {
         SessionInfo sessionInfo = sessions.get(httpSessionId);
-        return sessionInfo.getPoints();
+        return sessionInfo.getUncovers();
     }
 
     public void adjustSessionPoints(String httpSessionId, int points) {
         SessionInfo sessionInfo = sessions.get(httpSessionId);
         if (sessionInfo != null) {
-            sessionInfo.setPoints(sessionInfo.getPoints() + points);
+            sessionInfo.setUncovers(sessionInfo.getUncovers() + points);
         }
     }
 
@@ -95,14 +95,14 @@ public class LiveGame {
      * Any session specific info associated with the live game
      */
     private static class SessionInfo {
-        private int points;
+        private int uncovers;
 
-        public int getPoints() {
-            return points;
+        public int getUncovers() {
+            return uncovers;
         }
 
-        public void setPoints(int points) {
-            this.points = points;
+        public void setUncovers(int uncovers) {
+            this.uncovers = uncovers;
         }
     }
 }

@@ -13,7 +13,7 @@ public class SessionGame {
     @Column(name = "game_id")
     private int gameId;
     @Column
-    private int points;
+    private int uncovers;
 
     protected SessionGame() {
     }
@@ -35,11 +35,11 @@ public class SessionGame {
         return gameId;
     }
 
-    public int getPoints() {
-        return points;
+    public int getUncovers() {
+        return uncovers;
     }
 
-    public void setPoints(int points) {
-        this.points = points;
+    public void setUncovers(int uncovers) {
+        this.uncovers = uncovers;
     }
 }

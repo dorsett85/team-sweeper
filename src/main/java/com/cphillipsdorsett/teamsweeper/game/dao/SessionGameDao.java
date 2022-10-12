@@ -53,10 +53,10 @@ public class SessionGameDao implements SessionGameRepository {
                 "" +
                     "UPDATE session_game " +
                     "SET" +
-                    "    points = :points " +
+                    "    uncovers = :uncovers " +
                     "WHERE id = :id"
             )
-            .setParameter("points", sessionGame.getPoints())
+            .setParameter("uncovers", sessionGame.getUncovers())
             .setParameter("id", sessionGame.getId())
             .executeUpdate();
     }
@@ -71,8 +71,9 @@ public class SessionGameDao implements SessionGameRepository {
                     "    g.difficulty," +
                     "    g.status," +
                     "    COUNT(g.status) count," +
-                    "    MIN(TIMESTAMPDIFF(MICROSECOND, g.started_at, g.ended_at) / 1000) as fastest_time," +
-                    "    MAX(sg.points) as most_points " +
+                    "    MIN(CalcDurationMS(g.started_at, g.ended_at)) as fastest_time," +
+                    "    MAX(sg.uncovers) as most_uncovers," +
+                    "    MAX(CalcScore(sg.uncovers, g.started_at, g.ended_at)) as highest_score " +
                     "FROM session_game sg " +
                     "INNER JOIN game g ON sg.game_id = g.id " +
                     "WHERE sg.session_id = :sessionId" +

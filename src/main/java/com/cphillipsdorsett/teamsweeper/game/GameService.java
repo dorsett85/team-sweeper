@@ -235,7 +235,7 @@ public class GameService {
 
     private void updateSessionGame(String sessionId, int gameId, LiveGame liveGame) {
         SessionGame sessionGame = sessionGameDao.findCurrent(sessionId, gameId);
-        sessionGame.setPoints(liveGame.getSessionPoints(sessionId));
+        sessionGame.setUncovers(liveGame.getUncoversBySession(sessionId));
         sessionGameDao.update(sessionGame);
     }
 
@@ -244,8 +244,9 @@ public class GameService {
      */
     private void sendEndGameMessage(String sessionId, LiveGame game, UncoverCellHandler callback) throws IOException {
         long duration = Duration.between(game.getStartedAt(), game.getEndedAt()).toMillis();
-        int points = game.getSessionPoints(sessionId);
-        GameEndResponseDto gameEndDto = new GameEndResponseDto(game.getStatus(), duration, points);
+        int uncovers = game.getUncoversBySession(sessionId);
+        float score = duration == 0 ? 0 : ((float) uncovers / 10) + ((float) 1000 / duration);
+        GameEndResponseDto gameEndDto = new GameEndResponseDto(game.getStatus(), duration, uncovers, score);
         callback.onEndGame(gameEndDto);
     }
 }

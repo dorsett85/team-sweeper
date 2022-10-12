@@ -69,7 +69,7 @@ const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
         </span>
       </div>
       <div>
-        <span>Points:</span> <span className={styles.pillText}>{points}</span>
+        <span>Uncovers:</span> <span className={styles.pillText}>{points}</span>
       </div>
     </div>
   );
