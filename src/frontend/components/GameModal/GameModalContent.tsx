@@ -8,63 +8,86 @@ interface GameModalContentProps {
   gameEnd: GameEnd;
 }
 
+type RecordStat = undefined | null | number;
+
+/**
+ * Calculates the all-time record stat against the current game stat used in the
+ * predicate function.
+ */
+const calcNewRecord = <TStat extends RecordStat>(
+  stat: TStat,
+  predicate: (knownStat: Extract<RecordStat, number>) => boolean
+): boolean => {
+  return stat !== undefined && (stat === null || predicate(stat));
+};
+
 const GameModalContent: React.FC<GameModalContentProps> = ({ gameEnd }) => {
-  const [fastestWinTime, setFastestWinTime] = useState<null | number>();
-  const [mostWinUncovers, setMostWinUncovers] = useState<null | number>();
-  const [highestWinScore, sethighestWinScore] = useState<null | number>();
+  const [fastestWinTime, setFastestWinTime] = useState<RecordStat>();
+  const [mostWinUncovers, setMostWinUncovers] = useState<RecordStat>();
+  const [highestWinScore, setHighestWinScore] = useState<RecordStat>();
 
   const gameDate = new Date(gameEnd.duration);
 
-  const isFastestGame =
-    fastestWinTime !== undefined &&
-    gameEnd.status === 'WON' &&
-    (fastestWinTime === null || gameEnd.duration <= fastestWinTime);
+  let isFastestGame = false;
+  let isMostUncovers = false;
+  let isHighestScore = false;
+  if (gameEnd.status === 'WON') {
+    isFastestGame = calcNewRecord(fastestWinTime, (record) => gameEnd.duration <= record);
+    isMostUncovers = calcNewRecord(mostWinUncovers, (record) => gameEnd.uncovers >= record);
+    isHighestScore = calcNewRecord(highestWinScore, (record) => gameEnd.score >= record);
+  }
 
-  const isMostUncovers =
-    mostWinUncovers !== undefined &&
-    gameEnd.status === 'WON' &&
-    (mostWinUncovers === null || gameEnd.uncovers >= mostWinUncovers);
+  const recordLiText: string[] = [
+    isFastestGame && 'Nice, new fastest time',
+    isMostUncovers && 'Excellent, most uncovers so far!',
+    isHighestScore && 'Wow, new high score!'
+  ].filter((text): text is string => !!text);
 
-  const isHighestScore =
-    highestWinScore !== undefined &&
-    gameEnd.status === 'WON' &&
-    (highestWinScore === null || gameEnd.score >= highestWinScore);
+  const recordList = !!recordLiText.length && (
+    <ul className={styles.recordList}>
+      {recordLiText.map((text) => {
+        return (
+          <li key={text}>
+            <strong>{text}</strong>
+          </li>
+        );
+      })}
+    </ul>
+  );
 
   return (
     <>
-      <section className={styles.summary}>
-        <div className={styles.timeBox}>
-          <span className={styles.timeText}>{dateToMinutesString(gameDate)}</span>
-          <span className={styles.timeType}>minutes</span>
-        </div>
-        <div className={styles.timeSeparator}>:</div>
-        <div className={styles.timeBox}>
-          <span className={styles.timeText}>{dateToSecondsString(gameDate)}</span>
-          <span className={styles.timeType}>seconds</span>
-        </div>
-      </section>
-      {isFastestGame && <strong className={styles.fastestWin}>Nice, new fastest time</strong>}
-      <section className={styles.summary}>
-        <div className={styles.timeBox}>
-          <span className={styles.timeText}>{gameEnd.uncovers}</span>
-          <span className={styles.timeType}>uncovers</span>
-        </div>
-      </section>
-      {isMostUncovers && (
-        <strong className={styles.fastestWin}>Excellent, most points so far!</strong>
-      )}
-      <section className={styles.summary}>
-        <div className={styles.timeBox}>
-          <span className={styles.timeText}>{gameEnd.score.toFixed(2)}</span>
-          <span className={styles.timeType}>score</span>
+      <section className={styles.boxSection}>
+        <div className={styles.boxScore}>
+          <div className={styles.timeBox}>
+            <div className={styles.timePart}>
+              <span className={styles.statText}>{dateToMinutesString(gameDate)}</span>
+              <span className={styles.typeText}>Minutes</span>
+            </div>
+            <div className={styles.timeSeparator}>:</div>
+            <div className={styles.timePart}>
+              <span className={styles.statText}>{dateToSecondsString(gameDate)}</span>
+              <span className={styles.typeText}>Seconds</span>
+            </div>
+          </div>
+          <div className={styles.statBoxOuter}>
+            <div className={styles.statBox}>
+              <span className={styles.statText}>{gameEnd.uncovers}</span>
+              <span className={styles.typeText}>Uncovers</span>
+            </div>
+            <div className={styles.statBox}>
+              <span className={styles.statText}>{gameEnd.score.toFixed(2)}</span>
+              <span className={styles.typeText}>SCORE</span>
+            </div>
+          </div>
         </div>
       </section>
-      {isHighestScore && <strong className={styles.fastestWin}>Wow, new high score!</strong>}
+      <section>{recordList}</section>
       <SessionStatsSummary
         onStatsLoaded={(time, uncovers, score) => {
           setFastestWinTime(time);
           setMostWinUncovers(uncovers);
-          sethighestWinScore(score);
+          setHighestWinScore(score);
         }}
       />
     </>
