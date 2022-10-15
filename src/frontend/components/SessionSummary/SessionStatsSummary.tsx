@@ -1,10 +1,10 @@
-import React, { memo, ReactElement, useEffect, useState } from 'react';
-import styles from '../GameModal/GameModal.module.less';
-import { GameDifficulty } from '../../types/gameDifficulty';
+import React, { memo, useEffect, useState } from 'react';
+import styles from './SessionSummary.module.less';
 import { SessionGameStats } from '../../types/sessionGameStats';
 import { fetchJson } from '../../utils/fetchJson';
 import { useAppSelector } from '../../pages/single-player/singlePlayerStore';
 import { dateToMinutesString, dateToSecondsString } from '../../utils/dateToUnitString';
+import { SelectDifficulty } from '../SelectDifficulty/SelectDifficulty';
 
 interface SessionSummaryProps {
   /**
@@ -17,14 +17,28 @@ interface SessionSummaryProps {
   ) => void;
 }
 
-const difficultyTextMap: Record<GameDifficulty, string> = {
-  e: 'Easy',
-  m: 'Medium',
-  h: 'Hard'
+interface StatListItemProps {
+  /**
+   * Display name of the stat
+   */
+  name: string;
+  /**
+   * Display value of the stat
+   */
+  value: string | number;
+}
+
+const StatListItem: React.FC<StatListItemProps> = ({ name, value }) => {
+  return (
+    <li className={styles.statLi}>
+      <span className={styles.statType}>{name}:</span> {value}
+    </li>
+  );
 };
 
 const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ onStatsLoaded }) => {
   const gameDifficulty = useAppSelector((state) => state.difficulty);
+  const [difficulty, setDifficulty] = useState(gameDifficulty);
   const [stats, setStats] = useState<SessionGameStats>();
 
   useEffect(() => {
@@ -59,92 +73,48 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ onStatsLoaded }) =
     return null;
   }
 
-  const fastestTimesListItems: ReactElement[] = [];
-  const mostUncoversListItems: ReactElement[] = [];
-  const highestScoreListItems: ReactElement[] = [];
-  const gamesPlayedListItems: ReactElement[] = [];
-  // Loop through all the game difficulty stats to populate different list
-  // sections.
-  Object.entries(stats.games).forEach(([difficultyKey, { count, statuses }]) => {
-    // Add the fastest games list items
-    const fastestWinTime = statuses.WON.fastestTime;
-    const fastestTimestamp = fastestWinTime && new Date(fastestWinTime);
-    let fastestTxt = 'NA';
-    if (fastestTimestamp) {
-      const fastestMins = dateToMinutesString(fastestTimestamp);
-      const fastestSeconds = dateToSecondsString(fastestTimestamp);
-      fastestTxt = `${fastestMins}:${fastestSeconds}`;
-    }
+  // Gather names and values to display for each stat item
+  const { count, statuses } = stats.games[difficulty];
+  const statLiProps: StatListItemProps[] = [];
 
-    fastestTimesListItems.push(
-      <li key={difficultyKey}>
-        <span className={styles.difficultyStats}>
-          <span className={styles.difficultyStatsType}>
-            {difficultyTextMap[difficultyKey as GameDifficulty]}
-          </span>{' '}
-          - {fastestTxt}
-        </span>
-      </li>
-    );
+  // Fastest win list item
+  const fastestWinTime = statuses.WON.fastestTime;
+  const fastestTimestamp = fastestWinTime && new Date(fastestWinTime);
+  let fastestTxt = 'NA';
+  if (fastestTimestamp) {
+    const fastestMinutes = dateToMinutesString(fastestTimestamp);
+    const fastestSeconds = dateToSecondsString(fastestTimestamp);
+    fastestTxt = `${fastestMinutes}:${fastestSeconds}`;
+  }
+  statLiProps.push({ name: 'Fastest Win', value: fastestTxt });
 
-    const mostWinUncovers = statuses.WON.mostUncovers || 'NA';
-    mostUncoversListItems.push(
-      <li key={difficultyKey}>
-        <span className={styles.difficultyStats}>
-          <span className={styles.difficultyStatsType}>
-            {difficultyTextMap[difficultyKey as GameDifficulty]}
-          </span>{' '}
-          - {mostWinUncovers}
-        </span>
-      </li>
-    );
+  // Most win uncovers list item
+  const mostWinUncovers = statuses.WON.mostUncovers || 'NA';
+  statLiProps.push({ name: 'Most Win Uncovers', value: mostWinUncovers });
 
-    const highestWinScore = statuses.WON.highestScore ? statuses.WON.highestScore.toFixed(2) : 'NA';
-    highestScoreListItems.push(
-      <li key={difficultyKey}>
-        <span className={styles.difficultyStats}>
-          <span className={styles.difficultyStatsType}>
-            {difficultyTextMap[difficultyKey as GameDifficulty]}
-          </span>{' '}
-          - {highestWinScore}
-        </span>
-      </li>
-    );
+  // Highest win score list item
+  const highestWinScore = statuses.WON.highestScore ? statuses.WON.highestScore.toFixed(2) : 'NA';
+  statLiProps.push({ name: 'Highest Win Score', value: highestWinScore });
 
-    // Add games played list items
-    const winPct = Math.round((statuses.WON.count / count) * 100);
-    const winPctText = isNaN(winPct) ? 'NA' : `${winPct}%`;
-
-    gamesPlayedListItems.push(
-      <li key={difficultyKey}>
-        <span className={styles.difficultyStats}>
-          <span className={styles.difficultyStatsType}>
-            {difficultyTextMap[difficultyKey as GameDifficulty]}
-          </span>
-          : {statuses.WON.count}/{count} ({winPctText})
-        </span>
-      </li>
-    );
-  });
+  // Games played list item
+  const winPct = Math.round((statuses.WON.count / count) * 100);
+  const winPctText = isNaN(winPct) ? 'NA' : `${winPct}%`;
+  const gamesPlayedWinPct = `${statuses.WON.count}/${count} (${winPctText})`;
+  statLiProps.push({ name: 'Games Played (wins/total)', value: gamesPlayedWinPct });
 
   return (
     <>
-      <section>
-        <h3>Fastest Win Times</h3>
-        <ul>{fastestTimesListItems}</ul>
-      </section>
-      <section>
-        <h3>Most Points Won</h3>
-        <ul>{mostUncoversListItems}</ul>
-      </section>
-      <section>
-        <h3>Highest Score Won</h3>
-        <ul>{highestScoreListItems}</ul>
-      </section>
-      <section>
-        <h3>Games Played (wins/total)</h3>
-        <ul>{gamesPlayedListItems}</ul>
-      </section>
+      <h3 className={styles.sessionSummaryHeading}>Session Summary</h3>
+      <SelectDifficulty
+        className={styles.difficultySelect}
+        difficulty={difficulty}
+        onSelect={setDifficulty}
+      />
+      <ul>
+        {statLiProps.map(({ name, value }) => (
+          <StatListItem key={name} name={name} value={value} />
+        ))}
+      </ul>
     </>
   );
 };

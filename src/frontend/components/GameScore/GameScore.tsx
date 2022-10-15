@@ -11,7 +11,7 @@ interface GameScoreProps {
 const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
   const gameIsLoading = useAppSelector((state) => state.isLoading);
   const [time, setTime] = useState(new Date(0));
-  const [points, setPoints] = useState(0);
+  const [uncovers, setUncovers] = useState(0);
   const { sock } = useGameSocket();
   const timerIntervalRef = useRef<NodeJS.Timer>();
 
@@ -27,7 +27,7 @@ const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
 
   useEffect(() => {
     const handleOnNewGame = () => {
-      setPoints(0);
+      setUncovers(0);
     };
     // When the game starts, increase the timer every second
     const handleOnStartGame = () => {
@@ -40,8 +40,8 @@ const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
         clearInterval(timerIntervalRef.current);
       }
     };
-    const handleOnAdjustPoints = (newPoints: number) => {
-      setPoints((oldPoints) => oldPoints + newPoints);
+    const handleOnAdjustPoints = (newUncovers: number) => {
+      setUncovers((oldUncovers) => oldUncovers + newUncovers);
     };
 
     sock.addOnNewGame(handleOnNewGame);
@@ -69,7 +69,7 @@ const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
         </span>
       </div>
       <div>
-        <span>Uncovers:</span> <span className={styles.pillText}>{points}</span>
+        <span>Uncovers:</span> <span className={styles.pillText}>{uncovers}</span>
       </div>
     </div>
   );

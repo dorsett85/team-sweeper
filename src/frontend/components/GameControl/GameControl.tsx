@@ -1,43 +1,27 @@
-import React, { FormEventHandler, memo } from 'react';
+import React, { memo } from 'react';
 import styles from './GameControl.module.less';
 import buttonStyles from '../../styles/button.module.less';
-import {
-  SinglePlayerState,
-  setDifficulty,
-  setIsLoading
-} from '../../pages/single-player/singlePlayerSlice';
+import { setDifficulty, setIsLoading } from '../../pages/single-player/singlePlayerSlice';
 import { useAppDispatch } from '../../pages/single-player/singlePlayerStore';
 import { DIFFICULTY } from '../../pages/single-player/constants/difficulty';
-import { GameStart } from '../../types/game';
 import { GameDifficulty } from '../../types/gameDifficulty';
+import { SelectDifficulty } from '../SelectDifficulty/SelectDifficulty';
 
 interface GameControlProps {
   difficulty: GameDifficulty;
   isLoading: boolean;
 }
 
-const difficultyMap: Record<GameStart['difficulty'], string> = {
-  e: 'Easy',
-  m: 'Medium',
-  h: 'Hard'
-} as const;
-
-const difficultyOptions = Object.entries(difficultyMap).map(([key, value]) => (
-  <option key={key} value={key}>
-    {value}
-  </option>
-));
-
 const GameControl: React.FC<GameControlProps> = ({ difficulty, isLoading }) => {
   const dispatch = useAppDispatch();
 
-  const handleOnSelect: FormEventHandler<HTMLSelectElement> = ({ currentTarget }) => {
+  const handleOnSelect = (newDifficulty: GameDifficulty) => {
     if (!isLoading) {
       // Save the difficulty setting for when the user returns to the page
-      localStorage.setItem(DIFFICULTY, currentTarget.value);
+      localStorage.setItem(DIFFICULTY, newDifficulty);
 
       dispatch(setIsLoading(true));
-      dispatch(setDifficulty(currentTarget.value as SinglePlayerState['difficulty']));
+      dispatch(setDifficulty(newDifficulty));
     }
   };
 
@@ -49,17 +33,7 @@ const GameControl: React.FC<GameControlProps> = ({ difficulty, isLoading }) => {
 
   return (
     <div className={styles.gameControlContainer}>
-      <div className={styles.gameControlSelectWrapper}>
-        <select
-          onInput={handleOnSelect}
-          className={styles.gameControlDifficultySelect}
-          value={difficulty}
-          aria-label='select difficulty'
-        >
-          {difficultyOptions}
-        </select>
-        <span className={styles.dropdownIcon}>▼</span>
-      </div>
+      <SelectDifficulty difficulty={difficulty} onSelect={handleOnSelect} />
       <button onClick={handleOnResetClick} className={buttonStyles.baseButton}>
         Reset Game
       </button>
