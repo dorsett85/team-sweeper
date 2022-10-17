@@ -33,7 +33,7 @@ type MessageReceivePayloadMap = {
   NEW_GAME: GameStart;
   START_GAME: boolean;
   UNCOVER_CELL: Pick<Cell, keyof CellIndexes | 'value'> & { points: number };
-  ADJUST_POINTS: { points: number };
+  INCREMENT_UNCOVERS: { uncovers: number };
   END_GAME: GameEnd;
 };
 
@@ -77,10 +77,10 @@ type DispatchMap = {
 type NewGameCallback = DispatchMap['NEW_GAME'];
 type StartGameCallback = DispatchMap['START_GAME'];
 type UncoverCellCallback = (value: Cell['value']) => void;
-type AdjustPointsCallback = (points: number) => void;
+type IncrementUncoversCallback = (uncovers: number) => void;
 type EndGameCallback = DispatchMap['END_GAME'];
 type UncoverCellParam = MessageReceivePayloadMap['UNCOVER_CELL'];
-type AdjustPointsParam = MessageReceivePayloadMap['ADJUST_POINTS'];
+type IncrementUncoversParam = MessageReceivePayloadMap['INCREMENT_UNCOVERS'];
 
 export class GameSocket {
   private readonly sock: WebSocket;
@@ -99,9 +99,9 @@ export class GameSocket {
    */
   private readonly onUncoverCellMap: Record<string, UncoverCellCallback> = {};
   /**
-   * Set of callbacks to fire when the game ends
+   * Set of callbacks to fire when uncovers are incremented
    */
-  private readonly onAdjustPointsSet: Set<AdjustPointsCallback> = new Set();
+  private readonly onIncrementUncoversSet: Set<IncrementUncoversCallback> = new Set();
   /**
    * Set of callbacks to fire when the game ends
    */
@@ -122,7 +122,7 @@ export class GameSocket {
       NEW_GAME: (payload) => this.handleOnNewGame(payload),
       START_GAME: (payload) => this.handleOnStartGame(payload),
       UNCOVER_CELL: (payload) => this.handleOnUncoverCell(payload),
-      ADJUST_POINTS: (payload) => this.handleOnAdjustPoints(payload),
+      INCREMENT_UNCOVERS: (payload) => this.handleOnIncrementUncovers(payload),
       END_GAME: (status) => this.handleOnEndGame(status)
     };
   }
@@ -232,24 +232,24 @@ export class GameSocket {
   }
 
   /**
-   * Add a callback to the onAdjustPoints set
+   * Add a callback to the onIncrementUncovers set
    */
-  public addOnAdjustPoints(callback: AdjustPointsCallback): void {
-    this.onAdjustPointsSet.add(callback);
+  public addOnIncrementUncovers(callback: IncrementUncoversCallback): void {
+    this.onIncrementUncoversSet.add(callback);
   }
 
   /**
-   * Remove a callback from the onAdjustPoints set
+   * Remove a callback from the onIncrementUncovers set
    */
-  public removeOnAdjustPoints(callback: AdjustPointsCallback): boolean {
-    return this.onAdjustPointsSet.delete(callback);
+  public removeOnAdjustPoints(callback: IncrementUncoversCallback): boolean {
+    return this.onIncrementUncoversSet.delete(callback);
   }
 
   /**
-   * Handler for when the server adjusts the user's points
+   * Handler for when the server increments the user's uncovers
    */
-  private handleOnAdjustPoints({ points }: AdjustPointsParam): void {
-    this.onAdjustPointsSet.forEach((callback) => callback(points));
+  private handleOnIncrementUncovers({ uncovers }: IncrementUncoversParam): void {
+    this.onIncrementUncoversSet.forEach((callback) => callback(uncovers));
   }
 
   /**

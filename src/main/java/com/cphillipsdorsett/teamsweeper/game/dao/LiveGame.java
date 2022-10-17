@@ -80,10 +80,14 @@ public class LiveGame {
         return sessionInfo.getUncovers();
     }
 
-    public void adjustSessionPoints(String httpSessionId, int points) {
+    public void incrementSessionUncovers(String httpSessionId) {
+        incrementSessionUncovers(httpSessionId, 1);
+    }
+
+    public void incrementSessionUncovers(String httpSessionId, int uncovers) {
         SessionInfo sessionInfo = sessions.get(httpSessionId);
         if (sessionInfo != null) {
-            sessionInfo.setUncovers(sessionInfo.getUncovers() + points);
+            sessionInfo.setUncovers(sessionInfo.getUncovers() + uncovers);
         }
     }
 

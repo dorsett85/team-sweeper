@@ -7,6 +7,6 @@ public enum GameSendMessageType {
     NEW_GAME,
     START_GAME,
     UNCOVER_CELL,
-    ADJUST_POINTS,
+    INCREMENT_UNCOVERS,
     END_GAME
 }

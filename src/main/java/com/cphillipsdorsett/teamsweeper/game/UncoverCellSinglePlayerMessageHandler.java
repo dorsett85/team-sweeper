@@ -1,7 +1,7 @@
 package com.cphillipsdorsett.teamsweeper.game;
 
 import com.cphillipsdorsett.teamsweeper.game.dto.GameEndResponseDto;
-import com.cphillipsdorsett.teamsweeper.game.dto.PointsResponseDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.IncrementUncoversResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.websocket.SendableMessage;
 import com.cphillipsdorsett.teamsweeper.game.websocket.UncoverCellHandler;
@@ -27,8 +27,8 @@ public class UncoverCellSinglePlayerMessageHandler implements UncoverCellHandler
     }
 
     @Override
-    public void onAdjustPoints(PointsResponseDto pointsDto) throws IOException {
-        sm.send(GameSendMessage.createAdjustPoints(pointsDto));
+    public void onIncrementUncovers(IncrementUncoversResponseDto incrementUncoversDto) throws IOException {
+        sm.send(GameSendMessage.createIncrementUncovers(incrementUncoversDto));
     }
 
     @Override

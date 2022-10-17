@@ -130,7 +130,7 @@ public class GameService {
         LiveGame game,
         UncoverCellHandler eventHandler,
         String sessionId,
-        Integer points
+        Integer uncovers
     ) throws IOException {
         // Early exit if the cell is already uncovered
         if (!cell.isCovered()) {
@@ -141,9 +141,9 @@ public class GameService {
         //  state.
         cell.setCovered(false);
         eventHandler.onUncover(new UncoverCellResponseDto(cell));
-        if (points != null) {
-            game.adjustSessionPoints(sessionId, points);
-            eventHandler.onAdjustPoints(new PointsResponseDto(points));
+        if (uncovers != null) {
+            game.incrementSessionUncovers(sessionId, uncovers);
+            eventHandler.onIncrementUncovers(new IncrementUncoversResponseDto(uncovers));
         }
         game.incrementUncoveredCells();
 

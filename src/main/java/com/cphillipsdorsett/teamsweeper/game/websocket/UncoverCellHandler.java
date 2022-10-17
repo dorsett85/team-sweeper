@@ -1,7 +1,7 @@
 package com.cphillipsdorsett.teamsweeper.game.websocket;
 
 import com.cphillipsdorsett.teamsweeper.game.dto.GameEndResponseDto;
-import com.cphillipsdorsett.teamsweeper.game.dto.PointsResponseDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.IncrementUncoversResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellResponseDto;
 
 import java.io.IOException;
@@ -22,9 +22,9 @@ public interface UncoverCellHandler {
     void onUncover(UncoverCellResponseDto cellDto) throws IOException;
 
     /**
-     * Fired when points are adjusted
+     * Fired when uncovers are incremented
      */
-    void onAdjustPoints(PointsResponseDto pointsDto) throws IOException;
+    void onIncrementUncovers(IncrementUncoversResponseDto incrementUncoversDto) throws IOException;
 
     /**
      * Fired when the game is over (either won or lost)

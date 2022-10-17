@@ -47,7 +47,7 @@ const GameScore: React.FC<GameScoreProps> = ({ className = '' }) => {
     sock.addOnNewGame(handleOnNewGame);
     sock.addOnStartGame(handleOnStartGame);
     sock.addOnEndGame(handleOnEndGame);
-    sock.addOnAdjustPoints(handleOnAdjustPoints);
+    sock.addOnIncrementUncovers(handleOnAdjustPoints);
 
     return () => {
       sock.removeOnNewGame(handleOnNewGame);

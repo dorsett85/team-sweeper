@@ -2,7 +2,7 @@ package com.cphillipsdorsett.teamsweeper.game.websocket.message;
 
 import com.cphillipsdorsett.teamsweeper.game.dto.GameEndResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.GameStartResponseDto;
-import com.cphillipsdorsett.teamsweeper.game.dto.PointsResponseDto;
+import com.cphillipsdorsett.teamsweeper.game.dto.IncrementUncoversResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.dto.UncoverCellResponseDto;
 
 /**
@@ -27,8 +27,8 @@ public class GameSendMessage extends BaseMessage<GameSendMessageType, Object> {
         return new GameSendMessage(GameSendMessageType.UNCOVER_CELL, cellResponseDto);
     }
 
-    public static GameSendMessage createAdjustPoints(PointsResponseDto pointsResponseDto) {
-        return new GameSendMessage(GameSendMessageType.ADJUST_POINTS, pointsResponseDto);
+    public static GameSendMessage createIncrementUncovers(IncrementUncoversResponseDto incrementUncoversDto) {
+        return new GameSendMessage(GameSendMessageType.INCREMENT_UNCOVERS, incrementUncoversDto);
     }
 
     public static GameSendMessage createEndGame(GameEndResponseDto gameEndResponseDto) {
