@@ -27,7 +27,7 @@ public class SessionGameStats {
         int count,
         Long fastestTime,
         int mostUncovers,
-        float highestScore
+        Float highestScore
     ) {
         this.difficulty = difficulty;
         this.status = status;

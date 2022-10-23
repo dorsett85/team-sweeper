@@ -2,6 +2,7 @@ package com.cphillipsdorsett.teamsweeper.game;
 
 import com.cphillipsdorsett.teamsweeper.BundleManifest;
 
+import com.cphillipsdorsett.teamsweeper.game.dto.SessionGameStatsResponseDto;
 import com.cphillipsdorsett.teamsweeper.game.websocket.GameSocketSessionStore;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,8 +30,8 @@ public class GameController {
     }
 
     @GetMapping("/session-stats")
-    public ResponseEntity<Object> getSessionGameStats(HttpSession session) {
-        Object sessionGameStats = gameService.findSessionGameStats(session.getId());
+    public ResponseEntity<SessionGameStatsResponseDto> getSessionGameStats(HttpSession session) {
+        SessionGameStatsResponseDto sessionGameStats = gameService.findSessionGameStats(session.getId());
         return ResponseEntity.ok(sessionGameStats);
     }
 

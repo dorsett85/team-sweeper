@@ -3,7 +3,7 @@ DROP FUNCTION IF EXISTS CalcScore;
 DELIMITER $$
 
 # Calculates the score of a game based on uncovers and duration
-CREATE FUNCTION CalcScore(uncovers INT, start_time TIMESTAMP, end_time TIMESTAMP)
+CREATE FUNCTION CalcScore(uncovers INT, start_time TIMESTAMP(3), end_time TIMESTAMP(3))
     RETURNS FLOAT
     DETERMINISTIC
 BEGIN
