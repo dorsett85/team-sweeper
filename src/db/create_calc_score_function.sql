@@ -12,7 +12,7 @@ BEGIN
     IF duration = 0 THEN
         RETURN 0;
     END IF;
-    RETURN (uncovers / 10) + (1000 / duration);
+    RETURN (uncovers / 15) + (1000 / duration);
 END $$
 
 DELIMITER ;

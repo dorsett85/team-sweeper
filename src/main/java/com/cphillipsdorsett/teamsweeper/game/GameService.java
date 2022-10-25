@@ -48,7 +48,8 @@ public class GameService {
         LiveGame liveGame = new LiveGame(game.getId(), sessionId, gameBoard);
         liveGameDao.updateSessionGame(sessionId, liveGame);
 
-        return new GameStartResponseDto(game, gameBoard.getBoardConfig());
+        BoardConfig boardConfig = BoardConfigPreset.getByDifficulty(gameBoard.getDifficulty());
+        return new GameStartResponseDto(game, boardConfig);
     }
 
     public SessionGameStatsResponseDto findSessionGameStats(String sessionId) {
@@ -209,9 +210,13 @@ public class GameService {
         // Update the game
         Game dbGame = gameDao.findCurrent(sessionId, liveGame.getId());
         dbGame.setStatus(liveGame.getStatus());
+        dbGame.setBoard(om.writeValueAsString(liveGame.getBoard()));
+        dbGame.setCompletionPct(BoardConfigPreset.getCompletionPct(
+            liveGame.getDifficulty(),
+            liveGame.getUncoveredCells()
+        ));
         dbGame.setStartedAt(liveGame.getStartedAt());
         dbGame.setEndedAt(liveGame.getEndedAt());
-        dbGame.setBoard(om.writeValueAsString(liveGame.getBoard()));
         gameDao.update(dbGame);
 
         // Update the session game
@@ -225,11 +230,15 @@ public class GameService {
     private void saveLiveGame(String sessionId, LiveGame liveGame) throws JsonProcessingException {
         // Update the game
         Game dbGame = gameDao.findCurrent(sessionId, liveGame.getId());
-        dbGame.setStartedAt(liveGame.getStartedAt());
         dbGame.setBoard(om.writeValueAsString(liveGame.getBoard()));
+        dbGame.setCompletionPct(BoardConfigPreset.getCompletionPct(
+            liveGame.getDifficulty(),
+            liveGame.getUncoveredCells()
+        ));
+        dbGame.setStartedAt(liveGame.getStartedAt());
         gameDao.update(dbGame);
 
-        // Update the session game
+        // Update the session_game
         updateSessionGame(sessionId, dbGame.getId(), liveGame);
     }
 
@@ -245,7 +254,7 @@ public class GameService {
     private void sendEndGameMessage(String sessionId, LiveGame game, UncoverCellHandler callback) throws IOException {
         long duration = Duration.between(game.getStartedAt(), game.getEndedAt()).toMillis();
         int uncovers = game.getUncoversBySession(sessionId);
-        float score = duration == 0 ? 0 : ((float) uncovers / 10) + ((float) 1000 / duration);
+        float score = duration == 0 ? 0 : ((float) uncovers / 15) + ((float) 1000 / duration);
         GameEndResponseDto gameEndDto = new GameEndResponseDto(game.getStatus(), duration, uncovers, score);
         callback.onEndGame(gameEndDto);
     }

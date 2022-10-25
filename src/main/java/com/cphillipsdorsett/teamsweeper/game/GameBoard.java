@@ -5,8 +5,6 @@ import com.cphillipsdorsett.teamsweeper.game.dao.GameDifficulty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -14,11 +12,6 @@ public class GameBoard {
     private final Cell[][] board;
     private final GameDifficulty difficulty;
     private final int uncoveredCellsNeededToWin;
-    private static final Map<GameDifficulty, BoardConfig> boardConfigMap = new HashMap<>() {{
-        put(GameDifficulty.E, new BoardConfig(9, 9, 10));
-        put(GameDifficulty.M, new BoardConfig(16, 16, 40));
-        put(GameDifficulty.H, new BoardConfig(16, 30, 99));
-    }};
     /**
      * 2d array of surrounding cells starting in top left corner moving
      * clockwise.
@@ -35,7 +28,7 @@ public class GameBoard {
     };
 
     public GameBoard(GameDifficulty difficulty) {
-        BoardConfig boardConfig = boardConfigMap.get(difficulty);
+        BoardConfig boardConfig = BoardConfigPreset.getByDifficulty(difficulty);
         int rows = boardConfig.getRows();
         int cols = boardConfig.getCols();
         int mines = boardConfig.getMines();
@@ -86,8 +79,8 @@ public class GameBoard {
         return board;
     }
 
-    public BoardConfig getBoardConfig() {
-        return boardConfigMap.get(difficulty);
+    public GameDifficulty getDifficulty() {
+        return difficulty;
     }
 
     public int getUncoveredCellsNeededToWin() {

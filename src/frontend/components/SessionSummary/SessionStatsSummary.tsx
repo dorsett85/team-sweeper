@@ -102,6 +102,15 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ onStatsLoaded }) =
   const gamesPlayedWinPct = `${statuses.WON.count}/${count} (${winPctText})`;
   statLiProps.push({ name: 'Games Played (wins/total)', value: gamesPlayedWinPct });
 
+  // Avg completion percentage
+  const allCount = statuses.IN_PROGRESS.count + statuses.LOST.count + statuses.WON.count;
+  const inProgressPct =
+    (statuses.IN_PROGRESS.count / allCount) * statuses.IN_PROGRESS.avgCompletionPct;
+  const lostPct = (statuses.LOST.count / allCount) * statuses.LOST.avgCompletionPct;
+  const wonPct = (statuses.WON.count / allCount) * statuses.WON.avgCompletionPct;
+  const completionPct = (inProgressPct + lostPct + wonPct).toFixed(2);
+  statLiProps.push({ name: 'Average Completion %', value: completionPct });
+
   return (
     <>
       <h3 className={styles.sessionSummaryHeading}>Session Summary</h3>

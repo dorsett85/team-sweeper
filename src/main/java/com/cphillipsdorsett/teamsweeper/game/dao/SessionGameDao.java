@@ -73,7 +73,8 @@ public class SessionGameDao implements SessionGameRepository {
                     "    COUNT(g.status) count," +
                     "    MIN(CalcDurationMS(g.started_at, g.ended_at)) as fastest_time," +
                     "    MAX(sg.uncovers) as most_uncovers," +
-                    "    MAX(CalcScore(sg.uncovers, g.started_at, g.ended_at)) as highest_score " +
+                    "    MAX(CalcScore(sg.uncovers, g.started_at, g.ended_at)) as highest_score," +
+                    "    AVG(g.completion_pct) as avg_completion_pct " +
                     "FROM session_game sg " +
                     "INNER JOIN game g ON sg.game_id = g.id " +
                     "WHERE sg.session_id = :sessionId" +

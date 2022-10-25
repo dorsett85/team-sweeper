@@ -19,6 +19,8 @@ public class Game {
      * contains cells.
      */
     private String board;
+    @Column(name = "completion_pct")
+    private float completionPct;
     @Column(name = "started_at")
     private Instant startedAt;
     @Column(name = "ended_at")
@@ -60,6 +62,14 @@ public class Game {
 
     public void setBoard(String board) {
         this.board = board;
+    }
+
+    public float getCompletionPct() {
+        return completionPct;
+    }
+
+    public void setCompletionPct(float completionPct) {
+        this.completionPct = completionPct;
     }
 
     public Instant getStartedAt() {

@@ -17,24 +17,10 @@ public class SessionGameStats {
     private int mostUncovers;
     @Column(name = "highest_score")
     private float highestScore;
+    @Column(name = "avg_completion_pct")
+    private float avgCompletionPct;
 
     protected SessionGameStats() {
-    }
-
-    public SessionGameStats(
-        GameDifficulty difficulty,
-        GameStatus status,
-        int count,
-        Long fastestTime,
-        int mostUncovers,
-        Float highestScore
-    ) {
-        this.difficulty = difficulty;
-        this.status = status;
-        this.count = count;
-        this.fastestTime = fastestTime;
-        this.mostUncovers = mostUncovers;
-        this.highestScore = highestScore;
     }
 
     public Long getId() {
@@ -63,5 +49,9 @@ public class SessionGameStats {
 
     public float getHighestScore() {
         return highestScore;
+    }
+
+    public float getAvgCompletionPct() {
+        return avgCompletionPct;
     }
 }

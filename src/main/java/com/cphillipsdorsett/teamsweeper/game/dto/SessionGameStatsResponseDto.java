@@ -44,6 +44,7 @@ public class SessionGameStatsResponseDto {
             gameDifficultyStats.statuses.get(statusKey).fastestTime = sessionGameStats.getFastestTime();
             gameDifficultyStats.statuses.get(statusKey).mostUncovers = sessionGameStats.getMostUncovers();
             gameDifficultyStats.statuses.get(statusKey).highestScore = sessionGameStats.getHighestScore();
+            gameDifficultyStats.statuses.get(statusKey).avgCompletionPct = sessionGameStats.getAvgCompletionPct();
         });
         return baseGamesStats;
     }
@@ -84,6 +85,10 @@ public class SessionGameStatsResponseDto {
          * Combined score taking into account uncovers and score
          */
         public float highestScore;
+        /**
+         * Calculated by uncovered cells divided by total non-mine cells
+         */
+        public float avgCompletionPct;
 
         public GameStatusStats() {
         }

@@ -16,11 +16,15 @@ interface StatusStats extends CommonStats {
   /**
    * Most uncovers in a game
    */
-  mostUncovers: number | null;
+  mostUncovers: number;
   /**
    * Highest score
    */
-  highestScore: number | null;
+  highestScore: number;
+  /**
+   * Calculated by uncovered cells divided by total non-mine cells
+   */
+  avgCompletionPct: number;
 }
 
 interface DifficultyStats extends CommonStats {

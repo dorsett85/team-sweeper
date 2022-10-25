@@ -10,6 +10,7 @@ public class LiveGame {
     private final int id;
     private GameStatus status = GameStatus.IN_PROGRESS;
     private final Cell[][] board;
+    private final GameDifficulty difficulty;
     private Instant startedAt;
     private Instant endedAt;
     private int uncoveredCells;
@@ -19,6 +20,7 @@ public class LiveGame {
     public LiveGame(int id, String httpSessionId, GameBoard gameBoard) {
         this.id = id;
         this.board = gameBoard.getBoard();
+        this.difficulty = gameBoard.getDifficulty();
         this.uncoveredCellsNeededToWin = gameBoard.getUncoveredCellsNeededToWin();
         sessions.put(httpSessionId, new SessionInfo());
     }
@@ -37,6 +39,10 @@ public class LiveGame {
 
     public Cell[][] getBoard() {
         return board;
+    }
+
+    public GameDifficulty getDifficulty() {
+        return difficulty;
     }
 
     public Instant getStartedAt() {
@@ -78,10 +84,6 @@ public class LiveGame {
     public int getUncoversBySession(String httpSessionId) {
         SessionInfo sessionInfo = sessions.get(httpSessionId);
         return sessionInfo.getUncovers();
-    }
-
-    public void incrementSessionUncovers(String httpSessionId) {
-        incrementSessionUncovers(httpSessionId, 1);
     }
 
     public void incrementSessionUncovers(String httpSessionId, int uncovers) {
