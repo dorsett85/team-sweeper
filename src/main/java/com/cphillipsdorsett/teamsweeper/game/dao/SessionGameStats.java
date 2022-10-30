@@ -16,7 +16,7 @@ public class SessionGameStats {
     @Column(name = "most_uncovers")
     private int mostUncovers;
     @Column(name = "highest_score")
-    private float highestScore;
+    private Float highestScore;
     @Column(name = "avg_completion_pct")
     private float avgCompletionPct;
 
