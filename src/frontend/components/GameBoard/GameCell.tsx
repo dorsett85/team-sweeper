@@ -31,8 +31,8 @@ const GameCell: React.FC<GameCellProps> = ({ difficulty, gameId, rowIdx, colIdx 
 
     // Initialize listeners to remove the covered cell button after all of the
     // css transitions have finished.
-    let transitionRunListener: (e: TransitionEvent) => void = () => undefined;
-    let transitionEndListener: (e: TransitionEvent) => void = () => undefined;
+    let transitionRunListener: (e: TransitionEvent) => void;
+    let transitionEndListener: (e: TransitionEvent) => void;
 
     if (cell) {
       // We want to REMOVE the button from the DOM, but after all of the
