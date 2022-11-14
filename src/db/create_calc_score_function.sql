@@ -9,7 +9,7 @@ CREATE FUNCTION CalcScore(uncovers INT, start_time TIMESTAMP(3), end_time TIMEST
 BEGIN
     DECLARE duration INT;
     SET duration = CalcDurationMS(start_time, end_time);
-    IF duration = 0 THEN
+    IF duration = 0 OR duration IS NULL THEN
         RETURN 0;
     END IF;
     RETURN (uncovers / 15) + (1000 / duration);

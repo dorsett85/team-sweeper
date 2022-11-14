@@ -29,7 +29,7 @@ public class GameService {
         // Any current live games need to be saved before they're overwritten
         LiveGame currentLiveGame = liveGameDao.get(sessionId).orElse(null);
         if (currentLiveGame != null && currentLiveGame.isInProgress()) {
-            saveLiveGame(sessionId, currentLiveGame);
+            endGame(sessionId, currentLiveGame);
         }
 
         GameBoard gameBoard = new GameBoard(difficulty);
@@ -204,7 +204,7 @@ public class GameService {
     }
 
     /**
-     * Update the db game and session game
+     * Update the db game and session game with the LiveGame
      */
     private void endGame(String sessionId, LiveGame liveGame) throws JsonProcessingException {
         // Update the game
@@ -220,25 +220,6 @@ public class GameService {
         gameDao.update(dbGame);
 
         // Update the session game
-        updateSessionGame(sessionId, dbGame.getId(), liveGame);
-    }
-
-    /**
-     * Save an in-progress live game. This enables data to be persisted before
-     * a new game overrides the session live game.
-     */
-    private void saveLiveGame(String sessionId, LiveGame liveGame) throws JsonProcessingException {
-        // Update the game
-        Game dbGame = gameDao.findCurrent(sessionId, liveGame.getId());
-        dbGame.setBoard(om.writeValueAsString(liveGame.getBoard()));
-        dbGame.setCompletionPct(BoardConfigPreset.getCompletionPct(
-            liveGame.getDifficulty(),
-            liveGame.getUncoveredCells()
-        ));
-        dbGame.setStartedAt(liveGame.getStartedAt());
-        gameDao.update(dbGame);
-
-        // Update the session_game
         updateSessionGame(sessionId, dbGame.getId(), liveGame);
     }
 
