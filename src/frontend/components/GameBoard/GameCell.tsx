@@ -11,8 +11,11 @@ interface GameCellProps extends Pick<Cell, 'rowIdx' | 'colIdx'> {
 
 const GameCell: React.FC<GameCellProps> = ({ difficulty, gameId, rowIdx, colIdx }) => {
   const [value, setValue] = useState<Cell['value']>();
+  const [flag, setFlag] = useState(false);
   const { sock } = useGameSocket();
   const coveredCellRef = useRef<HTMLButtonElement | null>(null);
+  const isButtonHeldRef = useRef(false);
+  const wasFlagged = useRef(false);
   const isCellClicked = useRef(false);
 
   // Subscribe to the onUncoverCell event
@@ -57,7 +60,30 @@ const GameCell: React.FC<GameCellProps> = ({ difficulty, gameId, rowIdx, colIdx 
     };
   }, []);
 
+  const handleOnCoveredCellMouseDown = () => {
+    isButtonHeldRef.current = true;
+
+    // when the mouse is held down the cell will be flagged
+    setTimeout(() => {
+      if (isButtonHeldRef.current) {
+        if (flag) {
+          wasFlagged.current = true;
+        }
+        setFlag((oldState) => !oldState);
+      }
+    }, 300);
+  };
+
   const handleOnCoveredCellClick = () => {
+    isButtonHeldRef.current = false;
+
+    // Don't allow the cell to be uncovered if it's flagged or if the user
+    // removed the flag before releasing the hold.
+    if (flag || wasFlagged.current) {
+      wasFlagged.current = false;
+      return;
+    }
+
     // Leaving this as a separate handler for now, may add more behavior here
     isCellClicked.current = true;
     sock.sendMsg('UNCOVER_CELL', { gameId, rowIdx, colIdx });
@@ -70,9 +96,13 @@ const GameCell: React.FC<GameCellProps> = ({ difficulty, gameId, rowIdx, colIdx 
     <GameCellOuter difficulty={difficulty}>
       <button
         ref={coveredCellRef}
-        className={`${styles.coveredCell} ${value ? styles.coveredCellRemoved : ''}`}
+        className={`${!flag ? styles.coveredCell : styles.coveredCellFlagged} ${
+          value ? styles.coveredCellRemoved : ''
+        }`}
+        onMouseDown={handleOnCoveredCellMouseDown}
         onClick={handleOnCoveredCellClick}
         disabled={!!value}
+        aria-label={flag ? 'flagged' : undefined}
       />
       <div className={styles[isMine && isClicked ? 'uncoveredClickedMineCell' : 'uncoveredCell']}>
         {value && (

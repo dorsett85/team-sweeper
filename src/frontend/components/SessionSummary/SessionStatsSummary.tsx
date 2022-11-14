@@ -100,7 +100,7 @@ const SessionStatsSummary: React.FC<SessionSummaryProps> = ({ onStatsLoaded }) =
   const winPct = Math.round((statuses.WON.count / count) * 100);
   const winPctText = isNaN(winPct) ? 'NA' : `${winPct}%`;
   const gamesPlayedWinPct = `${statuses.WON.count}/${count} (${winPctText})`;
-  statLiProps.push({ name: 'Games Played (wins/total)', value: gamesPlayedWinPct });
+  statLiProps.push({ name: 'Games Won/Played (win %)', value: gamesPlayedWinPct });
 
   // Avg completion percentage
   const allCount = statuses.IN_PROGRESS.count + statuses.LOST.count + statuses.WON.count;

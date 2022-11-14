@@ -61,6 +61,22 @@ each(@difficulty, {
   }
 }
 
+.coveredCellFlagged {
+  &:extend(.coveredCell);
+
+  &::after {
+    content: '';
+    position: absolute;
+    height: inherit;
+    width: inherit;
+    transform: translate(-50%, -50%);
+    background-image: url("../../assets/img/red-flag-32.png");
+    background-position: center;
+    background-size: 66.6%;
+    background-repeat: no-repeat;
+  }
+}
+
 .coveredCellRemoved {
   border-radius: 50px;
   opacity: 0;
