@@ -32,14 +32,14 @@ const GameCell: React.FC<GameCellProps> = ({ difficulty, gameId, rowIdx, colIdx 
   useEffect(() => {
     const cell = coveredCellRef.current;
 
-    // Initialize listeners to remove the covered cell button after all of the
-    // css transitions have finished.
+    // Initialize listeners to remove the covered cell button after all the css
+    // transitions have finished.
     let transitionRunListener: (e: TransitionEvent) => void;
     let transitionEndListener: (e: TransitionEvent) => void;
 
     if (cell) {
-      // We want to REMOVE the button from the DOM, but after all of the
-      // transitions have happened. We'll count all of the transition starts so
+      // We want to REMOVE the button from the DOM, but after all the
+      // transitions have happened. We'll count all the transition starts so
       // we know when to delete the button element on the last transition end.
       let transitionRunCount = 0;
       let transitionEndCount = 0;
@@ -60,7 +60,12 @@ const GameCell: React.FC<GameCellProps> = ({ difficulty, gameId, rowIdx, colIdx 
     };
   }, []);
 
-  const handleOnCoveredCellMouseDown = () => {
+  const handleOnCoveredCellMouseDown = (e: React.MouseEvent) => {
+    // Don't allow right clicks
+    if (e.button === 2) {
+      return;
+    }
+
     isButtonHeldRef.current = true;
 
     // when the mouse is held down the cell will be flagged
