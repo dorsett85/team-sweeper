@@ -18,11 +18,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        // TODO add/remove the appropriate origins during production and
-        //  development, e.g., add cphillipsdorsett.com on production.
         registry
             .addHandler(gameSocketHandler, "/game/publish")
-            .setAllowedOrigins("http://localhost:4000")
+            .setAllowedOrigins("http://localhost:4000", "https://team-sweeper.cphillipsdorsett.com")
             .addInterceptors(new GameSocketInterceptor());
     }
 }

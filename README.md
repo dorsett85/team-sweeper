@@ -2,12 +2,23 @@
 
 ### Getting Started
 
-```shell
-# Build or run the application to get dependencies and create spring session
-# table
-# TODO add gradle build/run command
+Software requirements
 
-# Install npm packages and build development static files
+1. Java 17
+2. Mysql 8
+3. Node 16
+4. Yarn
+
+Create a database named `team_sweeper` with a user `clayton` that has all
+privileges. Run all the mysql scripts in `src/db` folder.
+
+Startup
+
+```shell
+# Install npm packages and build static files
 yarn
-yarn build:dev
+yarn build
+
+# Build and start the web server
+./gradlew bootRun
 ```
