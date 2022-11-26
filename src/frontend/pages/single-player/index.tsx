@@ -6,10 +6,12 @@ import singlePlayerStore from './singlePlayerStore';
 import GameSocketProvider from '../../components/GameSocketProvider/GameSocketProvider';
 import GameSocketNotOpen from '../../components/GameSocketNotOpen/GameSocketNotOpen';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 renderReactDom(
   <Provider store={singlePlayerStore}>
     <GameSocketProvider
-      url='ws://localhost:8080/game/publish'
+      url={`${isProd ? 'wss' : 'ws'}://localhost:8080/game/publish`}
       renderGameSocketNotOpen={({ readyState, onSocketConnect, reason }) => (
         <GameSocketNotOpen
           readyState={readyState}
