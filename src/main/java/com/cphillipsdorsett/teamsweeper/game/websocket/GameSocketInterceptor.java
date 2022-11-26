@@ -21,15 +21,7 @@ public class GameSocketInterceptor implements HandshakeInterceptor {
         WebSocketHandler wsHandler,
         Map<String, Object> attributes
     ) {
-        System.out.println("");
-        System.out.println("TRYING TO HANDSHAKE!");
-        System.out.println("");
-        if (request instanceof ServletServerHttpRequest) {
-            System.out.println("");
-            System.out.println("Request is instance of http servlet");
-            System.out.println("");
-            ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-
+        if (request instanceof ServletServerHttpRequest servletRequest) {
             // Always create a new http session for the app to use. This is NOT
             // the same as the websocket session id!
             HttpSession session = servletRequest.getServletRequest().getSession(true);
