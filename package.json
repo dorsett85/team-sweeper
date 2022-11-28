@@ -7,9 +7,9 @@
   "author": "Clayton Phillips-Dorsett",
   "license": "MIT",
   "scripts": {
-    "start": "webpack serve",
+    "start": "RANDOM=true webpack serve",
     "build:dev": "webpack",
-    "build": "NODE_ENV=production webpack"
+    "build": "webpack --env production"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.7.1",
