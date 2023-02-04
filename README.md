@@ -21,4 +21,8 @@ yarn build
 
 # Build and start the web server
 ./gradlew bootRun
+
+# For Gradle builds in production run
+./gradlw clean build
+java -jar build/libs/team-sweeper-0.0.1-SNAPSHOT.jar
 ```

@@ -8,14 +8,19 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class BundleManifestArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
-    public BundleManifest resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws IOException {
+    public BundleManifest resolveArgument(
+        MethodParameter parameter,
+        ModelAndViewContainer mavContainer,
+        NativeWebRequest webRequest,
+        WebDataBinderFactory binderFactory
+    ) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        File file = new ClassPathResource("static/bundles/manifest.json").getFile();
+        InputStream file = new ClassPathResource("static/bundles/manifest.json").getInputStream();
         return objectMapper.readValue(file, BundleManifest.class);
     }
 
