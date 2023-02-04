@@ -5,6 +5,7 @@ import com.cphillipsdorsett.teamsweeper.game.websocket.GameSocketSessionStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketSession;
 
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -40,7 +41,10 @@ public class WebSessionListener implements HttpSessionListener {
 
         // Close related websocket connections
         try {
-            gameSocketSessionStore.getByHttpId(sessionId).close();
+            WebSocketSession socketSession = gameSocketSessionStore.getByHttpId(sessionId);
+            if (socketSession != null && socketSession.isOpen()) {
+                socketSession.close();
+            }
         } catch (Exception e) {
             logger.error("Error closing websocket session", e);
         }
