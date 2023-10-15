@@ -29,7 +29,20 @@ const GameSocketNotOpen: React.FC<GameSocketNotOpenProps> = ({
     onReconnectClick();
   };
 
-  const message = reason || 'You may have been idle for too long or the server disconnected';
+  const title = readyState === 'CONNECTING' ? 'Connecting' : 'Connection lost!';
+  const body =
+    readyState === 'CONNECTING' ? (
+      <div className={styles.loader} />
+    ) : (
+      <section className={styles.modalContentSection}>
+        <p>{reason || 'You may have been idle for too long or the server disconnected'}</p>
+        <div className='text-center'>
+          <button className={buttonStyles.baseButton} onClick={handleOnReconnectClick}>
+            Restart connection
+          </button>
+        </div>
+      </section>
+    );
 
   return (
     <Modal
@@ -38,15 +51,8 @@ const GameSocketNotOpen: React.FC<GameSocketNotOpenProps> = ({
       showCloseButton={false}
       aria-labelledby={MODAL_HEADING_ID}
     >
-      <ModalTitle id={MODAL_HEADING_ID} title='Connection lost!' />
-      <section className={styles.modalContentSection}>
-        <p>{message}</p>
-        <div className='text-center'>
-          <button className={buttonStyles.baseButton} onClick={handleOnReconnectClick}>
-            Restart connection
-          </button>
-        </div>
-      </section>
+      <ModalTitle id={MODAL_HEADING_ID} title={title} />
+      {body}
     </Modal>
   );
 };

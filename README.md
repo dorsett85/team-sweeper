@@ -6,7 +6,7 @@ Software requirements
 
 1. Java 17
 2. Mysql 8
-3. Node 16
+3. Node 18
 4. Yarn
 
 Create a database named `team_sweeper` with a user `clayton` that has all

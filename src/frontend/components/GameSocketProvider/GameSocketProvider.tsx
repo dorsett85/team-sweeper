@@ -49,7 +49,10 @@ const GameSocketProvider: React.FC<GameSocketProviderProps> = ({
   const connectToGameSocket = () =>
     new GameSocket(url, {
       onOpen: () => {
-        setReadyState('OPEN');
+        // give a delay when setting to open to avoid UI flashes
+        setTimeout(() => {
+          setReadyState('OPEN');
+        }, 1000);
       },
       onError: (e) => {
         console.error(e);
