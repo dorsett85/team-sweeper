@@ -4,7 +4,7 @@ interface EnvVar {
 }
 
 const DEV_HOST = 'localhost:8080';
-const PROD_HOST = 'team-sweeper.cphillipsdorsett.com';
+const PROD_HOST = 'teamsweeper.claytonbuilds.com';
 const WS_PATH = 'game/publish';
 
 /**
