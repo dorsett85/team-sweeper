@@ -4,7 +4,7 @@
         <div class="footer-content">
             <span class="footer-content-professional-link">
                 🖤&nbsp;
-                <a href="https://cphillipsdorsett.com" target="_blank" rel="noopener noreferrer">
+                <a href="https://claytonbuilds.com" target="_blank" rel="noopener noreferrer">
                     Clayton Phillips-Dorsett
                 </a>
             </span>
