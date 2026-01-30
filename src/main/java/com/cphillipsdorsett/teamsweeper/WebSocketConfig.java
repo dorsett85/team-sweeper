@@ -20,7 +20,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry
             .addHandler(gameSocketHandler, "/game/publish")
-            .setAllowedOrigins("http://localhost:4000", "https://team-sweeper.cphillipsdorsett.com")
+            .setAllowedOrigins("http://localhost:4000", "https://teamsweeper.claytonbuilds.com")
             .addInterceptors(new GameSocketInterceptor());
     }
 }
